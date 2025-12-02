@@ -113,6 +113,23 @@ class Farmer(db.Model):
     
     # Document verification status
     documents_verified = db.Column(db.Boolean, default=False)
+
+    # Has the farmer completed the onboarding flow (UI-driven quick profile)?
+    # Soil Type (Loamy, Clay, Sandy, Black Soil, Red Soil, etc.)
+    soil_type = db.Column(db.String(100))
+
+    # Irrigation Type (Tube Well, Well, Rainfed, Canal)
+    irrigation_type = db.Column(db.String(50))
+
+    # Harvest Date (YYYY-MM)
+    harvest_date = db.Column(db.Date)
+
+    # Selected unit for land size (acre / hectare / bigha)
+    land_unit = db.Column(db.String(20), default="acre")
+
+    # Current Crop(s) cultivated (stored as comma-separated or JSON)
+    current_crops = db.Column(db.String(500))
+    onboarding_completed = db.Column(db.Boolean, default=False)
     
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -122,6 +139,8 @@ class Farmer(db.Model):
     subsidy_applications = db.relationship('SubsidyApplication', backref='farmer', lazy=True, cascade='all, delete-orphan')
     price_alerts = db.relationship('PriceAlert', backref='farmer', lazy=True, cascade='all, delete-orphan')
     rewards = db.relationship('FarmerReward', backref='farmer', lazy=True, cascade='all, delete-orphan')
+
+
     
     def __repr__(self):
         return f'<Farmer {self.farmer_id} - {self.name}>'

@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Onboarding — Sahayak</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/onboarding.css') }}">
+</head>
+
+<body>
+    <div class="onboard-wrap">
+        <div class="card">
+
+            <!-- Step 0: Welcome -->
+            <div class="step active" data-step="0">
+                <div class="header-hero">
+                    <div class="hero-illustration">
+                        <svg width="48" height="48" viewBox="0 0 24 24">
+                            <circle cx="12" cy="8" r="3" fill="#1b5e20"/>
+                            <path d="M4 20c1-5 7-6 8-6s7 1 8 6z" fill="#388e3c"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="h1">Namaste, {{ session.get('farmer_kisan_id') or 'Kisan' }} ji!<br>
+                            Let's set up your farm profile.
+                        </h1>
+                        <p class="p-small">Designing a friendly chat with an agricultural expert, not filling out a bank application.</p>
+                        <p class="small-note">This will take ~30 seconds.</p>
+                    </div>
+                </div>
+                <button id="startBtn" class="big-btn">Shuru Karein</button>
+            </div>
+
+            <!-- Step 1: Crop Selection -->
+            <div class="step" data-step="1">
+                <h2 class="h1">Abhi aapne kaunsi fasal lagayi hai?</h2>
+                <p class="small-note">Tap the image that matches your main crop.</p>
+
+                <div class="crop-grid">
+                    <div class="crop-card" tabindex="0" data-crop="paddy">
+                        <img src="{{ url_for('static', filename='img/paddy.svg') }}" alt="Paddy">
+                        <div class="label">Dhaan</div>
+                    </div>
+
+                    <div class="crop-card" tabindex="0" data-crop="maize">
+                        <img src="{{ url_for('static', filename='img/maize.svg') }}" alt="Maize">
+                        <div class="label">Makka</div>
+                    </div>
+
+                    <div class="crop-card" tabindex="0" data-crop="sugarcane">
+                        <img src="{{ url_for('static', filename='img/sugarcane.svg') }}" alt="Sugarcane">
+                        <div class="label">Ganna</div>
+                    </div>
+
+                    <div class="crop-card" tabindex="0" data-crop="other">
+                        <img src="{{ url_for('static', filename='img/other.svg') }}" alt="Other">
+                        <div class="label">Other</div>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <input id="cropInput" name="crop" type="hidden" value="{{ pre.crop }}">
+                    <button id="nextFromCrop" class="big-btn next-btn" disabled>Next</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Land & Irrigation -->
+            <div class="step" data-step="2">
+                <h2 class="h1">Khet ka kul size kya hai?</h2>
+
+                <div class="range-wrap">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <div class="slider-value" id="acresValue">{{ pre.acres or 2 }} Acres</div>
+
+                        <div class="unit-toggle">
+                            <div class="unit-pill active" data-unit="acre">Acre</div>
+                            <div class="unit-pill" data-unit="hectare">Hectare</div>
+                            <div class="unit-pill" data-unit="bigha">Bigha</div>
+                        </div>
+                    </div>
+
+                    <input id="acresRange" type="range" min="0.5" max="50" step="0.5" value="{{ pre.acres or 2 }}">
+                </div>
+
+                <h3 class="h1" style="margin-top:12px">Sinchai ka sadhan?</h3>
+
+                <div class="chips" role="list">
+                    <div class="chip" data-irrigation="tube_well">💧 Tube Well</div>
+                    <div class="chip" data-irrigation="well">🕳 Well</div>
+                    <div class="chip" data-irrigation="rainfed">🌧️ Rain Fed</div>
+                    <div class="chip" data-irrigation="canal">🌊 Canal</div>
+                </div>
+
+                <div class="controls">
+                    <input id="irrigationInput" name="irrigation" type="hidden">
+                    <input id="districtInput" name="district" placeholder="Apka zila (optional)"
+                        style="flex:1;padding:10px;border-radius:10px;border:1px solid #eee;margin-top:8px">
+                </div>
+
+                <div style="display:flex;gap:8px;margin-top:12px">
+                    <button id="nextFromSize" class="big-btn" style="flex:1" disabled>Next</button>
+                    <button id="nextFromIrrigation" class="big-btn" style="flex:1;background:#9e9e9e" disabled>Next</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Harvest Timing -->
+            <div class="step" data-step="3">
+                <h2 class="h1">Katayi kab tak hone ki ummeed hai?</h2>
+                <p class="small-note">This helps us suggest the best Oilseed for the next season.</p>
+
+                <div style="display:flex;gap:8px;margin-top:12px">
+                    <select id="harvestMonth" style="flex:1;padding:12px;border-radius:10px;border:1px solid #eee">
+                        <option>January</option><option>February</option><option>March</option>
+                        <option>April</option><option>May</option><option>June</option>
+                        <option>July</option><option>August</option><option>September</option>
+                        <option selected>October</option><option>November</option><option>December</option>
+                    </select>
+
+                    <select id="harvestYear" style="flex:1;padding:12px;border-radius:10px;border:1px solid #eee">
+                        <option>2025</option><option selected>2026</option><option>2027</option>
+                    </select>
+                </div>
+
+                <div style="display:flex;gap:8px;margin-top:12px">
+                    <button id="nextFromHarvest" class="big-btn" style="flex:1">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Soil Type -->
+            <div class="step" data-step="4">
+                <h2 class="h1">Mitti kis tarah ki hai?</h2>
+                <p class="small-note">Tap the texture that looks like your field.</p>
+
+                <div class="soil-scroll">
+                    <div class="soil-card" tabindex="0" data-soil="black">
+                        <img src="{{ url_for('static', filename='img/soil_black.svg') }}" alt="Black soil">
+                        <div class="label">Kali Mitti</div>
+                    </div>
+
+                    <div class="soil-card" tabindex="0" data-soil="sandy">
+                        <img src="{{ url_for('static', filename='img/soil_sandy.svg') }}" alt="Sandy soil">
+                        <div class="label">Retili Mitti</div>
+                    </div>
+
+                    <div class="soil-card" tabindex="0" data-soil="clay">
+                        <img src="{{ url_for('static', filename='img/soil_clay.svg') }}" alt="Clay soil">
+                        <div class="label">Chikni Mitti</div>
+                    </div>
+                </div>
+
+                <div style="margin-top:12px">
+                    <input id="soilInput" name="soil" type="hidden">
+                    <button id="doneBtn" class="big-btn" disabled>Done — Get Suggestion</button>
+                </div>
+            </div>
+
+            <!-- Step 5: Loader -->
+            <div class="step" data-step="6">
+                <div class="loader-wrap">
+                    <div class="pulse"></div>
+                    <div id="loaderText" class="loader-text">... Checking Soil Data ...</div>
+                    <div class="small-muted">Our expert is checking market prices and subsidies for you.</div>
+                </div>
+            </div>
+
+            <!-- Hidden Form -->
+            <form id="onboardHiddenForm" method="post" action="/onboarding" style="display:none">
+
+                <input id="cropHidden" name="crop">
+                <input id="acresHidden" name="acres">
+                <input id="districtHidden" name="district">
+                <input id="harvestHidden" name="harvest_date">
+
+                <!-- newly added -->
+                <input id="irrigationHidden" name="irrigation">
+                <input id="soilHidden" name="soil">
+
+            </form>
+
+        </div>
+
+        <div class="footer-note">
+            Big & tappable controls. Visual-first, progressive disclosure — one question at a time.
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/onboarding.js') }}"></script>
+
+</body>
+</html>

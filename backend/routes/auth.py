@@ -133,8 +133,16 @@ def verify_otp_post():
     session['farmer_id_verified'] = farmer.id
     session['farmer_kisan_id'] = farmer.farmer_id
     
-    # Redirect to profile page
-    return redirect(url_for('auth.profile'))
+    # If the farmer has completed onboarding previously, go to dashboard.
+    # Otherwise start onboarding to collect minimal context.
+    try:
+        if getattr(farmer, 'onboarding_completed', False):
+            return redirect(url_for('dashboard'))
+    except Exception:
+        # If any issue accessing the flag, fall back to onboarding
+        pass
+
+    return redirect(url_for('onboarding.onboarding'))
 
 
 @auth_bp.route('/profile', methods=['GET'])
@@ -161,14 +169,8 @@ def continue_to_dashboard():
     if not farmer:
         session.clear()
         return redirect(url_for('auth.login'))
-    
-    # Check if farmer is oilseed farmer
-    if farmer.is_oilseed_farmer:
-        # Route to dashboard
-        return redirect(url_for('dashboard'))  # TODO: Create dashboard route
-    else:
-        # Route to Module 1 (Fayda Calculator) to convert to oilseed farming
-        return redirect(url_for('fayda.fayda_calculator'))
+    # Route to dashboard (Sahayak) for all users - bot will handle suggestions
+    return redirect(url_for('dashboard'))
 
 
 @auth_bp.route('/resend-otp', methods=['POST'])

@@ -207,9 +207,15 @@
             </div>
 
             <form method="POST" action="{{ url_for('auth.continue_to_dashboard') }}">
+                {% if session.get('user_context') or session.get('analysis') %}
+                <button type="submit" class="continue-button">
+                    Open Sahayak
+                </button>
+                {% else %}
                 <button type="submit" class="continue-button">
                     Continue to Dashboard
                 </button>
+                {% endif %}
             </form>
             <div class="data-source-text" style="margin-top: 5px; margin-bottom: 0;">Data retrieved securely from Government database</div>
         </div>
