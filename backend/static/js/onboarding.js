@@ -45,12 +45,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // -----------------------------
-    // Step 2 → Land Size & Irrigation
+    // Step 2 → Land Size & Water Type
     // -----------------------------
     const acresRange = document.getElementById("acresRange");
     const acresValue = document.getElementById("acresValue");
-    const irrigationChips = document.querySelectorAll(".chip");
-    const irrigationInput = document.getElementById("irrigationInput");
+    const waterTypeChips = document.querySelectorAll(".chip");
+    const waterTypeInput = document.getElementById("waterTypeInput");
 
     const nextFromSize = document.getElementById("nextFromSize");
     const nextFromIrrigation = document.getElementById("nextFromIrrigation");
@@ -61,12 +61,12 @@ document.addEventListener("DOMContentLoaded", () => {
         nextFromSize.disabled = false;
     });
 
-    irrigationChips.forEach(chip => {
+    waterTypeChips.forEach(chip => {
         chip.addEventListener("click", () => {
-            irrigationChips.forEach(c => c.classList.remove("active"));
+            waterTypeChips.forEach(c => c.classList.remove("active"));
             chip.classList.add("active");
 
-            irrigationInput.value = chip.dataset.irrigation;
+            waterTypeInput.value = chip.dataset.waterType;
             nextFromIrrigation.disabled = false;
         });
     });
@@ -78,6 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     nextFromIrrigation?.addEventListener("click", () => {
         document.getElementById("districtHidden").value = districtInput.value;
+        document.getElementById("waterTypeHidden").value = waterTypeInput.value;
         showStep(3);
     });
 

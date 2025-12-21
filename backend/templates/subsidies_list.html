@@ -1,0 +1,481 @@
+{% extends "base.html" %}
+{% block title %}सब्सिडी और योजनाएं{% endblock %}
+{% block style %}
+    <style>
+       
+
+        /* FRAME (Main App Container) */
+        .frame {
+            width: 100%;
+            max-width: 420px;
+            height: 100%;
+            background-color: #f7f9f7;
+            border-radius: 8px;
+            box-shadow: 0 4px 60px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        
+
+        /* Page Subtitle */
+        .page-info {
+            padding: 15px;
+            background-color: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            z-index: 50;
+        }
+        
+        .page-main-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #388e3c; /* Green color for importance */
+            margin-bottom: 5px;
+        }
+        
+        .page-description {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        /* 2. FILTER TABS */
+        .filter-tabs {
+            display: flex;
+            margin: 0 15px 15px;
+            border-bottom: 1px solid #e0e0e0;
+            gap: 5px;
+            overflow-x: auto;
+        }
+
+        .filter-button {
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            color: #757575;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .filter-button.active {
+            color: #388e3c;
+            border-bottom-color: #388e3c;
+            font-weight: bold;
+        }
+        
+        /* LOADER STYLES */
+        .loader-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #388e3c;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loader-text {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .loader-subtext {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        /* ANALYZE BUTTON */
+        .analyze-btn {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #388e3c 0%, #2e7d32 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(56, 142, 60, 0.3);
+            margin: 15px auto;
+            display: block;
+        }
+        
+        .analyze-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+            box-shadow: 0 4px 12px rgba(56, 142, 60, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .analyze-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* SCROLLABLE LIST CONTAINER */
+        .subsidy-list-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 0 15px 20px;
+            position: relative;
+        }
+
+        /* 4. SUBSIDY CARDS */
+        .subsidy-card {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            border-left: 5px solid #4caf50; /* Green highlight for relevance */
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .subsidy-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .card-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .subsidy-name {
+            font-size: 15px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .subsidy-focus {
+            font-size: 11px;
+            color: #fff;
+            background-color: #2196f3;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .subsidy-details-row {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        
+        .subsidy-details-row strong {
+            color: #333;
+            margin-right: 5px;
+        }
+
+        .view-details-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 8px;
+            background-color: #4caf50;
+            color: #fff;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            align-self: flex-start;
+        }
+
+        .view-details-btn:hover {
+            background-color: #388e3c;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+
+    <div class="frame">
+
+        
+        <div class="page-info">
+            <div class="page-main-title">योजनाएं और सब्सिडी</div>
+            <div class="page-description">सरकारी योजनाएं खोजें और अपने खेत के लिए सर्वोत्तम वित्तीय सहायता प्राप्त करें।</div>
+        </div>
+
+        <!-- 2. FILTER TABS -->
+        <div class="filter-tabs">
+            <div class="filter-button" id="filter-recommended">✨ अनुशंसा</div>
+            <div class="filter-button active" id="filter-subsidies">📋 सभी सब्सिडी</div>
+            <div class="filter-button" id="filter-schemes">🎯 सभी योजनाएं</div>
+            
+        </div>
+
+        <!-- 3. SCROLLABLE LIST CONTAINER -->
+        <div class="subsidy-list-container">
+            <div id="subsidy-cards-list">
+                <!-- Cards will be populated by JavaScript -->
+            </div>
+            <br><br>
+        </div>
+    </div>
+{% endblock %}
+{% block script %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const listContainer = document.getElementById('subsidy-cards-list');
+            const filterSubsidies = document.getElementById('filter-subsidies');
+            const filterSchemes = document.getElementById('filter-schemes');
+            const filterRecommended = document.getElementById('filter-recommended');
+
+            let allSubsidies = [];
+            let allSchemes = [];
+            let smartRecommendations = [];
+            let currentFilter = 'recommended';
+            let isAnalyzing = false;
+
+            // --- Load subsidies from API ---
+            async function loadSubsidies() {
+                try {
+                    const response = await fetch('/subsidies/api/list?type=subsidy');
+                    if (response.ok) {
+                        allSubsidies = await response.json();
+                        console.log('Loaded subsidies:', allSubsidies);
+                    } else {
+                        console.error('Failed to load subsidies');
+                    }
+                } catch (error) {
+                    console.error('Error loading subsidies:', error);
+                }
+            }
+
+            // --- Load schemes from API ---
+            async function loadSchemes() {
+                try {
+                    const response = await fetch('/subsidies/api/list?type=scheme');
+                    if (response.ok) {
+                        allSchemes = await response.json();
+                        console.log('Loaded schemes:', allSchemes);
+                    } else {
+                        console.error('Failed to load schemes');
+                    }
+                } catch (error) {
+                    console.error('Error loading schemes:', error);
+                }
+            }
+
+            // --- Check for existing stored recommendations ---
+            async function checkStoredRecommendations() {
+                try {
+                    const response = await fetch('/subsidies/api/ai-recommendations');
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.recommended_schemes) {
+                            smartRecommendations = data.recommended_schemes;
+                            console.log('Loaded stored recommendations:', smartRecommendations);
+                            return true;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking stored recommendations:', error);
+                }
+                return false;
+            }
+
+            // --- Show Loader ---
+            function showLoader(message = "आपके लिए सर्वोत्तम योजनाएं विश्लेषण कर रहे हैं...") {
+                listContainer.innerHTML = `
+                    <div class="loader-container">
+                        <div class="spinner"></div>
+                        <div class="loader-text">${message}</div>
+                        <div class="loader-subtext">यह कुछ सेकंड ले सकता है...</div>
+                    </div>
+                `;
+            }
+
+            // --- Show Analyze Button ---
+            function showAnalyzeButton() {
+                listContainer.innerHTML = `
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px; text-align: center;">
+                        <div style="font-size: 48px; margin-bottom: 15px;">🔍</div>
+                        <div style="font-size: 16px; font-weight: bold; color: #333; margin-bottom: 10px;">अपनी व्यक्तिगत योजनाएं प्राप्त करें</div>
+                        <div style="font-size: 13px; color: #666; margin-bottom: 20px; max-width: 300px;">
+                            कृत्रिम बुद्धिमत्ता द्वारा संचालित सिफारिशें प्राप्त करने के लिए "विश्लेषण करें" पर क्लिक करें।
+                        </div>
+                        <button class="analyze-btn" id="analyze-btn">🤖 विश्लेषण करें और अनुशंसा दें</button>
+                    </div>
+                `;
+                
+                document.getElementById('analyze-btn').addEventListener('click', analyzeRecommendations);
+            }
+
+            // --- Analyze Recommendations ---
+            async function analyzeRecommendations() {
+                if (isAnalyzing) return;
+                isAnalyzing = true;
+                
+                showLoader("🤖 आपकी खेत प्रोफाइल का विश्लेषण कर रहे हैं...");
+                
+                try {
+                    const response = await fetch('/subsidies/api/smart-recommendations', {
+                        method: 'POST'
+                    });
+                    
+                    if (response.ok || response.status === 201) {
+                        const data = await response.json();
+                        console.log('Smart recommendations:', data);
+                        
+                        if (data.success && data.recommended_schemes) {
+                            smartRecommendations = data.recommended_schemes;
+                            renderSmartRecommendations(smartRecommendations);
+                        } else {
+                            listContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #e53935;">सिफारिशें उत्पन्न करने में विफल। कृपया पुनः प्रयास करें।</div>';
+                        }
+                    } else {
+                        listContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #e53935;">सिफारिशें उत्पन्न करने में त्रुटि। कृपया पुनः प्रयास करें।</div>';
+                    }
+                } catch (error) {
+                    console.error('Error analyzing recommendations:', error);
+                    listContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #e53935;">नेटवर्क त्रुटि। कृपया पुनः प्रयास करें।</div>';
+                } finally {
+                    isAnalyzing = false;
+                }
+            }
+
+            // --- Render Cards ---
+            function renderCards(dataToRender) {
+                listContainer.innerHTML = '';
+                if (dataToRender.length === 0) {
+                    listContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">कोई आइटम नहीं मिला।</div>';
+                    return;
+                }
+                dataToRender.forEach(subsidy => {
+                    const card = document.createElement('div');
+                    card.className = 'subsidy-card';
+                    card.innerHTML = `
+                        <div class="card-header-row">
+                            <div class="subsidy-name">${subsidy.name}</div>
+                            <div class="subsidy-focus" style="background-color: ${subsidy.focus_color};">${subsidy.focus_area}</div>
+                        </div>
+                        <div class="subsidy-details-row"><strong>लाभ:</strong> ${subsidy.benefit_amount}</div>
+                        <div class="subsidy-details-row"><strong>पात्रता:</strong> ${subsidy.eligibility_criteria}</div>
+                        <button class="view-details-btn">विवरण देखें</button>
+                    `;
+                    card.addEventListener('click', () => {
+                        window.location.href = `/subsidies/detail/${subsidy.id}`;
+                    });
+                    listContainer.appendChild(card);
+                });
+            }
+
+            // --- Render Smart Recommendations ---
+            function renderSmartRecommendations(smartRecs) {
+                listContainer.innerHTML = '';
+                if (smartRecs.length === 0) {
+                    listContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">कोई अनुशंसा उपलब्ध नहीं है।</div>';
+                    return;
+                }
+                smartRecs.forEach(rec => {
+                    const card = document.createElement('div');
+                    card.className = 'subsidy-card';
+                    const priorityColor = rec.priority === 'high' ? '#ff6f00' : rec.priority === 'medium' ? '#fbc02d' : '#9e9e9e';
+                    const priorityLabel = rec.priority === 'high' ? '🔴 उच्च प्राथमिकता' : rec.priority === 'medium' ? '🟡 मध्यम प्राथमिकता' : '⚪ कम प्राथमिकता';
+                    
+                    card.innerHTML = `
+                        <div class="card-header-row">
+                            <div class="subsidy-name">${rec.scheme_name || rec.name}</div>
+                            <div class="subsidy-focus" style="background-color: ${rec.focus_color || '#2196f3'};">${rec.focus_area}</div>
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
+                            <span style="background: ${priorityColor}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">${priorityLabel}</span>
+                            <span style="background: #4caf50; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">🤖 मेल: ${rec.match_percentage}%</span>
+                        </div>
+                        <div class="subsidy-details-row"><strong>आपके लिए क्यों:</strong> ${rec.reason}</div>
+                        <div class="subsidy-details-row"><strong>लाभ:</strong> ${rec.benefit_amount || rec.scheme_name}</div>
+                        <div class="subsidy-details-row"><strong>पात्रता:</strong> ${rec.eligibility_criteria || rec.description}</div>
+                        <button class="view-details-btn">विवरण देखें</button>
+                    `;
+                    card.addEventListener('click', () => {
+                        const schemeId = rec.scheme_id || rec.id;
+                        window.location.href = `/subsidies/detail/${schemeId}`;
+                    });
+                    listContainer.appendChild(card);
+                });
+            }
+
+            // --- Filter Functions ---
+            async function applyFilter(filterType) {
+                currentFilter = filterType;
+                let filtered = [];
+                
+                if (filterType === 'subsidies') {
+                    filtered = allSubsidies;
+                    renderCards(filtered);
+                } else if (filterType === 'schemes') {
+                    filtered = allSchemes;
+                    renderCards(filtered);
+                } else if (filterType === 'recommended') {
+                    // Check if we have stored recommendations
+                    if (smartRecommendations.length > 0) {
+                        renderSmartRecommendations(smartRecommendations);
+                    } else {
+                        // Show analyze button
+                        showAnalyzeButton();
+                    }
+                }
+            }
+
+            filterSubsidies.addEventListener('click', () => {
+                document.querySelectorAll('.filter-button').forEach(btn => btn.classList.remove('active'));
+                filterSubsidies.classList.add('active');
+                applyFilter('subsidies');
+            });
+
+            filterSchemes.addEventListener('click', () => {
+                document.querySelectorAll('.filter-button').forEach(btn => btn.classList.remove('active'));
+                filterSchemes.classList.add('active');
+                applyFilter('schemes');
+            });
+
+            filterRecommended.addEventListener('click', () => {
+                document.querySelectorAll('.filter-button').forEach(btn => btn.classList.remove('active'));
+                filterRecommended.classList.add('active');
+                applyFilter('recommended');
+            });
+
+            // Load all data on page load
+            async function initPage() {
+                await loadSubsidies();
+                await loadSchemes();
+                await checkStoredRecommendations();
+                applyFilter('subsidies');
+            }
+
+            initPage();
+        });
+
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,632 @@
+{% extends "base.html" %}
+
+{% block title %}{{ crop }} Sell Harvest - Telhan Sathi{% endblock %}
+
+{% block style %}
+    <link href="https://fonts.googleapis.com/css2?family=Hind:wght@400;500;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            /* Palette: Earth & Harvest */
+            --primary-green: #2d6a4f; /* Deep Leaf Green */
+            --accent-green: #52b788;  /* Fresh Shoot Green */
+            --harvest-gold: #ffb703;  /* Ripe Crop Gold */
+            --soil-dark: #1f2421;     /* Dark Earth Text */
+            --off-white: #f8f9fa;
+            --surface-white: #ffffff;
+            --shadow-soft: 0 8px 30px rgba(0,0,0,0.08);
+            --radius-lg: 24px;
+            --radius-md: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+ 
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            min-height: 95vh; /* Slightly floating on desktop */
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-soft);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Decorative Header Leaf */
+        .app-container::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            background: var(--accent-green);
+            opacity: 0.1;
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        /* --- Header Section --- */
+        .header_title {
+            padding: 25px 25px 10px 25px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .page-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 28px;
+            color: var(--primary-green);
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 2px;
+        }
+
+        /* --- Crop Badge (Floating) --- */
+        .crop-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .crop-badge {
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(135deg, var(--primary-green), var(--accent-green));
+            padding: 6px 16px;
+            border-radius: 50px;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 4px 10px rgba(45, 106, 79, 0.2);
+        }
+
+        .content {
+            padding: 25px;
+            flex: 1;
+            z-index: 1;
+        }
+
+        /* --- Section Styling --- */
+        .section-card {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #eef0f2;
+        }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 12px;
+        }
+
+        .input-label {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--primary-green);
+        }
+
+        .unit-badge {
+            font-size: 12px;
+            background: #e9ecef;
+            padding: 4px 8px;
+            border-radius: 6px;
+            color: #495057;
+        }
+
+        /* --- 1. Custom Slider --- */
+        .range-container {
+            position: relative;
+            padding: 10px 0;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 12px;
+            cursor: pointer;
+            background: #e9ecef;
+            border-radius: 10px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            height: 28px;
+            width: 28px;
+            border-radius: 50%;
+            background: var(--surface-white);
+            border: 6px solid var(--primary-green);
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -9px; /* Centers thumb */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 2;
+        }
+
+        .slider-fill {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            left: 0;
+            height: 12px;
+            background: var(--primary-green);
+            border-radius: 10px;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .manual-input {
+            width: 100%;
+            text-align: center;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 10px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-green);
+            margin-top: 15px;
+            font-family: 'Outfit', sans-serif;
+            transition: border-color 0.3s;
+        }
+        
+        .manual-input:focus {
+            outline: none;
+            border-color: var(--accent-green);
+        }
+
+        /* --- 2. Price Input --- */
+        .price-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .currency-icon {
+            position: absolute;
+            left: 16px;
+            font-weight: bold;
+            color: #adb5bd;
+            font-size: 20px;
+        }
+
+        .price-input {
+            width: 100%;
+            padding: 15px 15px 15px 40px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--soil-dark);
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .price-input:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            background: #f8fff9;
+        }
+
+        .market-tag {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #6c757d;
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* --- 3. Hero Earnings Card --- */
+        .earnings-card {
+            background: linear-gradient(135deg, var(--primary-green), #1b4332);
+            color: white;
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 25px rgba(45, 106, 79, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Golden glow effect */
+        .earnings-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, var(--harvest-gold) 0%, transparent 70%);
+            opacity: 0.2;
+        }
+
+        .earnings-title {
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .total-display {
+            font-family: 'Outfit', sans-serif;
+            font-size: 42px;
+            font-weight: 700;
+            margin: 5px 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .breakdown-pill {
+            display: inline-block;
+            background: rgba(255,255,255,0.15);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 14px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* --- 4. Date & Photos --- */
+        .date-input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 16px;
+            color: var(--soil-dark);
+            font-family: 'Hind', sans-serif;
+            background: white;
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .photo-upload-box {
+            aspect-ratio: 1;
+            border: 2px dashed #cbd5e0;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            background: #f8f9fa;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .photo-upload-box:active {
+            transform: scale(0.98);
+            background: #e9ecef;
+        }
+
+        .photo-upload-box i {
+            font-size: 24px;
+            color: #adb5bd;
+            margin-bottom: 4px;
+        }
+
+        .photo-upload-box span {
+            font-size: 10px;
+            color: #adb5bd;
+            font-weight: 600;
+        }
+
+        .photo-upload-box.has-image {
+            border-style: solid;
+            border-color: var(--primary-green);
+        }
+
+        .uploaded-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: none;
+        }
+
+        /* --- Footer --- */
+        .footer-actions {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #f0f0f0;
+            position: sticky;
+            bottom: 0;
+            z-index: 10;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: var(--harvest-gold);
+            color: #3e2c00; /* Dark contrast for gold */
+            border: none;
+            padding: 18px;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+            box-shadow: 0 4px 15px rgba(255, 183, 3, 0.4);
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-submit:active {
+            transform: scale(0.98);
+        }
+
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="app-container">
+    <div class="header_title">
+        <div class="page-title">Sell Harvest</div>
+        <div class="subtitle">Create a new listing for buyers</div>
+        
+        <div class="crop-header">
+            <div class="crop-badge">
+                <i class="fas fa-leaf" style="margin-right: 8px;"></i>
+                <span id="cropNameDisplay">Mustard</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="earnings-card">
+            <div class="earnings-title">Est. Total Income (कुल आय)</div>
+            <div class="total-display" id="totalMath">₹0</div>
+            <div class="breakdown-pill">
+                <span id="qtyMath">0</span> Qtl × ₹<span id="priceMath">0</span>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="label-row">
+                <span class="input-label">Quantity (मात्रा)</span>
+                <span class="unit-badge">Quintals</span>
+            </div>
+            
+            <div class="range-container">
+                <div class="slider-fill" id="sliderFill"></div>
+                <input type="range" id="quantitySlider" min="1" max="100" value="50" step="1">
+            </div>
+            <input type="number" id="manualQty" class="manual-input" value="50">
+        </div>
+
+        <div class="section-card">
+            <div class="label-row">
+                <span class="input-label">Expected Price (कीमत)</span>
+                <span class="unit-badge">Per Quintal</span>
+            </div>
+            
+            <div class="price-wrapper">
+                <span class="currency-icon">₹</span>
+                <input type="number" id="priceInput" class="price-input" value="5450">
+            </div>
+            
+            <div class="market-tag">
+                <i class="fas fa-chart-line" style="color: var(--primary-green)"></i>
+                <span>Current Market Rate: <strong>₹<span id="marketRateDisplay">5450</span></strong></span>
+            </div>
+        </div>
+
+        <div class="section-card" style="padding-bottom: 10px;">
+            <div class="label-row">
+                <span class="input-label">Harvest Date (कटाई)</span>
+            </div>
+            <input type="date" id="harvest_date" class="date-input">
+        </div>
+
+        <div class="section-card">
+            <div class="label-row">
+                <span class="input-label">Crop Photos (तस्वीरें)</span>
+            </div>
+            <div class="photo-grid">
+                <div class="photo-upload-box" onclick="document.getElementById('file1').click()">
+                    <input type="file" id="file1" hidden accept="image/*" onchange="previewImage(this, 'img1')">
+                    <i class="fas fa-camera"></i>
+                    <span>Add</span>
+                    <img id="img1" class="uploaded-img">
+                </div>
+                <div class="photo-upload-box" onclick="document.getElementById('file2').click()">
+                    <input type="file" id="file2" hidden accept="image/*" onchange="previewImage(this, 'img2')">
+                    <i class="fas fa-camera"></i>
+                    <span>Add</span>
+                    <img id="img2" class="uploaded-img">
+                </div>
+                <div class="photo-upload-box" onclick="document.getElementById('file3').click()">
+                    <input type="file" id="file3" hidden accept="image/*" onchange="previewImage(this, 'img3')">
+                    <i class="fas fa-camera"></i>
+                    <span>Add</span>
+                    <img id="img3" class="uploaded-img">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer-actions">
+        <button id="submitBtn" class="btn-submit" onclick="submitSellRequest()">
+            <span>Confirm Request</span>
+            <i class="fas fa-arrow-right"></i>
+        </button>
+    </div>
+    <br><br><br>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    // --- 1. INITIALIZATION ---
+    const params = new URLSearchParams(window.location.search);
+    const cropName = params.get('crop') || 'Mustard';
+    const marketRate = parseFloat(params.get('price')) || 5450;
+
+    // Elements
+    const slider = document.getElementById('quantitySlider');
+    const manualQty = document.getElementById('manualQty');
+    const priceInput = document.getElementById('priceInput');
+    const sliderFill = document.getElementById('sliderFill');
+
+    // Initial Values
+    document.getElementById('cropNameDisplay').textContent = cropName;
+    document.getElementById('marketRateDisplay').textContent = marketRate;
+    priceInput.value = marketRate; 
+    document.getElementById('harvest_date').min = new Date().toISOString().split('T')[0];
+
+    // --- 2. CALCULATOR LOGIC ---
+    function updateCalculations() {
+        const qty = parseFloat(manualQty.value) || 0;
+        const price = parseFloat(priceInput.value) || 0;
+        const total = qty * price;
+
+        // Update Result Text (Indian formatting)
+        document.getElementById('totalMath').textContent = '₹' + total.toLocaleString('en-IN');
+        
+        // Update Breakdown Text
+        document.getElementById('qtyMath').textContent = qty;
+        document.getElementById('priceMath').textContent = price.toLocaleString('en-IN');
+
+        // Update Slider Visual Fill
+        const percentage = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
+        sliderFill.style.width = percentage + '%';
+    }
+
+    // --- 3. EVENT LISTENERS ---
+    
+    // Slider Drag
+    slider.addEventListener('input', (e) => {
+        manualQty.value = e.target.value;
+        updateCalculations();
+    });
+
+    // Manual Quantity Input
+    manualQty.addEventListener('input', (e) => {
+        let val = parseFloat(e.target.value);
+        if(val > 100) val = 100; 
+        if(val < 0) val = 0;
+        slider.value = val;
+        updateCalculations();
+    });
+
+    // Price Input Change
+    priceInput.addEventListener('input', () => {
+        updateCalculations();
+    });
+
+    // Initialize
+    updateCalculations();
+
+    // --- 4. PHOTO PREVIEW ---
+    function previewImage(input, imgId) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById(imgId);
+                img.src = e.target.result;
+                img.style.display = 'block';
+                input.parentElement.classList.add('has-image');
+                
+                // Hide icon text for cleaner look
+                const icon = input.parentElement.querySelector('i');
+                const text = input.parentElement.querySelector('span');
+                if(icon) icon.style.display = 'none';
+                if(text) text.style.display = 'none';
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // --- 5. SUBMIT FUNCTION (Kept mostly same, added animation logic) ---
+    async function submitSellRequest() {
+        const qty = manualQty.value;
+        const price = priceInput.value;
+        const date = document.getElementById('harvest_date').value;
+
+        if(!date) { alert("Please select a harvest date."); return; }
+        if(!qty || qty <= 0) { alert("Please enter a valid quantity."); return; }
+        if(!price || price <= 0) { alert("Please enter a valid price."); return; }
+
+        const btn = document.getElementById('submitBtn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        btn.disabled = true;
+
+        const formData = new FormData();
+        formData.append('crop', cropName);
+        formData.append('quantity', qty);
+        formData.append('expected_price', price);
+        formData.append('harvest_date', date);
+
+        const photo1 = document.getElementById('file1').files[0];
+        const photo2 = document.getElementById('file2').files[0];
+        const photo3 = document.getElementById('file3').files[0];
+
+        if (photo1) formData.append('photo1', photo1);
+        if (photo2) formData.append('photo2', photo2);
+        if (photo3) formData.append('photo3', photo3);
+
+        try {
+            const response = await fetch('/market/sell/create', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                btn.innerHTML = '<i class="fas fa-check"></i> Success!';
+                btn.style.background = '#2d6a4f'; // Change to green on success
+                setTimeout(() => {
+                    alert("Request Submitted! \nYour Price: ₹" + price + "/Qtl");
+                    window.location.href = '/market/all-deals';
+                }, 500);
+            } else {
+                const error = await response.json();
+                alert('Error: ' + (error.error || 'Failed to submit'));
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error submitting request: ' + error.message);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+</script>
+{% endblock %}

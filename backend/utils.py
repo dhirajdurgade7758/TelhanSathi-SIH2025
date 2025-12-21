@@ -17,18 +17,34 @@ def send_otp_sms(phone_number, otp_code):
     For development, just log it. For production, use actual Twilio.
     """
     # Development Mode: Print OTP
-    if os.getenv('FLASK_ENV') == 'development':
+    env = os.getenv('FLASK_ENV', 'production')
+    if env == 'development':
         print(f"[DEV MODE] OTP for {phone_number}: {otp_code}")
         return True
-    
-    # Production Mode: Use Twilio
+
+    # Production Mode: Use Twilio but validate credentials first
     try:
         from twilio.rest import Client
-        
+
         account_sid = os.getenv('TWILIO_ACCOUNT_SID')
         auth_token = os.getenv('TWILIO_AUTH_TOKEN')
         twilio_phone = os.getenv('TWILIO_PHONE_NUMBER')
-        
+
+        missing = [name for name, val in (
+            ('TWILIO_ACCOUNT_SID', account_sid),
+            ('TWILIO_AUTH_TOKEN', auth_token),
+            ('TWILIO_PHONE_NUMBER', twilio_phone),
+        ) if not val]
+
+        if missing:
+            print(f"Twilio credentials missing: {', '.join(missing)}")
+            # If local fallback is allowed (or not explicitly production), print OTP instead
+            local_fallback = os.getenv('LOCAL_FALLBACK', 'true').lower() in ('1', 'true', 'yes')
+            if local_fallback or env != 'production':
+                print(f"[FALLBACK] OTP for {phone_number}: {otp_code}")
+                return True
+            return False
+
         client = Client(account_sid, auth_token)
         message = client.messages.create(
             body=f"Your Telhan Sathi OTP is: {otp_code}. Valid for 5 minutes.",

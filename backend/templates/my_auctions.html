@@ -1,0 +1,468 @@
+{% extends "base.html" %}
+
+{% block title %}मेरी नीलामी - मंडी कनेक्ट{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bidding.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="my-auctions-container">
+    <!-- Header with Action Button -->
+    <div class="page-header-action">
+        <div class="page-header">
+            <h1>🌾 My Auctions</h1>
+            <p class="subtitle">Manage your auction listings and track bids</p>
+        </div>
+        <a href="/bidding/create-auction" class="btn-primary">+ Create New Auction</a>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-section">
+        <button class="tab-btn active" onclick="switchTab('all')">All</button>
+        <button class="tab-btn" onclick="switchTab('live')">Live</button>
+        <button class="tab-btn" onclick="switchTab('ended')">Ended</button>
+        <button class="tab-btn" onclick="switchTab('sold')">Sold</button>
+        <button class="tab-btn" onclick="switchTab('cancelled')">Cancelled</button>
+        <button class="tab-btn" onclick="switchTab('bidded')">With Bids 🎯</button>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-content">
+                <span class="stat-number" id="totalAuctions">0</span>
+                <span class="stat-label">Total Auctions</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">🔴</div>
+            <div class="stat-content">
+                <span class="stat-number" id="liveCount">0</span>
+                <span class="stat-label">Live Auctions</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-content">
+                <span class="stat-number" id="soldCount">0</span>
+                <span class="stat-label">Sold</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-content">
+                <span class="stat-number" id="totalEarnings">₹0</span>
+                <span class="stat-label">Total Earnings</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auctions List -->
+    <div class="auctions-list" id="auctionsList">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Loading your auctions...</p>
+        </div>
+    </div>
+
+    <!-- No Auctions Message -->
+    <div id="noAuctions" class="empty-state" style="display: none;">
+        <h2>😕 No auctions yet</h2>
+        <p>Create your first auction to start selling your crops</p>
+        <a href="/bidding/create-auction" class="btn-primary">Create First Auction →</a>
+    </div>
+</div>
+
+<!-- Auction Card Template -->
+<template id="auctionCardTemplate">
+    <div class="auction-card-detailed">
+        <!-- Card Header with Status -->
+        <div class="card-header">
+            <div class="card-title">
+                <h3 id="cropName">Soybean</h3>
+                <span class="status-badge" id="statusBadge">LIVE</span>
+            </div>
+            <div class="card-actions">
+                <button class="btn-icon" title="View Details" onclick="viewAuctionDetails()">👁️</button>
+                <button class="btn-icon" title="Edit" onclick="editAuction()" id="editBtn" style="display:none;">✏️</button>
+                <button class="btn-icon" title="End Auction" onclick="endAuction()" id="endBtn" style="display:none;">⏹️</button>
+            </div>
+        </div>
+
+        <!-- Card Content -->
+        <div class="card-content">
+            <!-- Auction Info Grid -->
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="label">Quantity</span>
+                    <span class="value" id="quantity">10 Q</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Base Price</span>
+                    <span class="value" id="basePrice">₹5,500/Q</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Min Bid</span>
+                    <span class="value" id="minBid">₹5,500</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Current Bid</span>
+                    <span class="value highlight" id="currentBid">₹5,650</span>
+                </div>
+            </div>
+
+            <!-- Bidding Stats -->
+            <div class="bid-stats">
+                <div class="stat">
+                    <span class="stat-icon">💰</span>
+                    <div class="stat-info">
+                        <span class="stat-label">Total Bids</span>
+                        <span class="stat-value" id="totalBids">5</span>
+                    </div>
+                </div>
+                <div class="stat">
+                    <span class="stat-icon">👥</span>
+                    <div class="stat-info">
+                        <span class="stat-label">Unique Bidders</span>
+                        <span class="stat-value" id="bidders">3</span>
+                    </div>
+                </div>
+                <div class="stat">
+                    <span class="stat-icon">📈</span>
+                    <div class="stat-info">
+                        <span class="stat-label">Avg Bid</span>
+                        <span class="stat-value" id="avgBid">₹5,600</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timing Info -->
+            <div class="timing-info">
+                <div class="timing-item">
+                    <span class="timing-label">Started:</span>
+                    <span class="timing-value" id="startTime">10:30 AM</span>
+                </div>
+                <div class="timing-item">
+                    <span class="timing-label">Ends:</span>
+                    <span class="timing-value" id="endTime">24 hours</span>
+                </div>
+            </div>
+
+            <!-- Location -->
+            <div class="location-info">
+                <span class="location-icon">📍</span>
+                <span id="location">Indore, Madhya Pradesh</span>
+            </div>
+        </div>
+
+        <!-- Card Footer with Action Button -->
+        <div class="card-footer">
+            <button class="btn-primary btn-full" id="viewDetailsBtn" onclick="viewAuctionDetails()">
+                View Full Details →
+            </button>
+        </div>
+    </div>
+</template>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let allAuctions = [];
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        loadMyAuctions();
+        setupAutoRefresh();
+    });
+
+    let allAuctions = [];
+    let biddedAuctions = [];
+
+    // Load farmer's auctions
+    function loadMyAuctions() {
+        // Load farmer's created auctions
+        Promise.all([
+            fetch('/bidding/farmer/my-auctions').then(res => {
+                if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                return res.json();
+            }),
+            fetch('/bidding/farmer/auctions/with-bids').then(res => {
+                if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                return res.json();
+            }).catch(err => {
+                console.log('Bidded auctions endpoint not available yet, continuing...');
+                return { auctions: [] };
+            })
+        ])
+        .then(([auctionsData, biddedData]) => {
+            console.log('Loaded auctions:', auctionsData);
+            console.log('Loaded bidded auctions:', biddedData);
+            
+            allAuctions = auctionsData.auctions || [];
+            biddedAuctions = biddedData.auctions || [];
+            
+            console.log(`Total created auctions: ${allAuctions.length}`);
+            console.log(`Total bidded auctions: ${biddedAuctions.length}`);
+            
+            // Mark bidded auctions with a flag
+            biddedAuctions.forEach(a => a.is_bidded = true);
+            
+            // Update statistics
+            updateStatistics(allAuctions);
+            
+            // Display all auctions
+            switchTab('all');
+        })
+        .catch(err => {
+            console.error('Error loading auctions:', err);
+            showError('Failed to load your auctions: ' + err.message);
+            document.getElementById('auctionsList').innerHTML = `<div style="grid-column: 1/-1; padding: 20px; color: red;">Error: ${err.message}</div>`;
+        });
+    }
+
+    // Switch tab
+    function switchTab(tab) {
+        // Update tab buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+
+        // Filter and display auctions
+        let filteredAuctions = allAuctions;
+
+        switch(tab) {
+            case 'live':
+                filteredAuctions = allAuctions.filter(a => a.status === 'live');
+                break;
+            case 'ended':
+                filteredAuctions = allAuctions.filter(a => a.status === 'ended');
+                break;
+            case 'sold':
+                filteredAuctions = allAuctions.filter(a => a.status === 'sold');
+                break;
+            case 'cancelled':
+                filteredAuctions = allAuctions.filter(a => a.status === 'cancelled');
+                break;
+            case 'bidded':
+                // Show only auctions with bids (bids_count > 0)
+                filteredAuctions = allAuctions.filter(a => a.bids_count > 0);
+                // Also add auctions from bidded list
+                if (biddedAuctions.length > 0) {
+                    filteredAuctions = [...filteredAuctions, ...biddedAuctions];
+                    // Remove duplicates
+                    const seen = new Set();
+                    filteredAuctions = filteredAuctions.filter(a => {
+                        if (seen.has(a.id)) return false;
+                        seen.add(a.id);
+                        return true;
+                    });
+                }
+                break;
+        }
+
+        displayAuctions(filteredAuctions);
+    }
+
+    // Display auctions
+    function displayAuctions(auctions) {
+        const container = document.getElementById('auctionsList');
+        const noData = document.getElementById('noAuctions');
+
+        if (auctions.length === 0) {
+            container.style.display = 'none';
+            noData.style.display = 'block';
+            return;
+        }
+
+        container.style.display = 'grid';
+        noData.style.display = 'none';
+        container.innerHTML = '';
+        
+        auctions.forEach(auction => {
+            const template = document.getElementById('auctionCardTemplate').content.cloneNode(true);
+            
+            // Fill template
+            const card = template.querySelector('.auction-card-detailed');
+            card.dataset.auctionId = auction.id;
+            
+            // Safe field access with fallbacks
+            const cropName = template.querySelector('#cropName');
+            if (cropName) cropName.textContent = auction.crop_name || 'Unknown';
+            
+            const quantity = template.querySelector('#quantity');
+            if (quantity) quantity.textContent = `${auction.quantity || 0} Q`;
+            
+            const basePrice = template.querySelector('#basePrice');
+            if (basePrice) basePrice.textContent = `₹${formatNumber(auction.base_price || 0)}/Q`;
+            
+            const minBid = template.querySelector('#minBid');
+            if (minBid) minBid.textContent = `₹${formatNumber(auction.min_bid || 0)}`;
+            
+            const currentBid = template.querySelector('#currentBid');
+            if (currentBid) currentBid.textContent = `₹${formatNumber(auction.current_bid || auction.min_bid || 0)}`;
+            
+            const totalBids = template.querySelector('#totalBids');
+            if (totalBids) totalBids.textContent = auction.bids_count || 0;
+            
+            const bidders = template.querySelector('#bidders');
+            if (bidders) bidders.textContent = auction.bidders_count || 0;
+            
+            const avgBid = template.querySelector('#avgBid');
+            if (avgBid) avgBid.textContent = `₹${formatNumber(auction.avg_bid || 0)}`;
+            
+            const location = template.querySelector('#location');
+            if (location) location.textContent = auction.location || 'N/A';
+            
+            const startTime = template.querySelector('#startTime');
+            if (startTime) startTime.textContent = formatTime(auction.start_time);
+            
+            const endTime = template.querySelector('#endTime');
+            if (endTime) endTime.textContent = getTimeRemaining(auction.end_time);
+
+            // Status badge
+            const statusBadge = template.querySelector('#statusBadge');
+            if (statusBadge) {
+                let badgeText = (auction.status || 'UNKNOWN').toUpperCase();
+                
+                // Add bid indicator if auction has bids
+                if (auction.bids_count > 0) {
+                    badgeText += ` 🎯 (${auction.bids_count} bids)`;
+                }
+                
+                statusBadge.textContent = badgeText;
+                statusBadge.className = `status-badge status-${auction.status || 'unknown'}`;
+                
+                // Add special styling if has bids
+                if (auction.bids_count > 0) {
+                    statusBadge.style.backgroundColor = '#22c55e';
+                    statusBadge.style.color = '#ffffff';
+                }
+            }
+
+            // Show/hide buttons based on status
+            const editBtn = template.querySelector('#editBtn');
+            const endBtn = template.querySelector('#endBtn');
+            
+            if (auction.status === 'live') {
+                if (endBtn) endBtn.style.display = 'inline-block';
+                if (editBtn) editBtn.style.display = 'inline-block';
+            } else {
+                if (editBtn) editBtn.style.display = 'none';
+                if (endBtn) endBtn.style.display = 'none';
+            }
+
+            // Event handlers
+            const auctionId = auction.id;
+            
+            const viewDetailsBtn = template.querySelector('[title="View Details"]');
+            if (viewDetailsBtn) {
+                viewDetailsBtn.onclick = () => {
+                    window.location.href = `/bidding/auction/${auctionId}/detail`;
+                };
+            }
+
+            if (endBtn) {
+                endBtn.onclick = () => {
+                    confirmEndAuction(auctionId);
+                };
+            }
+
+            container.appendChild(template);
+        });
+    }
+
+    // Update statistics
+    function updateStatistics(auctions) {
+        const totalAuctions = auctions.length;
+        const liveCount = auctions.filter(a => a.status === 'live').length;
+        const soldCount = auctions.filter(a => a.status === 'sold').length;
+        const totalEarnings = auctions
+            .filter(a => a.status === 'sold')
+            .reduce((sum, a) => sum + (a.final_price * a.quantity), 0);
+
+        document.getElementById('totalAuctions').textContent = totalAuctions;
+        document.getElementById('liveCount').textContent = liveCount;
+        document.getElementById('soldCount').textContent = soldCount;
+        document.getElementById('totalEarnings').textContent = `₹${formatNumber(totalEarnings)}`;
+    }
+
+    // Confirm and end auction
+    function confirmEndAuction(auctionId) {
+        if (confirm('Are you sure you want to end this auction? This cannot be undone.')) {
+            fetch(`/bidding/farmer/auction/${auctionId}/end`, {
+                method: 'POST'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('✅ Auction ended successfully', 'success');
+                    setTimeout(loadMyAuctions, 1500);
+                } else {
+                    showNotification('❌ ' + (data.message || 'Failed to end auction'), 'error');
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                showNotification('❌ Error ending auction', 'error');
+            });
+        }
+    }
+
+    // Setup auto-refresh
+    function setupAutoRefresh() {
+        setInterval(loadMyAuctions, 60000); // Refresh every minute
+    }
+
+    // Helper functions
+    function formatNumber(num) {
+        return new Intl.NumberFormat('en-IN').format(num);
+    }
+
+    function formatTime(dateString) {
+        if (!dateString) return 'N/A';
+        const date = new Date(dateString);
+        return date.toLocaleString('en-IN', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    function getTimeRemaining(endTime) {
+        const now = new Date();
+        const end = new Date(endTime);
+        const diff = end - now;
+
+        if (diff <= 0) return 'Ended';
+        
+        const hours = Math.floor(diff / 3600000);
+        const minutes = Math.floor((diff % 3600000) / 60000);
+        
+        if (hours > 0) return `${hours}h ${minutes}m`;
+        return `${minutes}m`;
+    }
+
+    function showNotification(message, type) {
+        const notif = document.createElement('div');
+        notif.className = `notification notification-${type}`;
+        notif.textContent = message;
+        document.body.appendChild(notif);
+
+        setTimeout(() => notif.remove(), 5000);
+    }
+
+    function showError(message) {
+        const container = document.getElementById('auctionsList');
+        container.innerHTML = `<div class="error-message">${message}</div>`;
+    }
+</script>
+{% endblock %}

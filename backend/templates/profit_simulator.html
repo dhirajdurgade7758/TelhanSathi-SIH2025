@@ -1,0 +1,452 @@
+{% extends "base.html" %}
+
+{% block title %}Profit Simulator - Telhan Sathi{% endblock %}
+
+{% block content %}
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Summary Card -->
+            <div class="card">
+                <h2 class="card-title">🌾 Oilseed Profit Simulator</h2>
+                <div id="summary-line" class="summary-text">Loading your farm data…</div>
+            </div>
+
+            <!-- Input Section -->
+            <div class="card">
+                <h3 class="card-subtitle">Select Oilseed & Parameters</h3>
+                <div class="row">
+                    <div class="col">
+                        <label>Oilseed Crop</label>
+                        <select id="cropName" class="input-field"></select>
+                    </div>
+                    <div class="col">
+                        <label>Area (Acres)</label>
+                        <input id="areaAcres" class="input-field" type="number" min="0.1" max="100" step="0.1" value="1">
+                    </div>
+                    <div class="col">
+                        <label>Harvest Month</label>
+                        <select id="harvestMonth" class="input-field"></select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Grid -->
+            <div class="card">
+                <h3 class="card-subtitle">📊 Profit Projection</h3>
+                <div class="result-grid">
+                    <div class="result-box yield-box">
+                        <div class="result-value" id="yieldVal">-</div>
+                        <div class="result-label">Yield per Acre (Qtl)</div>
+                    </div>
+                    <div class="result-box price-box">
+                        <div class="result-value" id="priceVal">-</div>
+                        <div class="result-label">Market Price (₹/Qtl)</div>
+                    </div>
+                    <div class="result-box cost-box">
+                        <div class="result-value" id="costVal">-</div>
+                        <div class="result-label">Total Input Cost (₹)</div>
+                    </div>
+                    <div class="result-box income-box">
+                        <div class="result-value" id="incomeVal">-</div>
+                        <div class="result-label">Gross Income (₹)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart -->
+            <div class="card">
+                <h3 class="card-subtitle">💹 Profit Breakdown</h3>
+                <div class="chart-container">
+                    <canvas id="profitChart"></canvas>
+                </div>
+                <div class="profit-summary">
+                    <div class="net-profit-display" id="netProfitDisplay">₹ -</div>
+                    <div class="net-profit-label">Net Profit</div>
+                </div>
+            </div>
+
+            <!-- CTA Buttons -->
+            <div class="card">
+                <div class="button-group">
+                    <button class="btn btn-primary" id="applySubsidy">Apply for Subsidy</button>
+                    <button class="btn btn-secondary" id="findBuyer">Find Buyer</button>
+                </div>
+            </div>
+        </div>
+
+        <style>
+    
+
+
+            .icon-button {
+                width: 24px;
+                height: 24px;
+                fill: white;
+                cursor: pointer;
+            }
+
+            .main-content {
+                flex-grow: 1;
+                overflow-y: auto;
+                padding: 8px;
+                padding-bottom: 80px;
+            }
+
+            .card {
+                background: #fff;
+                padding: 16px;
+                border-radius: 10px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                margin-bottom: 15px;
+            }
+
+            .card-title {
+                margin: 0 0 8px 0;
+                font-size: 18px;
+                font-weight: 600;
+                color: #333;
+            }
+
+            .card-subtitle {
+                margin: 0 0 12px 0;
+                font-size: 15px;
+                font-weight: 600;
+                color: #333;
+            }
+
+            .summary-text {
+                font-size: 13px;
+                color: #666;
+                line-height: 1.6;
+            }
+
+            .row {
+                display: flex;
+                gap: 12px;
+                margin-bottom: 12px;
+                align-items: flex-end;
+            }
+
+            .col {
+                flex: 1;
+            }
+
+            label {
+                font-size: 12px;
+                color: #666;
+                display: block;
+                margin-bottom: 4px;
+                font-weight: 500;
+            }
+
+            .input-field {
+                width: 100%;
+                padding: 10px;
+                border-radius: 6px;
+                border: 1px solid #ddd;
+                font-size: 13px;
+                transition: border-color 0.2s;
+            }
+
+            .input-field:focus {
+                outline: none;
+                border-color: #388e3c;
+                box-shadow: 0 0 0 2px rgba(56, 142, 60, 0.1);
+            }
+
+            .result-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+
+            .result-box {
+                background: linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%);
+                padding: 14px;
+                border-radius: 8px;
+                text-align: center;
+                border-left: 4px solid #388e3c;
+                box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+            }
+
+            .result-box.yield-box {
+                border-left-color: #ffc107;
+            }
+
+            .result-box.price-box {
+                border-left-color: #ff9800;
+            }
+
+            .result-box.cost-box {
+                border-left-color: #f44336;
+            }
+
+            .result-box.income-box {
+                border-left-color: #2196f3;
+            }
+
+            .result-value {
+                font-size: 18px;
+                font-weight: bold;
+                color: #388e3c;
+            }
+
+            .result-label {
+                font-size: 11px;
+                color: #666;
+                margin-top: 4px;
+            }
+
+            .chart-container {
+                position: relative;
+                height: 280px;
+                margin: 20px 0;
+            }
+
+            .profit-summary {
+                text-align: center;
+                margin-top: 12px;
+                padding: 12px;
+                background: #f0f7f0;
+                border-radius: 8px;
+            }
+
+            .net-profit-display {
+                font-size: 24px;
+                font-weight: bold;
+                color: #2e7d32;
+            }
+
+            .net-profit-label {
+                font-size: 12px;
+                color: #666;
+                margin-top: 4px;
+            }
+
+            .button-group {
+                display: flex;
+                gap: 12px;
+            }
+
+            .btn {
+                padding: 12px 16px;
+                border-radius: 8px;
+                border: none;
+                cursor: pointer;
+                font-weight: 600;
+                font-size: 14px;
+                flex: 1;
+                transition: all 0.3s ease;
+            }
+
+            .btn-primary {
+                background: #388e3c;
+                color: #fff;
+            }
+
+            .btn-primary:hover {
+                background: #2e7d32;
+                box-shadow: 0 2px 8px rgba(56, 142, 60, 0.3);
+            }
+
+            .btn-secondary {
+                background: #fff;
+                border: 2px solid #388e3c;
+                color: #388e3c;
+            }
+
+            .btn-secondary:hover {
+                background: #f0f7f0;
+                border-color: #2e7d32;
+                color: #2e7d32;
+            }
+
+            @media (max-width: 420px) {
+                .row {
+                    flex-direction: column;
+                }
+
+                .col {
+                    width: 100%;
+                }
+            }
+        </style>
+{% endblock %}
+
+{% block script %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        let farmer = null;
+        let oilseedsList = [];
+        let harvestMonths = [];
+        let chart = null;
+
+        async function init() {
+            try {
+                const res = await fetch('/profit/api/init', {credentials: 'same-origin'});
+                const data = await res.json();
+                if (data.error) { 
+                    document.getElementById('summary-line').textContent = 'Error: ' + data.error; 
+                    return; 
+                }
+                
+                farmer = data.farmer;
+                oilseedsList = data.oilseeds_list || [];
+                harvestMonths = data.harvest_months || [];
+
+                // Update summary
+                document.getElementById('summary-line').textContent = 
+                    `Farm: ${farmer.name} | District: ${farmer.district} | Soil: ${farmer.soil_type || 'N/A'} | Water: ${farmer.water_type || 'N/A'}`;
+
+                // Populate crop dropdown
+                const cropSel = document.getElementById('cropName');
+                oilseedsList.forEach(crop => {
+                    const opt = document.createElement('option');
+                    opt.value = crop;
+                    opt.textContent = crop;
+                    cropSel.appendChild(opt);
+                });
+                cropSel.value = farmer.current_crop || (oilseedsList[0] || 'Mustard');
+
+                // Populate harvest month dropdown
+                const harvestSel = document.getElementById('harvestMonth');
+                harvestMonths.forEach(month => {
+                    const opt = document.createElement('option');
+                    opt.value = month;
+                    opt.textContent = month;
+                    harvestSel.appendChild(opt);
+                });
+                harvestSel.value = farmer.harvest_month || 'October';
+
+                // Set area from farmer data
+                document.getElementById('areaAcres').value = farmer.area_in_acres || 1;
+
+                // Event listeners
+                document.getElementById('cropName').addEventListener('change', simulate);
+                document.getElementById('areaAcres').addEventListener('change', simulate);
+                document.getElementById('harvestMonth').addEventListener('change', simulate);
+                
+                document.getElementById('applySubsidy').addEventListener('click', () => {
+                    window.location.href = '/subsidies/list';
+                });
+                document.getElementById('findBuyer').addEventListener('click', () => {
+                    const crop = document.getElementById('cropName').value;
+                    window.location.href = `/market/nearby/${crop}`;
+                });
+
+                // Init chart
+                const ctx = document.getElementById('profitChart').getContext('2d');
+                chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {labels: [], datasets: []},
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: (v) => '₹' + (v/1000).toFixed(1) + 'K',
+                                    color: '#666'
+                                },
+                                grid: {color: 'rgba(0,0,0,0.05)'}
+                            },
+                            x: {
+                                ticks: {color: '#666'},
+                                grid: {display: false}
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    color: '#666',
+                                    font: {size: 12},
+                                    padding: 12,
+                                    usePointStyle: true
+                                }
+                            }
+                        }
+                    }
+                });
+
+                simulate();
+            } catch (e) {
+                document.getElementById('summary-line').textContent = 'Error loading farm data: ' + e.message;
+            }
+        }
+
+        async function simulate() {
+            try {
+                const cropName = document.getElementById('cropName').value;
+                const areaAcres = parseFloat(document.getElementById('areaAcres').value || 1);
+                const harvestMonth = document.getElementById('harvestMonth').value;
+
+                const payload = {
+                    crop_name: cropName,
+                    state: farmer.state || 'Maharashtra',
+                    market_district: farmer.district || '',
+                    harvest_month: harvestMonth,
+                    soil_type: farmer.soil_type || '',
+                    water_type: farmer.water_type || 'Freshwater',
+                    area_in_acres: areaAcres
+                };
+
+                const res = await fetch('/profit/api/simulate', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+
+                const out = await res.json();
+                if (out.error) {
+                    console.error('Simulation error:', out);
+                    return;
+                }
+
+                const pred = out.prediction;
+
+                // Update result boxes
+                document.getElementById('yieldVal').textContent = pred.yield_per_acre.toFixed(2);
+                document.getElementById('priceVal').textContent = '₹ ' + pred.price_per_quintal.toLocaleString();
+                document.getElementById('costVal').textContent = '₹ ' + Math.round(pred.input_cost).toLocaleString();
+                document.getElementById('incomeVal').textContent = '₹ ' + Math.round(pred.gross_income).toLocaleString();
+                document.getElementById('netProfitDisplay').textContent = '₹ ' + Math.round(pred.net_profit).toLocaleString();
+
+                // Update bar chart
+                chart.data.labels = [cropName];
+                chart.data.datasets = [
+                    {
+                        label: 'Input Cost',
+                        data: [pred.input_cost],
+                        backgroundColor: '#f44336',
+                        borderRadius: 6
+                    },
+                    {
+                        label: 'Gross Income',
+                        data: [pred.gross_income],
+                        backgroundColor: '#2196f3',
+                        borderRadius: 6
+                    },
+                    {
+                        label: 'Net Profit',
+                        data: [pred.net_profit],
+                        backgroundColor: '#2e7d32',
+                        borderRadius: 6
+                    }
+                ];
+                chart.update();
+            } catch (e) {
+                console.error('Simulate error:', e);
+            }
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+{% endblock %}

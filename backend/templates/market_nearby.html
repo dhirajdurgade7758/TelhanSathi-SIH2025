@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% block title %}{{ crop }} Prices{% endblock %}
+
+{% block style %}
+
+    <style>
+  
+
+        /* Frame (Mobile View Container) */
+        .frame {
+            width: 100%;
+            max-width: 450px; /* Slightly wider for better content space */
+            margin: 0 auto; /* Center on large screens */
+            height: 100vh;
+            background-color: #ffffff; /* White content background */
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+
+
+        /* Page Info (Date and Live Label) */
+        .page-info {
+            padding: 10px 15px;
+            background: #e8f5e9; /* Lighter Green */
+            font-size: 14px;
+            color: #1b5e20; /* Darker Green for text */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #c8e6c9;
+        }
+        
+        /* Main Content Scroll Area */
+        .main-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-bottom: 20px;
+        }
+
+        /* Main Price Card */
+        .price-card {
+            background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%); /* Green Gradient */
+            margin: 20px 15px;
+            padding: 25px;
+            border-radius: 15px;
+            color: white;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+
+        .price-card:active {
+            transform: scale(0.98);
+        }
+
+        .price-card h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 400;
+            opacity: 0.9;
+        }
+
+        .price-card h2 {
+            margin: 5px 0 15px;
+            font-size: 28px;
+            font-weight: 700;
+            color: #ffe082; /* Light Yellow for contrast */
+        }
+
+        .main-price {
+            font-size: 40px;
+            font-weight: bold;
+            display: flex;
+            align-items: baseline;
+        }
+
+        .main-price small {
+            font-size: 18px;
+            margin-left: 5px;
+            font-weight: 400;
+            color: #c8e6c9;
+        }
+
+        .price-card p {
+            font-size: 14px;
+            color: #dcedc8;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Buyer List Header */
+        .buyer-list-header {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin: 15px 15px 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Buyer Card */
+        .buyer-card {
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 0 15px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #eee;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .buyer-card:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .buyer-card:active {
+            transform: translateY(1px);
+        }
+
+        .buyer-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .buyer-name {
+            font-weight: bold;
+            font-size: 16px;
+            color: #1e3a24;
+        }
+
+        .buyer-distance {
+            font-size: 12px;
+            color: #777;
+            margin-top: 3px;
+            display: flex;
+            align-items: center;
+        }
+
+        .buyer-distance i {
+            margin-right: 4px;
+        }
+
+        .buyer-price {
+            font-size: 22px;
+            font-weight: 700;
+            color: #ff6f00; /* Orange/Amber for immediate attention */
+        }
+    </style>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+{% endblock %}
+
+
+{% block content %}
+<div class="frame">
+
+
+    <div class="page-info">
+        <div style="display:flex;align-items:center;"><i class="fa-solid fa-bolt me-2"></i> Live Prices</div>
+        <span><i class="fa-regular fa-calendar-days me-2"></i> {{ now().strftime("%d %b %Y") }}</span>
+    </div>
+
+    <div class="main-content">
+
+        <div class="price-card" id="avg-price-card" style="cursor: pointer;">
+            <h3>AVERAGE MARKET PRICE</h3>
+            <h2>{{ crop }}</h2>
+
+            <div class="main-price">
+                {% if avg_price %}
+                    ₹{{ avg_price }} <small>/ Quintal</small>
+                {% else %}
+                    <span style="color:#ffe082;">Price Not Available</span>
+                {% endif %}
+            </div>
+            <p><i class="fa-solid fa-clock-rotate-left"></i> Updated today • Tap for detailed review</p>
+        </div>
+
+        <div class="buyer-list-header">
+            <i class="fa-solid fa-location-dot me-2"></i> Nearby Buyers
+        </div>
+
+        {% for p in prices %}
+        <div class="buyer-card" style="cursor: pointer;" onclick="goToDealReview('{{ crop }}', {{ p.price if p.price else p['price'] }})">
+            <div class="buyer-info">
+                <div class="buyer-name">{{ p.buyer_name if p.buyer_name else p["buyer_name"] }}</div>
+                <div class="buyer-distance">
+                    <i class="fa-solid fa-road"></i> {{ p.distance_km if p.distance_km else p["distance_km"] }} km away
+                </div>
+            </div>
+
+            <div class="buyer-price">
+                ₹{{ p.price if p.price else p["price"] }}
+            </div>
+        </div>
+        {% endfor %}
+        
+        {% if not prices %}
+        <div style="text-align: center; color: #999; padding: 20px;">
+            <p><i class="fa-solid fa-circle-exclamation"></i> No nearby buyers found for {{ crop }} yet.</p>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Handle average price card click
+        const avgPriceCard = document.getElementById('avg-price-card');
+        if (avgPriceCard) {
+            avgPriceCard.addEventListener('click', () => {
+                // Use 0 as a default price if avg_price is not set to avoid breaking the URL
+                const price = '{{ avg_price }}' ? parseFloat('{{ avg_price }}') : 0;
+                goToDealReview('{{ crop }}', price);
+            });
+        }
+    });
+
+    function goToDealReview(crop, price) {
+        // Navigate to deal review page with crop name and price
+        window.location.href = `/market/deal-review?crop=${encodeURIComponent(crop)}&price=${price}`;
+    }
+</script>
+{% endblock script %}

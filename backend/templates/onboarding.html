@@ -82,17 +82,16 @@
                     <input id="acresRange" type="range" min="0.5" max="50" step="0.5" value="{{ pre.acres or 2 }}">
                 </div>
 
-                <h3 class="h1" style="margin-top:12px">Sinchai ka sadhan?</h3>
+                <h3 class="h1" style="margin-top:12px">Pani kaisa hai aapke khet mein?</h3>
 
                 <div class="chips" role="list">
-                    <div class="chip" data-irrigation="tube_well">💧 Tube Well</div>
-                    <div class="chip" data-irrigation="well">🕳 Well</div>
-                    <div class="chip" data-irrigation="rainfed">🌧️ Rain Fed</div>
-                    <div class="chip" data-irrigation="canal">🌊 Canal</div>
+                    <div class="chip" data-water-type="freshwater">💧 Freshwater</div>
+                    <div class="chip" data-water-type="salt_water">🧂 Salt Water</div>
+                    <div class="chip" data-water-type="brackish_water">⚓ Brackish Water</div>
                 </div>
 
                 <div class="controls">
-                    <input id="irrigationInput" name="irrigation" type="hidden">
+                    <input id="waterTypeInput" name="water_type" type="hidden">
                     <input id="districtInput" name="district" placeholder="Apka zila (optional)"
                         style="flex:1;padding:10px;border-radius:10px;border:1px solid #eee;margin-top:8px">
                 </div>
@@ -172,7 +171,7 @@
                 <input id="harvestHidden" name="harvest_date">
 
                 <!-- newly added -->
-                <input id="irrigationHidden" name="irrigation">
+                <input id="waterTypeHidden" name="water_type">
                 <input id="soilHidden" name="soil">
 
             </form>

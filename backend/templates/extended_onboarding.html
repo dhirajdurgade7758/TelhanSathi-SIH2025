@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>आपकी जानकारी - Sahayak</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-green: #2d5016;
+            --secondary-green: #3d6b1f;
+            --accent-green: #4a8c2a;
+            --light-green: #e8f5e9;
+            --text-dark: #1b3a1b;
+            --text-light: #6b7280;
+            --border-color: #d1d5db;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, var(--light-green) 0%, #f0f9ff 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-dark);
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .header-back {
+            background: white;
+            border: 1px solid var(--border-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .header-back:hover {
+            background: var(--light-green);
+            border-color: var(--primary-green);
+        }
+
+        .header-back .material-icons {
+            font-size: 24px;
+            color: var(--primary-green);
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .header-logo img {
+            height: 40px;
+            width: auto;
+        }
+
+        .logo-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary-green);
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-green) 100%);
+            color: white;
+            padding: 28px 24px;
+            text-align: center;
+        }
+
+        .card-header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .card-header p {
+            font-size: 13px;
+            opacity: 0.95;
+        }
+
+        .card-body {
+            padding: 32px 24px;
+        }
+
+        .form-section {
+            margin-bottom: 32px;
+        }
+
+        .form-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary-green);
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--light-green);
+        }
+
+        .section-title .material-icons {
+            font-size: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .required {
+            color: #ef4444;
+            font-weight: 700;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            color: var(--text-dark);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-green);
+            background: #fafafa;
+            box-shadow: 0 0 0 3px rgba(45, 80, 22, 0.08);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-green) 100%);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(45, 80, 22, 0.25);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary .material-icons {
+            font-size: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .card-body {
+                padding: 24px 16px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .header-logo {
+                gap: 8px;
+            }
+
+            .header-logo img {
+                height: 32px;
+            }
+
+            .logo-text {
+                font-size: 16px;
+            }
+        }
+
+        .info-banner {
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            padding: 14px 16px;
+            border-radius: 6px;
+            margin-bottom: 24px;
+            font-size: 13px;
+            color: #92400e;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .info-banner .material-icons {
+            font-size: 18px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-back" onclick="window.history.back()">
+                <i class="material-icons">arrow_back</i>
+            </div>
+            <div class="header-logo">
+                <img src="static/img/agri_logo.jpg" alt="Sahayak Logo">
+            </div>
+            <div style="width: 40px;"></div>
+        </div>
+
+        <!-- Card -->
+        <div class="card">
+            <div class="card-header">
+                <h1>👨‍🌾 आपकी जानकारी</h1>
+                <p>कृपया अपने बारे में विवरण साझा करें</p>
+            </div>
+
+            <div class="card-body">
+                <!-- Info Banner -->
+                <div class="info-banner">
+                    <i class="material-icons">info</i>
+                    <span>आपकी व्यक्तिगत जानकारी सुरक्षित है। आप इसे बाद में अपडेट कर सकते हैं।</span>
+                </div>
+
+                <form id="profileForm">
+                    <!-- Personal Information -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="material-icons">person</i>
+                            व्यक्तिगत जानकारी
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                आपका नाम <span class="required">*</span>
+                            </label>
+                            <input type="text" id="name" name="name" placeholder="अपना पूरा नाम दर्ज करें" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>जन्म तिथि</label>
+                                <input type="date" id="dob" name="dob">
+                            </div>
+
+                            <div class="form-group">
+                                <label>लिंग</label>
+                                <select id="gender" name="gender">
+                                    <option value="">-- चुनें --</option>
+                                    <option value="male">पुरुष</option>
+                                    <option value="female">महिला</option>
+                                    <option value="other">अन्य</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>जाति श्रेणी</label>
+                            <select id="casteCategory" name="casteCategory">
+                                <option value="">-- चुनें --</option>
+                                <option value="general">सामान्य</option>
+                                <option value="obc">अन्य पिछड़ा वर्ग (OBC)</option>
+                                <option value="sc">अनुसूचित जाति (SC)</option>
+                                <option value="st">अनुसूचित जनजाति (ST)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Address Information -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="material-icons">location_on</i>
+                            पता विवरण
+                        </div>
+
+                        <div class="form-group">
+                            <label>स्थायी पता</label>
+                            <textarea id="address" name="address" placeholder="अपना पूरा पता दर्ज करें"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>जिला <span class="required">*</span></label>
+                            <input type="text" id="district" name="district" placeholder="जिले का नाम" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>गाँव</label>
+                                <input type="text" id="village" name="village" placeholder="गाँव का नाम">
+                            </div>
+
+                            <div class="form-group">
+                                <label>तहसील</label>
+                                <input type="text" id="taluka" name="taluka" placeholder="तहसील का नाम">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>राज्य</label>
+                                <input type="text" id="state" name="state" placeholder="राज्य का नाम">
+                            </div>
+
+                            <div class="form-group">
+                                <label>पिन कोड</label>
+                                <input type="text" id="pincode" name="pincode" placeholder="6 अंक" pattern="\d{6}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Land Information -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="material-icons">agriculture</i>
+                            भूमि जानकारी
+                        </div>
+
+                        <div class="form-group">
+                            <label>भूमि धारक का प्रकार</label>
+                            <select id="landType" name="landType">
+                                <option value="">-- चुनें --</option>
+                                <option value="owner">मालिक</option>
+                                <option value="tenant">किरायेदार</option>
+                                <option value="sharecropper">साझेदार</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="button-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="material-icons">done</i>
+                            अगला (जारी रखें)
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value.trim();
+            const district = document.getElementById('district').value.trim();
+            const pincode = document.getElementById('pincode').value.trim();
+
+            if (!name) {
+                alert('कृपया अपना नाम दर्ज करें');
+                return;
+            }
+
+            if (!district) {
+                alert('कृपया अपना जिला दर्ज करें');
+                return;
+            }
+
+            if (pincode && !/^\d{6}$/.test(pincode)) {
+                alert('कृपया 6 अंकों का सही पिन कोड दर्ज करें');
+                return;
+            }
+
+            // Collect form data
+            const formData = {
+                name: name,
+                dob: document.getElementById('dob').value,
+                gender: document.getElementById('gender').value,
+                casteCategory: document.getElementById('casteCategory').value,
+                address: document.getElementById('address').value,
+                district: district,
+                village: document.getElementById('village').value,
+                taluka: document.getElementById('taluka').value,
+                state: document.getElementById('state').value,
+                pincode: pincode,
+                landType: document.getElementById('landType').value
+            };
+
+            // Store in localStorage and redirect
+            localStorage.setItem('farmerProfile', JSON.stringify(formData));
+            window.location.href = 'onboarding';
+        });
+    </script>
+</body>
+</html>

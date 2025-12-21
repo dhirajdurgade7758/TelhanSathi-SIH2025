@@ -1,0 +1,448 @@
+{% extends "base.html" %}
+
+{% block title %}Won Auctions - Mandi Connect{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bidding.css') }}">
+<style>
+    .won-auctions-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .page-header {
+        margin-bottom: 30px;
+    }
+
+    .page-header h1 {
+        font-size: 28px;
+        margin-bottom: 8px;
+        color: #2c3e50;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        color: #7f8c8d;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .stat-icon {
+        font-size: 32px;
+    }
+
+    .stat-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-number {
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .stat-label {
+        font-size: 14px;
+        opacity: 0.9;
+    }
+
+    .auction-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .auction-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .auction-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .auction-card-image {
+        width: 100%;
+        height: 200px;
+        background: #f0f0f0;
+        object-fit: cover;
+    }
+
+    .auction-card-content {
+        padding: 20px;
+    }
+
+    .crop-name {
+        font-size: 18px;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+
+    .auction-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 15px;
+        font-size: 14px;
+    }
+
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px;
+        background: #f9f9f9;
+        border-radius: 6px;
+    }
+
+    .detail-label {
+        color: #7f8c8d;
+        font-weight: 600;
+    }
+
+    .detail-value {
+        color: #2c3e50;
+        font-weight: 700;
+    }
+
+    .price-info {
+        background: #e8f5e9;
+        border-left: 4px solid #4caf50;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+    }
+
+    .final-price {
+        font-size: 20px;
+        font-weight: bold;
+        color: #2e7d32;
+    }
+
+    .total-amount {
+        font-size: 14px;
+        color: #558b2f;
+    }
+
+    .transaction-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        font-weight: 600;
+    }
+
+    .status-pending {
+        background: #fff3e0;
+        color: #e65100;
+    }
+
+    .status-confirmed {
+        background: #e3f2fd;
+        color: #1565c0;
+    }
+
+    .status-paid {
+        background: #f3e5f5;
+        color: #6a1b9a;
+    }
+
+    .status-completed {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .action-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .btn-primary, .btn-secondary {
+        padding: 10px 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.3s;
+    }
+
+    .btn-primary {
+        background: #10b981;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #059669;
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background: #e5e7eb;
+        color: #2c3e50;
+    }
+
+    .btn-secondary:hover {
+        background: #d1d5db;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #7f8c8d;
+    }
+
+    .empty-icon {
+        font-size: 64px;
+        margin-bottom: 15px;
+    }
+
+    .empty-text {
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+
+    .empty-subtext {
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+
+    .browse-btn {
+        padding: 12px 24px;
+        background: #10b981;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .browse-btn:hover {
+        background: #059669;
+    }
+
+    .farmer-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px;
+        background: #f0f0f0;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        font-size: 14px;
+    }
+
+    .farmer-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #10b981;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="won-auctions-container">
+    <!-- Header -->
+    <div class="page-header">
+        <h1>🎉 Won Auctions</h1>
+        <p class="subtitle">Auctions you've won - Complete transactions and receive goods</p>
+    </div>
+
+    <!-- Statistics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">🏆</div>
+            <div class="stat-content">
+                <span class="stat-number" id="totalWon">{{ auctions|length }}</span>
+                <span class="stat-label">Total Won</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-content">
+                <span class="stat-number" id="totalValue">₹0</span>
+                <span class="stat-label">Total Value</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-content">
+                <span class="stat-number" id="pendingCount">0</span>
+                <span class="stat-label">Pending</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-content">
+                <span class="stat-number" id="completedCount">0</span>
+                <span class="stat-label">Completed</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auctions Grid -->
+    {% if auctions %}
+    <div class="auction-grid">
+        {% for auction in auctions %}
+        <div class="auction-card">
+            <!-- Image -->
+            {% if auction.photo1_path %}
+                <img src="{{ auction.photo1_path }}" alt="{{ auction.crop_name }}" class="auction-card-image">
+            {% else %}
+                <div class="auction-card-image" style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-size: 48px;">
+                    🌾
+                </div>
+            {% endif %}
+
+            <div class="auction-card-content">
+                <!-- Crop Name -->
+                <div class="crop-name">{{ auction.crop_name }}</div>
+
+                <!-- Farmer Info -->
+                <div class="farmer-info">
+                    <div class="farmer-avatar">{{ auction.seller.farmer_name[0] if auction.seller else 'F' }}</div>
+                    <div>
+                        <strong>{{ auction.seller.farmer_name if auction.seller else 'Unknown Farmer' }}</strong>
+                        <div style="font-size: 12px; color: #7f8c8d;">{{ auction.location }}</div>
+                    </div>
+                </div>
+
+                <!-- Details Grid -->
+                <div class="auction-details">
+                    <div class="detail-item">
+                        <span class="detail-label">📦 Quantity</span>
+                        <span class="detail-value">{{ auction.quantity_quintal }} Q</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">💵 Your Bid</span>
+                        <span class="detail-value">₹{{ auction.current_highest_bid }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">📍 Location</span>
+                        <span class="detail-value">{{ auction.location[:15] }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">⏱️ Ended</span>
+                        <span class="detail-value">{{ auction.end_time.strftime('%d-%m-%Y') }}</span>
+                    </div>
+                </div>
+
+                <!-- Price Info -->
+                <div class="price-info">
+                    <div class="total-amount">Total Amount (₹)</div>
+                    <div class="final-price">₹{{ (auction.quantity_quintal * auction.current_highest_bid)|int }}</div>
+                </div>
+
+                <!-- Transaction Status -->
+                {% set transaction = auctions|selectattr('id', 'equalto', auction.id)|map(attribute='id')|first %}
+                {% if transaction %}
+                    <div class="transaction-status status-{{ transaction.status }}">
+                        {% if transaction.status == 'pending' %}
+                            ⏳ Payment Pending
+                        {% elif transaction.status == 'confirmed' %}
+                            ✓ Confirmed
+                        {% elif transaction.status == 'paid' %}
+                            💳 Payment Received
+                        {% elif transaction.status == 'delivered' %}
+                            📦 Delivered
+                        {% else %}
+                            ✅ Completed
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <a href="/bidding/auction/{{ auction.id }}/detail" class="btn-primary">
+                        View Details
+                    </a>
+                    <a href="/bidding/transaction/{{ transaction.id }}" class="btn-secondary">
+                        Track Order
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="empty-state">
+        <div class="empty-icon">🎯</div>
+        <div class="empty-text">No Won Auctions Yet</div>
+        <div class="empty-subtext">Start bidding on live auctions to win the best deals</div>
+        <a href="{{ url_for('bidding.buyer_auctions_page') }}" class="browse-btn">
+            Browse Live Auctions
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script>
+    // Calculate and display statistics
+    document.addEventListener('DOMContentLoaded', function() {
+        let totalValue = 0;
+        let pendingCount = 0;
+        let completedCount = 0;
+
+        // Parse auctions data from HTML
+        const cards = document.querySelectorAll('.auction-card');
+        cards.forEach(card => {
+            // Extract price info
+            const priceText = card.querySelector('.final-price')?.textContent || '₹0';
+            const priceValue = parseInt(priceText.replace(/[₹,]/g, ''));
+            totalValue += priceValue;
+
+            // Count by status
+            const status = card.querySelector('.transaction-status');
+            if (status?.classList.contains('status-pending')) {
+                pendingCount++;
+            } else if (status?.classList.contains('status-completed')) {
+                completedCount++;
+            }
+        });
+
+        // Update statistics
+        document.getElementById('totalValue').textContent = '₹' + totalValue.toLocaleString();
+        document.getElementById('pendingCount').textContent = pendingCount;
+        document.getElementById('completedCount').textContent = completedCount;
+    });
+</script>
+{% endblock %}

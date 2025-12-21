@@ -1,0 +1,975 @@
+{% extends "base.html" %}
+
+{% block title %}नीलामी बनाएं - तेलहान साथी{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bidding.css') }}">
+<style>
+    /* ===== CREATE AUCTION MODERN DESIGN ===== */
+    
+    * {
+        box-sizing: border-box;
+    }
+    
+    .create-auction-container {
+        background: linear-gradient(135deg, #f5f7fa 0%, #e8f0f5 100%);
+        min-height: 100vh;
+        padding: 20px 0;
+        padding-bottom: 40px;
+        position: relative;
+    }
+    
+    .create-auction-container::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(circle at 20% 50%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    /* Header Section */
+    .form-header {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: #ffffff;
+        padding: 50px 20px;
+        text-align: center;
+        box-shadow: 0 20px 40px rgba(16, 185, 129, 0.25);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .form-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 100% 100%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+        pointer-events: none;
+    }
+    
+    .form-header > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    .form-header h1 {
+        margin: 0 0 12px 0;
+        font-size: 36px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        animation: slideDownFade 0.6s ease-out;
+    }
+
+    .form-header .subtitle {
+        margin: 0;
+        font-size: 16px;
+        opacity: 0.95;
+        font-weight: 500;
+        animation: slideUpFade 0.6s ease-out 0.1s both;
+    }
+    
+    @keyframes slideDownFade {
+        from {
+            transform: translateY(-30px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideUpFade {
+        from {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    /* Main Form Wrapper */
+    .form-wrapper {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 0 20px;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Form Sections */
+    .form-section {
+        background: #ffffff;
+        border-radius: 18px;
+        padding: 32px;
+        margin-bottom: 24px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        border-top: 5px solid #10b981;
+        animation: scaleIn 0.5s ease-out;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .form-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: -50px;
+        width: 100px;
+        height: 100px;
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.05) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    
+    .form-section:hover {
+        box-shadow: 0 15px 50px rgba(16, 185, 129, 0.12);
+        transform: translateY(-2px);
+    }
+    
+    @keyframes scaleIn {
+        from {
+            transform: scale(0.95);
+            opacity: 0;
+        }
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    .section-title {
+        margin: 0 0 28px 0;
+        font-size: 22px;
+        font-weight: 800;
+        color: #1e3a24;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .section-title::after {
+        content: '';
+        flex: 1;
+        height: 2px;
+        background: linear-gradient(90deg, #10b981 0%, transparent 100%);
+    }
+
+    /* Form Group */
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group:last-child {
+        margin-bottom: 0;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 600;
+        color: #374151;
+        font-size: 14px;
+    }
+
+    .required {
+        color: #ef4444;
+        font-weight: 700;
+    }
+
+    /* Form Inputs */
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
+        width: 100%;
+        padding: 14px 16px;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 500;
+        color: #374151;
+        transition: all 0.3s ease;
+        font-family: inherit;
+        box-sizing: border-box;
+        background: #fafbfc;
+    }
+    
+    input[type="text"]::placeholder,
+    input[type="number"]::placeholder,
+    textarea::placeholder,
+    select {
+        color: #9ca3af;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus,
+    textarea:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1), inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        background: #ffffff;
+        transform: translateY(-1px);
+    }
+
+    input[readonly] {
+        background: #f3f4f6;
+        cursor: not-allowed;
+        color: #6b7280;
+    }
+
+    textarea {
+        resize: vertical;
+        min-height: 110px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    select {
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 20px;
+        padding-right: 40px;
+    }
+
+    /* Form Row */
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Help Text */
+    .help-text {
+        display: block;
+        margin-top: 6px;
+        font-size: 12px;
+        color: #9ca3af;
+        font-weight: 500;
+    }
+
+    /* Info Box */
+    .info-box {
+        display: flex;
+        gap: 14px;
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        border-left: 4px solid #3b82f6;
+        border-radius: 12px;
+        padding: 16px;
+        margin-top: 24px;
+        transition: all 0.3s ease;
+        border: 1px solid #bfdbfe;
+    }
+    
+    .info-box:hover {
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.15);
+        transform: translateX(4px);
+    }
+
+    .info-icon {
+        font-size: 20px;
+        flex-shrink: 0;
+        animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-4px); }
+    }
+
+    .info-content {
+        flex: 1;
+    }
+
+    .info-content p {
+        margin: 0;
+        font-size: 14px;
+        color: #1e40af;
+        line-height: 1.6;
+        font-weight: 500;
+    }
+
+    /* Photos Grid */
+    .photos-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    @media (max-width: 768px) {
+        .photos-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .photo-upload-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .photo-label {
+        font-weight: 600;
+        color: #374151;
+        font-size: 14px;
+        display: flex;
+        gap: 4px;
+    }
+
+    /* Photo Input */
+    .photo-input-wrapper {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .photo-input-wrapper input[type="file"] {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+        padding: 0;
+        border: none;
+    }
+
+    .photo-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 45px 20px;
+        background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+        border: 2.5px dashed #d1d5db;
+        border-radius: 14px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        position: relative;
+    }
+    
+    .photo-placeholder::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 30% 30%, rgba(16, 185, 129, 0) 0%, rgba(16, 185, 129, 0.03) 100%);
+        border-radius: 14px;
+    }
+
+    .photo-placeholder:hover {
+        border-color: #10b981;
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        box-shadow: 0 12px 30px rgba(16, 185, 129, 0.15);
+        transform: translateY(-3px);
+    }
+
+    .upload-icon {
+        font-size: 38px;
+        animation: uploadPulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes uploadPulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.1); opacity: 0.8; }
+    }
+
+    .photo-placeholder span:last-child {
+        font-size: 14px;
+        color: #6b7280;
+        font-weight: 600;
+        position: relative;
+        z-index: 1;
+    }
+
+    .photo-placeholder img {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+        border-radius: 10px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Form Actions */
+    .form-actions {
+        display: flex;
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        flex: 1;
+        padding: 16px 24px;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-primary::before,
+    .btn-secondary::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+    
+    .btn-primary:active::before,
+    .btn-secondary:active::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: #ffffff;
+        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 32px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-primary:active:not(:disabled) {
+        transform: translateY(-1px);
+    }
+
+    .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+        color: #374151;
+        border: 2px solid #d1d5db;
+    }
+
+    .btn-secondary:hover {
+        background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+        border-color: #9ca3af;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-secondary:active {
+        transform: translateY(0);
+    }
+
+    /* Form Message */
+    .form-message {
+        padding: 16px 20px;
+        border-radius: 14px;
+        font-weight: 600;
+        font-size: 15px;
+        margin-bottom: 16px;
+        animation: slideDownBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        border-left: 5px solid;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-message-success {
+        background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+        color: #065f46;
+        border-left-color: #10b981;
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2);
+    }
+
+    .form-message-error {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        color: #7f1d1d;
+        border-left-color: #ef4444;
+        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.2);
+    }
+
+    @keyframes slideDownBounce {
+        0% {
+            transform: translateY(-30px);
+            opacity: 0;
+        }
+        60% {
+            transform: translateY(5px);
+            opacity: 1;
+        }
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    /* Tips Section */
+    .tips-section {
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 32px;
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border: 2px solid #fbbf24;
+        border-radius: 18px;
+        box-shadow: 0 15px 50px rgba(251, 191, 36, 0.2);
+        position: relative;
+        z-index: 1;
+        animation: scaleIn 0.6s ease-out;
+    }
+    
+    .tips-section::before {
+        content: '💡';
+        position: absolute;
+        top: -15px;
+        right: 30px;
+        font-size: 32px;
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .tips-section h3 {
+        margin: 0 0 20px 0;
+        font-size: 20px;
+        font-weight: 800;
+        color: #b45309;
+    }
+
+    .tips-section ul {
+        margin: 0;
+        padding-left: 0;
+        list-style: none;
+    }
+
+    .tips-section li {
+        margin: 12px 0;
+        color: #92400e;
+        font-size: 15px;
+        padding-left: 32px;
+        position: relative;
+        line-height: 1.6;
+        font-weight: 500;
+    }
+
+    .tips-section li::before {
+        content: '✓';
+        position: absolute;
+        left: 0;
+        color: #f59e0b;
+        font-weight: 800;
+        font-size: 18px;
+    }
+
+    .tips-section strong {
+        color: #d97706;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .form-header {
+            padding: 30px 20px;
+        }
+
+        .form-header h1 {
+            font-size: 24px;
+        }
+
+        .form-header .subtitle {
+            font-size: 14px;
+        }
+
+        .form-section {
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+
+        .tips-section {
+            margin: 20px;
+        }
+
+        .create-auction-container {
+            padding-bottom: 100px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="create-auction-container">
+    <!-- Header -->
+    <div class="form-header">
+        <h1>📋 Create New Auction</h1>
+        <p class="subtitle">List your crops and find buyers directly</p>
+    </div>
+
+    <!-- Main Form -->
+    <div class="form-wrapper">
+        <form id="createAuctionForm" method="POST" action="/bidding/farmer/create-auction" enctype="multipart/form-data">
+            <!-- Section 1: Crop Information -->
+            <div class="form-section">
+                <h2 class="section-title">🌾 Crop Information</h2>
+                
+                <div class="form-group">
+                    <label for="cropName" class="form-label">Crop Type <span class="required">*</span></label>
+                    <select id="cropName" name="crop_name" required>
+                        <option value="">Select a crop</option>
+                        <option value="Soybean">Soybean</option>
+                        <option value="Sunflower">Sunflower</option>
+                        <option value="Safflower">Safflower</option>
+                        <option value="Groundnut">Groundnut</option>
+                        <option value="Castor">Castor</option>
+                        <option value="Mustard">Mustard</option>
+                        <option value="Coconut">Coconut</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="quantity" class="form-label">Quantity (Quintals) <span class="required">*</span></label>
+                        <input type="number" id="quantity" name="quantity" min="1" max="1000" required 
+                               placeholder="e.g., 50" onchange="updateBasePriceDisplay()">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="basePrice" class="form-label">Base Price (₹) <span class="required">*</span></label>
+                        <input type="number" id="basePrice" name="base_price" readonly 
+                               placeholder="Will be fetched from Mandi API">
+                        <small class="help-text">Automatically fetched from Government Mandi Price API</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Bidding Details -->
+            <div class="form-section">
+                <h2 class="section-title">💰 Bidding Details</h2>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="minBid" class="form-label">Minimum Bid Price (₹) <span class="required">*</span></label>
+                        <input type="number" id="minBid" name="min_bid_price" min="100" required 
+                               placeholder="e.g., 5500" onchange="validateMinBid()">
+                        <small class="help-text">Must be equal to or greater than base price</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="duration" class="form-label">Auction Duration (Hours) <span class="required">*</span></label>
+                        <select id="duration" name="duration_hours" required>
+                            <option value="">Select duration</option>
+                            <option value="6">6 Hours</option>
+                            <option value="12">12 Hours</option>
+                            <option value="24">24 Hours</option>
+                            <option value="48">48 Hours (2 Days)</option>
+                            <option value="72">72 Hours (3 Days)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Auto-bid Info -->
+                <div class="info-box">
+                    <span class="info-icon">ℹ️</span>
+                    <div class="info-content">
+                        <p><strong>Auto-Bidding:</strong> Buyers can set automatic bidding up to a maximum price. The system will automatically place bids on their behalf.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Location & Description -->
+            <div class="form-section">
+                <h2 class="section-title">📍 Location & Description</h2>
+                
+                <div class="form-group">
+                    <label for="location" class="form-label">Location <span class="required">*</span></label>
+                    <input type="text" id="location" name="location" required 
+                           placeholder="e.g., Indore, Madhya Pradesh">
+                </div>
+
+                <div class="form-group">
+                    <label for="description" class="form-label">Description (Optional)</label>
+                    <textarea id="description" name="description" rows="4" 
+                              placeholder="Provide details about your crop (quality, variety, harvest date, etc.)"></textarea>
+                    <small class="help-text">Max 500 characters</small>
+                </div>
+            </div>
+
+            <!-- Section 4: Photos -->
+            <div class="form-section">
+                <h2 class="section-title">📸 Photos</h2>
+                
+                <div class="photos-grid">
+                    <div class="photo-upload-group">
+                        <label for="photo1" class="photo-label">Main Photo <span class="required">*</span></label>
+                        <div class="photo-input-wrapper" id="photo1Wrapper">
+                            <input type="file" id="photo1" name="photo1" accept="image/*" required onchange="previewPhoto(this, 1)">
+                            <div class="photo-placeholder" id="photo1Preview">
+                                <span class="upload-icon">📷</span>
+                                <span>Click to upload</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="photo-upload-group">
+                        <label for="photo2" class="photo-label">Photo 2 (Optional)</label>
+                        <div class="photo-input-wrapper" id="photo2Wrapper">
+                            <input type="file" id="photo2" name="photo2" accept="image/*" onchange="previewPhoto(this, 2)">
+                            <div class="photo-placeholder" id="photo2Preview">
+                                <span class="upload-icon">📷</span>
+                                <span>Click to upload</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="photo-upload-group">
+                        <label for="photo3" class="photo-label">Photo 3 (Optional)</label>
+                        <div class="photo-input-wrapper" id="photo3Wrapper">
+                            <input type="file" id="photo3" name="photo3" accept="image/*" onchange="previewPhoto(this, 3)">
+                            <div class="photo-placeholder" id="photo3Preview">
+                                <span class="upload-icon">📷</span>
+                                <span>Click to upload</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <small class="help-text">Supported formats: JPG, PNG (Max 5MB each)</small>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" onclick="resetForm()">Clear Form</button>
+                <button type="submit" class="btn-primary" id="submitBtn">
+                    <span>Create Auction</span>
+                </button>
+            </div>
+
+            <!-- Success/Error Messages -->
+            <div id="formMessage" class="form-message" style="display: none;"></div>
+        </form>
+    </div>
+
+    <!-- Tips Section -->
+    <div class="tips-section">
+        <h3>💡 Tips for Successful Auction</h3>
+        <ul>
+            <li><strong>Clear Photos:</strong> High-quality photos increase buyer confidence and typically result in better prices</li>
+            <li><strong>Accurate Description:</strong> Mention variety, harvest date, and any special qualities of your crop</li>
+            <li><strong>Realistic Pricing:</strong> Check market prices for your crop type to set competitive minimum bids</li>
+            <li><strong>Timing:</strong> Shorter durations create urgency, longer durations attract more bidders</li>
+            <li><strong>Quantity:</strong> Larger quantities may attract wholesale buyers for better deals</li>
+        </ul>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Form submission
+    document.getElementById('createAuctionForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        submitAuction();
+    });
+
+    // Fetch base price when crop changes
+    document.getElementById('cropName').addEventListener('change', function() {
+        updateBasePriceDisplay();
+    });
+
+    // Fetch and display base price
+    function updateBasePriceDisplay() {
+        const crop = document.getElementById('cropName').value;
+        if (!crop) return;
+
+        fetch(`/bidding/get-base-price/${crop}`)
+            .then(res => res.json())
+            .then(data => {
+                const basePrice = data.price || 5000;
+                document.getElementById('basePrice').value = basePrice;
+                document.getElementById('minBid').placeholder = `Minimum: ₹${formatNumber(basePrice)}`;
+            })
+            .catch(err => {
+                console.error('Error fetching base price:', err);
+                document.getElementById('basePrice').value = '5000'; // Default fallback
+            });
+    }
+
+    // Validate minimum bid
+    function validateMinBid() {
+        const basePrice = parseInt(document.getElementById('basePrice').value) || 0;
+        const minBid = parseInt(document.getElementById('minBid').value) || 0;
+
+        if (minBid < basePrice) {
+            showMessage('Minimum bid must be at least ₹' + formatNumber(basePrice), 'error');
+            document.getElementById('minBid').value = basePrice;
+            return false;
+        }
+        return true;
+    }
+
+    // Preview photo
+    function previewPhoto(input, photoNum) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            
+            // Validate file size
+            if (file.size > 5 * 1024 * 1024) {
+                showMessage('Photo must be less than 5MB', 'error');
+                input.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById(`photo${photoNum}Preview`);
+                preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Submit auction
+    function submitAuction() {
+        // Validate form
+        if (!validateMinBid()) return;
+
+        const form = document.getElementById('createAuctionForm');
+        const formData = new FormData(form);
+
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span>Creating...</span>';
+        
+        // Debug logging
+        console.log('Creating auction with data:');
+        for (let [key, value] of formData.entries()) {
+            console.log(`  ${key}: ${value}`);
+        }
+
+        fetch('/bidding/farmer/create-auction', {
+            method: 'POST',
+            body: formData,
+            credentials: 'include'  // Important: Include cookies for session
+        })
+        .then(res => {
+            console.log(`Response status: ${res.status}`);
+            // Handle non-2xx responses
+            if (!res.ok) {
+                return res.json().then(data => {
+                    console.error('Error response:', data);
+                    throw new Error(data.error || `HTTP ${res.status}: ${res.statusText}`);
+                });
+            }
+            return res.json();
+        })
+        .then(data => {
+            console.log('Success response:', data);
+            if (data.success) {
+                showMessage('✅ Auction created successfully! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = `/bidding/create-auction`;
+                }, 2000);
+            } else {
+                showMessage('❌ ' + (data.message || data.error || 'Failed to create auction'), 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Create Auction</span>';
+            }
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            const errorMessage = err.message || 'Error creating auction. Please try again.';
+            console.error('Error message:', errorMessage);
+            
+            // Show specific error messages
+            if (errorMessage.includes('Farmer not authenticated')) {
+                showMessage('❌ Please log in as a farmer to create an auction', 'error');
+            } else if (errorMessage.includes('401')) {
+                showMessage('❌ Your session has expired. Please log in again.', 'error');
+            } else {
+                showMessage('❌ ' + errorMessage, 'error');
+            }
+            
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span>Create Auction</span>';
+        });
+    }
+
+    // Reset form
+    function resetForm() {
+        document.getElementById('createAuctionForm').reset();
+        document.querySelectorAll('[id^="photo"][id$="Preview"]').forEach(el => {
+            el.innerHTML = '<span class="upload-icon">📷</span><span>Click to upload</span>';
+        });
+    }
+
+    // Show message
+    function showMessage(message, type) {
+        const msgEl = document.getElementById('formMessage');
+        msgEl.textContent = message;
+        msgEl.className = `form-message form-message-${type}`;
+        msgEl.style.display = 'block';
+
+        if (type === 'success') {
+            setTimeout(() => {
+                msgEl.style.display = 'none';
+            }, 5000);
+        }
+    }
+
+    // Helper
+    function formatNumber(num) {
+        return new Intl.NumberFormat('en-IN').format(num);
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        updateBasePriceDisplay();
+    });
+</script>
+{% endblock %}

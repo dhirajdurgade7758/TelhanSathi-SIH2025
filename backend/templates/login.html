@@ -1,242 +1,797 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telhan Sathi - Login</title>
+    <title>टेलहन साथी - लॉगिन</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* BASE & BACKGROUND STYLES */
-        body {
-            font-family: sans-serif;
+        * {
             margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            color: #fff;
-            background-color: #1e3a24;
-            background-image: linear-gradient(180deg, #2d5735 0%, #1e3a24 100%);
-        }
-
-        .frame {
-            width: 100%;
-            max-width: 380px;
-            height: 100vh;
-            background-color: transparent;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 4px 60px rgba(0, 0, 0, 0.5);
-            border-radius: 8px;
-            position: relative;
             padding: 0;
-            margin: 0;
             box-sizing: border-box;
         }
 
-        .header {
+        body {
+            font-family: 'Noto Sans Devanagari', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf0 100%);
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            padding: 30px 0 0;
-            background-color: transparent;
+            padding: 0;
+        }
+
+        /* MOBILE: FULL WIDTH */
+        @media (max-width: 768px) {
+            body {
+                /* मोबाइल पर पूरे पेज के लिए हरा बैकग्राउंड बनाए रखना */
+                background: linear-gradient(135deg, #1e3a24 0%, #2d5735 100%);
+                display: block;
+                padding: 0;
+            }
+        }
+
+        /* MAIN CONTAINER */
+        .main-container {
+            width: 100%;
+            max-width: 480px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        /* LAPTOP WIDTH */
+        @media (min-width: 1024px) {
+            .main-container {
+                max-width: 520px;
+            }
+        }
+
+        /* MOBILE: FULL SCREEN - UPDATED */
+        @media (max-width: 768px) {
+            .main-container {
+                max-width: 100%;
+                min-height: 100vh;
+                border-radius: 0;
+                box-shadow: none;
+                /* यह सुनिश्चित करता है कि कंटेनर ट्रांसपेरेंट हो, ताकि बॉडी का बैकग्राउंड दिखे */
+                background: transparent; 
+            }
+        }
+
+        /* HEADER */
+        .header {
+            background: linear-gradient(135deg, #1a4721 0%, #2e7d32 100%);
+            padding: 32px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 28px 24px;
+                border-radius: 0;
+            }
+        }
+
+        .logo-container {
+            width: 56px;
+            height: 56px;
+            background: white;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            flex-shrink: 0;
         }
 
         .logo {
-            width: 40px;
-            height: 40px;
-            background-color: #4caf50;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            clip-path: polygon(50% 0%, 100% 100%, 50% 80%, 0% 100%);
+            font-size: 28px;
+            color: #2e7d32;
+        }
+
+        .title-section {
+            flex: 1;
         }
 
         .app-title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #fff;
-            margin-bottom: 2px;
+            font-size: 26px;
+            font-weight: 700;
+            color: white;
+            line-height: 1.3;
+            margin-bottom: 4px;
         }
 
         .ministry {
             font-size: 14px;
-            color: #c8e6c9;
-            margin-bottom: 40px;
-            font-weight: lighter;
+            color: rgba(255, 255, 255, 0.95);
+            font-weight: 400;
         }
 
-        .login-card {
-            background: rgba(46, 74, 52, 0.4);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-radius: 25px;
-            padding: 30px 25px;
-            margin: 0 15px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+        @media (max-width: 768px) {
+            .app-title {
+                font-size: 24px;
+            }
+            
+            .ministry {
+                font-size: 13px;
+            }
+        }
+
+        /* LOGIN CONTENT */
+        .login-content {
+            padding: 40px 32px;
+            background: white;
+        }
+
+        @media (min-width: 1024px) {
+            .login-content {
+                padding: 48px 40px;
+            }
+        }
+
+        /* MOBILE: LOGIN CONTENT - UPDATED */
+        @media (max-width: 768px) {
+            .login-content {
+                background: white;
+                border-radius: 0; /* कोनों को हटाने के लिए अपडेट किया गया */
+                padding: 32px 24px;
+                margin-top: 0; /* ओवरलैप हटाने के लिए अपडेट किया गया */
+                position: relative;
+                z-index: 1;
+                min-height: calc(100vh - 180px);
+            }
+        }
+
+        /* LOGIN METHOD SELECTOR */
+        .login-method-selector {
+            display: flex;
+            background: #f8f9fa;
+            border-radius: 14px;
+            padding: 6px;
+            margin-bottom: 32px;
+            border: 1px solid #e9ecef;
             position: relative;
         }
 
-        .card-heading {
-            font-size: 20px;
+        .method-tab {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            background: transparent;
+            font-size: 15px;
             font-weight: 600;
-            text-align: center;
-            margin-bottom: 8px;
-            color: #fff;
+            color: #666;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            z-index: 1;
+            font-family: 'Noto Sans Devanagari', sans-serif;
         }
 
-        .card-subheading {
+        .method-tab .material-icons {
+            font-size: 20px;
+        }
+
+        .method-tab.active {
+            color: #1e3a24;
+        }
+
+        .selector-slider {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            width: calc(50% - 6px);
+            height: calc(100% - 12px);
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 0;
+        }
+
+        /* LOGIN FORM */
+        .login-form {
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .login-form.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .form-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1e3a24;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .form-title .material-icons {
+            font-size: 24px;
+            color: #2e7d32;
+        }
+
+        .form-subtitle {
+            font-size: 15px;
+            color: #666;
+            margin-bottom: 28px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .form-title {
+                font-size: 20px;
+            }
+            
+            .form-subtitle {
+                font-size: 14px;
+            }
+        }
+
+        /* INPUT FIELDS */
+        .input-group {
+            margin-bottom: 24px;
+        }
+
+        .input-label {
+            display: block;
             font-size: 14px;
-            text-align: center;
-            color: #a5d6a7;
-            margin-bottom: 40px;
+            font-weight: 500;
+            color: #444;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-label .material-icons {
+            font-size: 18px;
+            color: #2e7d32;
         }
 
         .input-field {
             width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 8px;
-            background-color: rgba(0, 0, 0, 0.3);
-            color: #fff;
-            font-size: 18px;
+            padding: 16px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            background: white;
+            color: #333;
+            font-size: 16px;
             font-weight: 500;
-            text-align: center;
-            box-sizing: border-box;
+            font-family: 'Noto Sans Devanagari', sans-serif;
             outline: none;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) inset;
+            transition: all 0.2s ease;
+        }
+
+        .input-field:focus {
+            border-color: #4caf50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
         }
 
         .input-field::placeholder {
-            color: #888;
+            color: #999;
         }
 
-        .button {
+        .input-hint {
+            font-size: 13px;
+            color: #666;
+            margin-top: 8px;
+            padding-left: 4px;
+        }
+
+        /* BUTTONS */
+        .login-button {
             width: 100%;
-            padding: 15px;
+            padding: 16px;
             border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'Noto Sans Devanagari', sans-serif;
             cursor: pointer;
-            text-align: center;
-            margin-top: 30px;
-            transition: background-color 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            margin-top: 8px;
+            transition: all 0.2s ease;
+            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
-        .primary-button {
-            background: linear-gradient(180deg, #d3d3d3 0%, #b0b0b0 100%);
-            color: #1e3a24;
+        .login-button:hover {
+            background: linear-gradient(135deg, #43a047 0%, #27632a 100%);
         }
 
-        .primary-button:hover {
-            background: linear-gradient(180deg, #e0e0e0 0%, #c0c0c0 100%);
+        .login-button:active {
+            transform: scale(0.98);
         }
 
-        .primary-button:disabled {
-            opacity: 0.5;
+        .login-button:disabled {
+            opacity: 0.6;
             cursor: not-allowed;
         }
 
-        .footer-links {
+        .login-button .material-icons {
+            font-size: 20px;
+        }
+
+        /* ALTERNATIVE OPTION */
+        .alternative-option {
             text-align: center;
-            margin-top: 25px;
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
         }
 
-        .link-text {
-            display: block;
-            font-size: 13px;
-            color: #a5d6a7;
-            margin-bottom: 5px;
-        }
-
-        .link {
-            color: #fff;
-            text-decoration: none;
-            font-weight: 500;
+        .alternative-text {
             font-size: 14px;
-            transition: color 0.3s;
+            color: #666;
+            margin-bottom: 16px;
         }
 
-        .link:hover {
-            color: #c8e6c9;
+        .alternative-button {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #4caf50;
+            border-radius: 12px;
+            background: transparent;
+            color: #4caf50;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: 'Noto Sans Devanagari', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .alternative-button:hover {
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        /* ERROR MESSAGES */
+        .error-message {
+            background: #fff5f5;
+            color: #d32f2f;
+            padding: 14px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            border: 1px solid #ffcdd2;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .error-message .material-icons {
+            font-size: 20px;
+            flex-shrink: 0;
+            color: #d32f2f;
+        }
+
+        /* FOOTER */
+        .footer {
+            padding: 24px 32px;
+            text-align: center;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+
+        @media (max-width: 768px) {
+            .footer {
+                background: transparent;
+                border-top: none;
+                padding: 20px 24px;
+                position: relative;
+                z-index: 2;
+            }
         }
 
         .copyright {
-            font-size: 10px;
-            color: #a5d6a7;
-            text-align: center;
-            padding: 10px 0;
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .copyright {
+                color: rgba(255, 255, 255, 0.9);
+            }
+        }
+
+        /* LOADING STATE */
+        .loading {
+            position: relative;
+            color: transparent !important;
+        }
+
+        .loading::after {
+            content: '';
             position: absolute;
-            bottom: 15px;
-            width: 100%;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
         }
 
-        .small-helper-text {
-            font-size: 11px;
-            color: #c8e6c9;
-            text-align: center;
-            margin-top: 5px;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
-        .error-message {
-            color: #ffcccc;
-            font-size: 12px;
-            text-align: center;
-            margin-bottom: 15px;
-            background: rgba(255, 0, 0, 0.1);
-            padding: 10px;
-            border-radius: 5px;
+        /* FORM ANIMATION */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-form.active {
+            animation: slideUp 0.3s ease forwards;
+        }
+
+        /* INPUT FOCUS EFFECT */
+        .input-field:focus {
+            transform: translateY(-1px);
         }
     </style>
 </head>
 <body>
 
-    <div class="frame">
+    <div class="main-container">
         <div class="header">
-            <div class="logo"></div>
-            <div class="app-title">Telhan Sathi</div>
-            <div class="ministry">Ministry of Agriculture</div>
-        </div>
+            <div class="logo-container">
+    <img src="static/img/agri_logo.jpg" alt="Logo" style="
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 14px;
+    ">
+</div>
 
-        <div class="login-card">
-            <div class="card-heading">लॉगिन करें</div>
-            <div class="card-subheading">अपनी किसान ID से लॉगिन करें</div>
-
-            {% if error %}
-            <div class="error-message">{{ error }}</div>
-            {% endif %}
-
-            <form method="POST" action="{{ url_for('auth.login_post') }}">
-                <input
-                    type="text"
-                    id="farmer_id"
-                    name="farmer_id"
-                    class="input-field"
-                    placeholder="1234 - 5678 - 9012"
-                    maxlength="14"
-                    required
-                >
-                <div class="small-helper-text">रजिस्टर्ड / पुराना यूज़र</div>
-
-                <button type="submit" class="button primary-button">
-                    आगे बढ़ें
-                </button>
-            </form>
-
-            <div class="footer-links">
-                <div class="link-text">OTP से लॉगिन करें</div>
-                <a href="{{ url_for('auth.register') }}" class="link">नया खाता खोलें (रजिस्टर करें)</a>
+            <div class="title-section">
+                <div class="app-title">टेलहन साथी</div>
+                <div class="ministry">कृषि मंत्रालय, भारत सरकार</div>
             </div>
         </div>
 
-        <div class="copyright">
-            © Govt of India - Telhan Sathi
+        <div class="login-content">
+            <div class="login-method-selector">
+                <div class="selector-slider" id="selectorSlider"></div>
+                <button class="method-tab active" onclick="showLoginMethod('farmer')">
+                    <span class="material-icons">badge</span>
+                    किसान आईडी से
+                </button>
+                <button class="method-tab" onclick="showLoginMethod('mobile')">
+                    <span class="material-icons">phone_android</span>
+                    मोबाइल से
+                </button>
+            </div>
+
+            <div id="farmer-form" class="login-form active">
+                <div class="form-title">
+                    <span class="material-icons">person</span>
+                    किसान आईडी लॉगिन
+                </div>
+                <div class="form-subtitle">
+                    अपनी पंजीकृत किसान आईडी दर्ज करें
+                </div>
+
+                {% if error %}
+                <div class="error-message">
+                    <span class="material-icons">error</span>
+                    <span>{{ error }}</span>
+                </div>
+                {% endif %}
+
+                <form method="POST" action="{{ url_for('auth.login_with_farmer_id') }}" id="farmerForm">
+                    <div class="input-group">
+                        <label class="input-label" for="farmer_id">
+                            <span class="material-icons">fingerprint</span>
+                            किसान आईडी
+                        </label>
+                        <input
+                            type="text"
+                            id="farmer_id"
+                            name="farmer_id"
+                            class="input-field"
+                            placeholder="XXXX-XXXX-XXXX"
+                            maxlength="14"
+                            pattern="[0-9]{4}-[0-9]{4}-[0-9]{4}"
+                            required
+                        >
+                        <div class="input-hint">
+                            फॉर्मेट: XXXX-XXXX-XXXX (12 अंक)
+                        </div>
+                    </div>
+
+                    <button type="submit" class="login-button" id="farmerSubmit">
+                        <span class="material-icons">login</span>
+                        लॉगिन करें
+                    </button>
+                </form>
+
+                <div class="alternative-option">
+                    <div class="alternative-text">किसान आईडी नहीं है?</div>
+                    <button type="button" onclick="showLoginMethod('mobile')" class="alternative-button">
+                        <span class="material-icons">swap_horiz</span>
+                        मोबाइल नंबर से लॉगिन
+                    </button>
+                </div>
+            </div>
+
+            <div id="mobile-form" class="login-form">
+                <div class="form-title">
+                    <span class="material-icons">phone_android</span>
+                    मोबाइल लॉगिन
+                </div>
+                <div class="form-subtitle">
+                    अपना पंजीकृत मोबाइल नंबर दर्ज करें
+                </div>
+
+                {% if mobile_error %}
+                <div class="error-message">
+                    <span class="material-icons">error</span>
+                    <span>{{ mobile_error }}</span>
+                </div>
+                {% endif %}
+
+                <form method="POST" action="{{ url_for('auth.login_with_mobile') }}" id="mobileForm">
+                    <div class="input-group">
+                        <label class="input-label" for="mobile_number">
+                            <span class="material-icons">call</span>
+                            मोबाइल नंबर
+                        </label>
+                        <input
+                            type="tel"
+                            id="mobile_number"
+                            name="mobile_number"
+                            class="input-field"
+                            placeholder="10 अंकों का मोबाइल नंबर"
+                            pattern="^(\+91)?[6-9]\d{9}$"
+                            required
+                        >
+                        <div class="input-hint">
+                            10 अंकों का भारतीय मोबाइल नंबर
+                        </div>
+                    </div>
+
+                    <button type="submit" class="login-button" id="mobileSubmit">
+                        <span class="material-icons">login</span>
+                        लॉगिन करें
+                    </button>
+                </form>
+
+                <div class="alternative-option">
+                    <div class="alternative-text">किसान आईडी है?</div>
+                    <button type="button" onclick="showLoginMethod('farmer')" class="alternative-button">
+                        <span class="material-icons">swap_horiz</span>
+                        किसान आईडी से लॉगिन
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="copyright">
+                © भारत सरकार - कृषि मंत्रालय<br>
+                टेलहन साथी - किसानों का डिजिटल साथी
+            </div>
         </div>
     </div>
+
+    <script>
+        // Login method switching
+        function showLoginMethod(method) {
+            const slider = document.getElementById('selectorSlider');
+            const farmerTab = document.querySelector('.method-tab:nth-child(2)');
+            const mobileTab = document.querySelector('.method-tab:nth-child(3)');
+            const farmerForm = document.getElementById('farmer-form');
+            const mobileForm = document.getElementById('mobile-form');
+            
+            if (method === 'farmer') {
+                // Update slider position
+                slider.style.transform = 'translateX(0)';
+                
+                // Update active tabs
+                farmerTab.classList.add('active');
+                mobileTab.classList.remove('active');
+                
+                // Switch forms
+                mobileForm.classList.remove('active');
+                setTimeout(() => {
+                    farmerForm.classList.add('active');
+                }, 50);
+                
+                // Focus on input
+                setTimeout(() => {
+                    document.getElementById('farmer_id')?.focus();
+                }, 100);
+                
+            } else if (method === 'mobile') {
+                // Update slider position
+                slider.style.transform = 'translateX(100%)';
+                
+                // Update active tabs
+                mobileTab.classList.add('active');
+                farmerTab.classList.remove('active');
+                
+                // Switch forms
+                farmerForm.classList.remove('active');
+                setTimeout(() => {
+                    mobileForm.classList.add('active');
+                }, 50);
+                
+                // Focus on input
+                setTimeout(() => {
+                    document.getElementById('mobile_number')?.focus();
+                }, 100);
+            }
+        }
+
+        // Input formatting for Farmer ID
+        document.getElementById('farmer_id')?.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 12) value = value.substring(0, 12);
+            
+            let formatted = '';
+            for (let i = 0; i < value.length; i++) {
+                if (i > 0 && i % 4 === 0 && formatted.length < 14) {
+                    formatted += '-';
+                }
+                formatted += value[i];
+            }
+            e.target.value = formatted;
+        });
+
+        // Input formatting for Mobile Number
+        document.getElementById('mobile_number')?.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 10) value = value.substring(0, 10);
+            
+            e.target.value = value;
+        });
+
+        // Form submission handlers
+        document.getElementById('farmerForm')?.addEventListener('submit', function(e) {
+            const farmerId = document.getElementById('farmer_id').value;
+            const pattern = /^\d{4}-\d{4}-\d{4}$/;
+            
+            if (!pattern.test(farmerId)) {
+                e.preventDefault();
+                showError('farmer_id', 'कृपया सही फॉर्मेट में किसान आईडी दर्ज करें: XXXX-XXXX-XXXX');
+                return false;
+            }
+            
+            // Show loading state
+            const button = document.getElementById('farmerSubmit');
+            button.classList.add('loading');
+            button.disabled = true;
+            
+            return true;
+        });
+
+        document.getElementById('mobileForm')?.addEventListener('submit', function(e) {
+            const mobile = document.getElementById('mobile_number').value;
+            const pattern = /^[6-9]\d{9}$/;
+            
+            if (!pattern.test(mobile)) {
+                e.preventDefault();
+                showError('mobile_number', 'कृपया सही 10 अंकों का भारतीय मोबाइल नंबर दर्ज करें');
+                return false;
+            }
+            
+            // Show loading state
+            const button = document.getElementById('mobileSubmit');
+            button.classList.add('loading');
+            button.disabled = true;
+            
+            return true;
+        });
+
+        // Error display function
+        function showError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const form = field.closest('.login-form');
+            
+            // Remove existing error
+            const existingError = form.querySelector('.error-message:not([data-server])');
+            if (existingError) existingError.remove();
+            
+            // Add new error
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.innerHTML = `
+                <span class="material-icons">error</span>
+                <span>${message}</span>
+            `;
+            
+            const title = form.querySelector('.form-title');
+            title.parentNode.insertBefore(errorDiv, title.nextSibling.nextSibling);
+            
+            // Focus and highlight field
+            field.focus();
+            field.style.borderColor = '#d32f2f';
+            
+            // Reset styling after interaction
+            field.addEventListener('input', function() {
+                this.style.borderColor = '#4caf50';
+                errorDiv.remove();
+            }, { once: true });
+        }
+
+        // Auto-show appropriate form based on errors
+        window.addEventListener('load', function() {
+            const errorDiv = document.querySelector('.error-message');
+            if (errorDiv) {
+                errorDiv.setAttribute('data-server', 'true');
+                
+                // Check which form had the error
+                if (document.getElementById('farmer-form').contains(errorDiv)) {
+                    showLoginMethod('farmer');
+                } else if (document.getElementById('mobile-form').contains(errorDiv)) {
+                    showLoginMethod('mobile');
+                }
+            }
+            
+            // Format any existing values
+            const farmerIdInput = document.getElementById('farmer_id');
+            if (farmerIdInput && farmerIdInput.value) {
+                farmerIdInput.dispatchEvent(new Event('input'));
+            }
+            
+            // Auto-focus on first input
+            const activeForm = document.querySelector('.login-form.active');
+            if (activeForm) {
+                const firstInput = activeForm.querySelector('input');
+                if (firstInput) {
+                    setTimeout(() => firstInput.focus(), 100);
+                }
+            }
+        });
+
+        // Input validation styling
+        document.querySelectorAll('.input-field').forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.value && !this.checkValidity()) {
+                    this.style.borderColor = '#d32f2f';
+                }
+            });
+            
+            input.addEventListener('input', function() {
+                if (this.checkValidity()) {
+                    this.style.borderColor = '#4caf50';
+                }
+            });
+        });
+    </script>
 
 </body>
 </html>

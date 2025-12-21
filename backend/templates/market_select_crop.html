@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}बेचने के लिए फसल चुनें{% endblock %}
+
+{% block style %}
+
+
+    <style>
+
+
+        .frame {
+            width: 100%;
+            max-width: 420px;
+            height: 100%;
+            background-color: #f7f9f7;
+            border-radius: 8px;
+            box-shadow: 0 4px 60px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+  
+
+        .header-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .page-info {
+            padding: 15px;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .page-main-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #d84315;
+        }
+
+        .page-description {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .main-content {
+            flex-grow: 1;
+
+            overflow-y: auto;
+        }
+
+        .crop-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            text-align: center;
+        }
+
+        .crop-item {
+            background: #f0f4f0;
+            border-radius: 12px;
+            padding: 15px 10px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: 0.2s;
+        }
+
+        .crop-item:hover, .crop-item.selected {
+            border-color: #ff9800;
+            background: #fff8e1;
+        }
+
+        .crop-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            margin-top: 6px;
+        }
+
+        .continue-button-container {
+            padding: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .continue-button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 12px;
+            background: linear-gradient(180deg, #ff9800, #fb8c00);
+            color: white;
+            cursor: pointer;
+        }
+
+        .continue-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+    </style>
+{% endblock %}
+
+{% block content %}
+
+<div class="frame">
+
+
+
+
+    <div class="page-info">
+        <div class="page-main-title">Select Oilseed to Sell</div>
+        <div class="page-description">Choose your crop to continue.</div>
+    </div>
+
+    <div class="main-content">
+        <div class="crop-grid" id="crop-grid">
+            
+            {% for crop in crops %}
+            <div class="crop-item" data-crop="{{ crop }}">
+                <div class="crop-name">{{ crop }}</div>
+            </div>
+            {% endfor %}
+
+        </div>
+
+        <div class="continue-button-container">
+            <button id="nextBtn" class="continue-button" disabled>आगे बढ़ें</button>
+        </div>
+    </div>
+
+</div>
+ {% endblock %}
+
+
+ 
+{% block script %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const items = document.querySelectorAll(".crop-item");
+    const nextBtn = document.getElementById("nextBtn");
+
+    let selectedCrop = null;
+
+    items.forEach(item => {
+        item.addEventListener("click", () => {
+            items.forEach(i => i.classList.remove("selected"));
+            item.classList.add("selected");
+
+            selectedCrop = item.dataset.crop;
+            nextBtn.disabled = false;
+            nextBtn.textContent = `आगे बढ़ें (${selectedCrop})`;
+        });
+    });
+
+    nextBtn.addEventListener("click", () => {
+        if (!selectedCrop) return;
+
+        window.location.href = `/market/nearby/${selectedCrop}`;
+    });
+});
+</script>
+{% endblock %}

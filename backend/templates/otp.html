@@ -1,224 +1,367 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telhan Sathi - OTP Verification</title>
+    <title>टेलहन साथी - OTP सत्यापन</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: sans-serif;
+        /* BASE & BACKGROUND STYLES (Login Page Style) */
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans Devanagari', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf0 100%);
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            color: #fff;
-            background-color: #1e3a24;
-            background-image: linear-gradient(180deg, #2d5735 0%, #1e3a24 100%);
+            padding: 0;
+            color: #333;
         }
 
-        .frame {
+        /* MOBILE: FULL WIDTH (Login Page Style) */
+        @media (max-width: 768px) {
+            body {
+                /* Ensures the green background covers the whole mobile screen */
+                background: linear-gradient(135deg, #1e3a24 0%, #2d5735 100%);
+                display: block;
+                padding: 0;
+            }
+        }
+
+        /* MAIN CONTAINER (Login Page Style) */
+        .main-container {
             width: 100%;
-            max-width: 380px;
-            height: 100vh;
-            background-color: transparent;
+            max-width: 480px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 4px 60px rgba(0, 0, 0, 0.5);
-            border-radius: 8px;
-            position: relative;
-            padding: 10px;
-            box-sizing: border-box;
-            margin: 0;
+            height: auto;
         }
 
+        /* MOBILE: FULL SCREEN (Adjusted for better flow without footer) */
+        @media (max-width: 768px) {
+            .main-container {
+                max-width: 100%;
+                /* Removed min-height: 100vh */
+                border-radius: 0;
+                box-shadow: none;
+                background: transparent;
+                display: flex;
+                flex-direction: column;
+            }
+        }
+
+        /* HEADER (Login Page Style) */
         .header {
+            background: linear-gradient(135deg, #1a4721 0%, #2e7d32 100%);
+            padding: 32px;
             display: flex;
             align-items: center;
-            padding: 10px 0 0;
-            margin-bottom: 40px;
-        }
-
-        .logo {
-            width: 45px;
-            height: 45px;
-            background-color: #4caf50;
-            border-radius: 8px;
-            margin-right: 15px;
-            clip-path: polygon(50% 0%, 100% 100%, 50% 80%, 0% 100%);
+            gap: 20px;
+            color: #fff;
             flex-shrink: 0;
         }
 
-        .title-group {
+        @media (max-width: 768px) {
+            .header {
+                padding: 28px 24px;
+                border-radius: 0;
+            }
+        }
+
+        .logo-container {
+            width: 56px;
+            height: 56px;
+            background: white;
+            border-radius: 14px;
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            flex-shrink: 0;
+        }
+        
+        .logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 14px;
+        }
+
+        .title-section {
+            flex: 1;
         }
 
         .app-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #fff;
-            margin-bottom: 2px;
+            font-size: 26px;
+            font-weight: 700;
+            color: white;
+            line-height: 1.3;
+            margin-bottom: 4px;
         }
 
-        .subtitle {
-            font-size: 12px;
-            color: #a5d6a7;
+        .ministry {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.95);
+            font-weight: 400;
         }
 
-        .content-area {
-            flex-grow: 1;
+        @media (max-width: 768px) {
+            .app-title {
+                font-size: 24px;
+            }
+            
+            .ministry {
+                font-size: 13px;
+            }
         }
+        
+        /* OTP CONTENT AREA */
+        .otp-content {
+            padding: 40px 32px;
+            background: white;
+            flex-grow: 1; 
+        }
+        
+        @media (max-width: 768px) {
+            .otp-content {
+                background: white;
+                border-radius: 0;
+                padding: 32px 24px;
+                position: relative;
+                z-index: 1;
+            }
+        }
+
 
         .section-heading {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 600;
-            margin-bottom: 10px;
-            color: #fff;
+            margin-bottom: 12px;
+            color: #1e3a24;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .section-heading .material-icons {
+            font-size: 24px;
+            color: #2e7d32;
         }
 
+
         .otp-instruction {
-            font-size: 16px;
-            color: #a5d6a7;
-            margin-bottom: 40px;
+            font-size: 15px;
+            color: #666;
+            margin-bottom: 30px;
         }
 
         .otp-container {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             gap: 6px;
             margin-bottom: 30px;
-            flex-wrap: nowrap;
+            max-width: 320px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .otp-input {
             width: 45px;
             height: 55px;
-            padding: 6px;
-            border: none;
-            border-radius: 10px;
-            background-color: rgba(0, 0, 0, 0.3);
-            color: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            background-color: #f8f9fa;
+            color: #333;
             font-size: 22px;
-            font-weight: bold;
+            font-weight: 600;
             text-align: center;
             outline: none;
-            transition: border 0.3s, background-color 0.3s;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+            font-family: 'Noto Sans Devanagari', sans-serif;
         }
 
         .otp-input:focus {
-            border: 2px solid #a5d6a7;
-            background-color: rgba(0, 0, 0, 0.4);
+            border-color: #4caf50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+            background-color: white;
         }
 
         .resend-group {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             font-size: 14px;
             margin-bottom: 20px;
+            padding: 0 5px;
         }
 
         .timer-display {
-            font-weight: bold;
-            color: #a5d6a7;
+            font-weight: 500;
+            color: #444;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            line-height: 1.4;
+            flex-shrink: 0;
         }
 
+        .timer-display span {
+            font-weight: 700;
+            color: #d32f2f;
+        }
+
+
         .resend-link {
-            color: #e0e0e0;
+            color: #2e7d32;
             text-decoration: none;
             font-weight: 600;
             cursor: pointer;
             transition: color 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            text-align: right;
+            line-height: 1.2;
         }
 
+        .resend-link .resend-icon-text {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
         .resend-link:hover:not(.disabled) {
             color: #4caf50;
         }
 
         .resend-link.disabled {
-            color: #757575;
+            color: #999;
             cursor: default;
-        }
-
-        .button-group {
-            margin-top: 40px;
         }
 
         .primary-button {
             width: 100%;
-            padding: 15px;
+            padding: 16px;
             border: none;
             border-radius: 12px;
-            font-size: 18px;
-            font-weight: bold;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
             text-align: center;
-            background: linear-gradient(180deg, #66bb6a 0%, #388e3c 100%);
+            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
             color: #fff;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            transition: opacity 0.3s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+            font-family: 'Noto Sans Devanagari', sans-serif;
+            margin-top: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         .primary-button:hover {
             opacity: 0.9;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
         }
 
         .primary-button:disabled {
-            opacity: 0.5;
+            opacity: 0.6;
             cursor: not-allowed;
+            background: linear-gradient(135deg, #a5d6a7 0%, #7cb342 100%);
         }
 
         .button-helper-text {
-            font-size: 12px;
-            color: #a5d6a7;
+            font-size: 12px; 
+            color: #999;
             text-align: center;
-            margin-top: 10px;
-        }
-
-        .copyright {
-            font-size: 10px;
-            color: #a5d6a7;
-            text-align: center;
-            padding: 10px 0;
-            width: 100%;
-            position: absolute;
-            bottom: 15px;
-            left: 0;
+            margin-top: 20px;
         }
 
         .error-message {
-            color: #ffcccc;
-            font-size: 12px;
-            text-align: center;
+            color: #d32f2f;
+            font-size: 14px;
+            text-align: left;
             margin-bottom: 20px;
-            background: rgba(255, 0, 0, 0.1);
-            padding: 10px;
-            border-radius: 5px;
+            background: #fff5f5;
+            padding: 14px 16px;
+            border-radius: 10px;
+            border: 1px solid #ffcdd2;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .error-message .material-icons {
+            font-size: 20px;
+            flex-shrink: 0;
+            color: #d32f2f;
+        }
+
+        /* FOOTER (REMOVED FOOTER CSS) */
+        /* All footer-related CSS has been removed */
+        
+        /* Loading State */
+        .loading {
+            position: relative;
+            color: transparent !important;
+            pointer-events: none;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
 
-    <div class="frame">
+    <div class="main-container">
         <div class="header">
-            <div class="logo"></div>
-            <div class="title-group">
-                <div class="app-title">TELHAN SATHI</div>
-                <div class="subtitle">आपके कृषि समय का विश्वसनीय साथी</div>
+            <div class="logo-container">
+                 <img src="im/agri logo.jpg" alt="Logo">
+            </div>
+            <div class="title-section">
+                <div class="app-title">टेलहन साथी</div>
+                <div class="ministry">कृषि मंत्रालय, भारत सरकार</div>
             </div>
         </div>
 
-        <div class="content-area">
-            <div class="section-heading">Security Verification</div>
-            <div class="otp-instruction">OTP sent to mobile ending in {{ phone_masked }}</div>
+        <div class="otp-content">
+            <div class="section-heading">
+                 <span class="material-icons">lock_open</span>
+                 सुरक्षा सत्यापन
+            </div>
+            
+            <div class="otp-instruction">
+                OTP आपके पंजीकृत मोबाइल नंबर पर भेजा गया है, जिसका नंबर ******{{ phone_masked }} है।
+            </div>
 
             {% if error %}
-            <div class="error-message">{{ error }}</div>
+            <div class="error-message">
+                <span class="material-icons">error</span>
+                <span>{{ error }}</span>
+            </div>
             {% endif %}
 
             <form method="POST" action="{{ url_for('auth.verify_otp_post') }}">
@@ -234,25 +377,31 @@
                 </div>
 
                 <div class="resend-group">
-                    <div class="timer-display">Resend OTP in <span id="countdown">00:30</span></div>
-                    <a href="#" class="resend-link disabled" id="resend-link">Didn't receive? Resend!</a>
+                    <div class="timer-display">
+                        <span class="material-icons" style="font-size: 18px; color: #444;">timer</span>
+                        OTP पुनः भेजें: <span id="countdown">00:30</span>
+                    </div>
+                    <a href="#" class="resend-link disabled" id="resend-link">
+                         <span class="resend-icon-text">
+                             <span class="material-icons" style="font-size: 18px;">refresh</span>
+                             OTP प्राप्त नहीं हुआ?
+                         </span>
+                         <span>पुनः प्रयास करें!</span>
+                    </a>
                 </div>
                 
                 <div class="button-group">
-                    <button type="submit" class="primary-button" id="verify-button">
-                        Verify & Enter
+                    <button type="submit" class="primary-button" id="verify-button" disabled>
+                        <span class="material-icons">check_circle</span>
+                        सत्यापित करें
                     </button>
-                    <div class="button-helper-text">सत्यापित करें</div>
                 </div>
                 
-                <div class="button-helper-text" style="margin-top: 20px;">By verifying, you agree to our Terms & Privacy</div>
+                <div class="button-helper-text">सत्यापन करके, आप हमारी नियम और गोपनीयता शर्तों से सहमत हैं।</div>
             </form>
         </div>
-
-        <div class="copyright">
-            © Govt of India - Telhan Sathi
+        
         </div>
-    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -261,7 +410,11 @@
             const resendLink = document.getElementById('resend-link');
             const verifyButton = document.getElementById('verify-button');
             const otpContainer = document.getElementById('otp-container');
-            const farmerId = document.querySelector('input[name="farmer_id"]').value;
+            
+            // Check if farmer_id hidden input exists
+            const farmerIdInput = document.querySelector('input[name="farmer_id"]');
+            const farmerId = farmerIdInput ? farmerIdInput.value : '';
+
             let countdownTime = 30;
             let timer;
 
@@ -277,7 +430,13 @@
                     otpContainer.parentElement.appendChild(otpInput);
                 }
                 otpInput.value = otp;
+                
+                // Enable/Disable Verify button based on OTP length
+                verifyButton.disabled = otp.length !== inputs.length;
             }
+            
+            // Initial button state
+            updateOtpField();
 
             function startTimer() {
                 resendLink.classList.add('disabled');
@@ -300,6 +459,7 @@
 
             function handleResend(event) {
                 event.preventDefault();
+                // Ensure the fetch URL and method match your backend setup
                 fetch('{{ url_for("auth.resend_otp") }}', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -308,13 +468,15 @@
                     if (data.success) {
                         // Clear OTP inputs
                         inputs.forEach(input => input.value = '');
+                        updateOtpField(); 
                         inputs[0].focus();
                         startTimer();
+                        // You can add a toast notification or alert for resend success here
                     }
                 });
             }
 
-            // OTP Input Auto-Jump
+            // OTP Input Auto-Jump and Backspace
             inputs.forEach((input, index) => {
                 input.addEventListener('input', (e) => {
                     input.value = input.value.replace(/[^0-9]/g, '');
@@ -330,13 +492,50 @@
                 input.addEventListener('keydown', (e) => {
                     if (e.key === 'Backspace' && input.value.length === 0 && index > 0) {
                         inputs[index - 1].focus();
+                    } else if (e.key === 'ArrowRight' && index < inputs.length - 1) {
+                        inputs[index + 1].focus();
+                    } else if (e.key === 'ArrowLeft' && index > 0) {
+                        inputs[index - 1].focus();
                     }
                 });
+                
+                // Handle paste event
+                input.addEventListener('paste', (e) => {
+                    e.preventDefault();
+                    const pasteData = e.clipboardData.getData('text').trim().replace(/\D/g, '');
+                    for (let i = 0; i < inputs.length && i < pasteData.length; i++) {
+                        inputs[i].value = pasteData[i];
+                    }
+                    updateOtpField();
+                    // Move focus to the next empty input or last input
+                    const nextIndex = Math.min(pasteData.length, inputs.length - 1);
+                    if (nextIndex < inputs.length) {
+                        inputs[nextIndex].focus();
+                    } else {
+                        inputs[inputs.length - 1].blur();
+                    }
+                });
+            });
+            
+            // Submission logic 
+            document.querySelector('form').addEventListener('submit', (e) => {
+                if (Array.from(inputs).some(input => input.value.length === 0)) {
+                    // Simple alert for incomplete OTP
+                    e.preventDefault();
+                    alert('कृपया संपूर्ण OTP दर्ज करें।');
+                    return;
+                }
+                
+                // Show loading state
+                verifyButton.classList.add('loading');
+                verifyButton.disabled = true;
+                verifyButton.textContent = 'सत्यापन हो रहा है...';
             });
 
             // Start timer on load
             startTimer();
         });
     </script>
+
 </body>
 </html>
