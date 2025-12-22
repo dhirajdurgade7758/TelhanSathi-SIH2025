@@ -8,7 +8,7 @@ import requests
 # Avoid circular imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from models_marketplace import Buyer, SellRequest, BuyerOffer, Chat, ChatMessage, MarketPrice
+from models_marketplace_keep import Buyer, SellRequest, BuyerOffer, Chat, ChatMessage, MarketPrice
 from extensions import db
 
 buyer_auth_bp = Blueprint('buyer_auth', __name__, url_prefix='/buyer')
@@ -173,7 +173,7 @@ def buyer_my_offers():
     buyer_id = session.get('buyer_id_verified')
     
     # Import here to avoid circular imports
-    from models_marketplace import BuyerOffer
+    from models_marketplace_keep import BuyerOffer
     
     # Get all buyer offers for this buyer (independent offers, not linked to sell requests)
     offers = BuyerOffer.query.filter_by(buyer_id=buyer_id).all()
@@ -239,7 +239,7 @@ def create_offer():
             return jsonify({'error': 'Invalid quantity or price format'}), 400
         
         # Import models
-        from models_marketplace import BuyerOffer, Buyer
+        from models_marketplace_keep import BuyerOffer, Buyer
         import uuid
         
         # Get buyer info
@@ -291,7 +291,7 @@ def marketplace_offers():
     - district: Filter by district_wanted
     - location: Filter by location_wanted
     """
-    from models_marketplace import BuyerOffer
+    from models_marketplace_keep import BuyerOffer
     
     # Get query parameters for filtering
     crop_name = request.args.get('crop_name', '').strip().lower()
@@ -339,7 +339,7 @@ def delete_offer(offer_id):
     if 'buyer_id_verified' not in session:
         return jsonify({'error': 'Not logged in'}), 401
     
-    from models_marketplace import BuyerOffer
+    from models_marketplace_keep import BuyerOffer
     
     buyer_id = session.get('buyer_id_verified')
     offer = BuyerOffer.query.filter_by(id=offer_id, buyer_id=buyer_id).first()
@@ -362,7 +362,7 @@ def update_offer(offer_id):
     if 'buyer_id_verified' not in session:
         return jsonify({'error': 'Not logged in'}), 401
     
-    from models_marketplace import BuyerOffer
+    from models_marketplace_keep import BuyerOffer
     
     try:
         buyer_id = session.get('buyer_id_verified')

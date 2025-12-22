@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 from extensions import db
 from flask_migrate import Migrate  # ✅ Added
-from models_marketplace import *
+from models_marketplace_keep import *
 
 load_dotenv()
 
@@ -49,7 +49,6 @@ from routes.weather import weather_bp
 from routes.redemption_store import redemption_bp
 from routes.buyer_auth import buyer_auth_bp
 from routes.translation import translation_bp
-from routes.bidding import bidding_bp
 from translations import get_translation, TRANSLATIONS
 
 app.register_blueprint(auth_bp)
@@ -67,7 +66,6 @@ app.register_blueprint(weather_bp)
 app.register_blueprint(redemption_bp)
 app.register_blueprint(buyer_auth_bp)
 app.register_blueprint(translation_bp)
-app.register_blueprint(bidding_bp)
 
 # ----------------------- ROOT-LEVEL ESP32 ENDPOINTS -----------------------
 # Import the handler function from field_monitoring
@@ -134,10 +132,9 @@ def set_language_context():
 
 
 # ==================== WebSocket Initialization ====================
-from ml.websocket_server import socketio as ws_socketio
-
-# Initialize WebSocket
-ws_socketio.init_app(app)
+# DISABLED: WebSocket server disabled after Nilami removal
+# from ml.websocket_server import socketio as ws_socketio
+# ws_socketio.init_app(app)
 
 
 # ----------------------- APP RUN -----------------------

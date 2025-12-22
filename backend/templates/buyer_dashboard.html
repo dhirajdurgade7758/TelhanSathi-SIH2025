@@ -367,12 +367,6 @@
             <button class="nav-link" onclick="switchTab('sell-requests')">
                 📋 Sell Requests
             </button>
-            <button class="nav-link" onclick="switchTab('browse-auctions')">
-                🏆 Browse Auctions
-            </button>
-            <button class="nav-link" onclick="switchTab('my-bids')">
-                💰 My Bids
-            </button>
             <button class="nav-link" onclick="switchTab('chats')">
                 💬 Chats
             </button>
@@ -544,56 +538,6 @@
             </div>
             <div id="sell-requests-container">
                 <p style="text-align: center; color: #666;">Loading sell requests...</p>
-            </div>
-        </div>
-
-        <!-- Browse Auctions Tab Content -->
-        <div id="browse-auctions" class="tab-content">
-            <div style="margin-bottom: 20px;">
-                <h2 style="font-size: 22px; margin-bottom: 15px;">🏆 Browse Live Auctions</h2>
-                <p style="color: #666;">Find and bid on fresh crops directly from farmers. Real-time bidding with live prices.</p>
-            </div>
-            <div style="max-width: 100%; background: white; padding: 25px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center;">
-                <div style="font-size: 18px; margin-bottom: 15px;">🏆 Live Auctions Marketplace</div>
-                <a href="{{ url_for('bidding.buyer_auctions_page') }}" style="display: inline-block; padding: 12px 24px; background: var(--primary-color); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                    Browse All Auctions →
-                </a>
-                <div id="auctions-preview" style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px;">
-                    <p style="grid-column: 1/-1; text-align: center; color: #999;">Loading auctions...</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- My Bids Tab Content -->
-        <div id="my-bids" class="tab-content">
-            <div style="margin-bottom: 20px;">
-                <h2 style="font-size: 22px; margin-bottom: 15px;">💰 My Bids</h2>
-                <p style="color: #666;">Track all your bids, wins, and auction activity.</p>
-            </div>
-            <div style="max-width: 100%; background: white; padding: 25px; border-radius: 12px; border: 1px solid var(--border-color);">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
-                    <a href="{{ url_for('bidding.buyer_my_bids_page') }}" style="padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.3s;">
-                        <div style="font-size: 32px; margin-bottom: 10px;">📊</div>
-                        <div style="font-size: 16px; font-weight: 600;">View All My Bids</div>
-                        <div style="font-size: 13px; opacity: 0.9; margin-top: 5px;">See all auctions you've bid on</div>
-                    </a>
-
-                    <a href="{{ url_for('bidding.buyer_won_auctions_page') }}" style="padding: 20px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; text-decoration: none; border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.3s;">
-                        <div style="font-size: 32px; margin-bottom: 10px;">🎉</div>
-                        <div style="font-size: 16px; font-weight: 600;">My Won Auctions</div>
-                        <div style="font-size: 13px; opacity: 0.9; margin-top: 5px;">Auctions you've won and need to complete</div>
-                    </a>
-
-                    <a href="{{ url_for('bidding.buyer_auctions_page') }}" style="padding: 20px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; text-decoration: none; border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.3s;">
-                        <div style="font-size: 32px; margin-bottom: 10px;">⚡</div>
-                        <div style="font-size: 16px; font-weight: 600;">Place New Bid</div>
-                        <div style="font-size: 13px; opacity: 0.9; margin-top: 5px;">Browse live auctions and bid now</div>
-                    </a>
-                </div>
-                <div id="my-bids-container" style="margin-top: 25px;">
-                    <h3 style="margin-bottom: 15px;">Recent Bids</h3>
-                    <p style="text-align: center; color: #999;">Loading your bids...</p>
-                </div>
             </div>
         </div>
 

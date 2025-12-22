@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import requests
 from extensions import db
-from models_marketplace import SellRequest, CropListing, MarketPrice
+from models_marketplace_keep import SellRequest, CropListing, MarketPrice
 
 crop_economics_bp = Blueprint('crop_economics', __name__, url_prefix='/crop-economics')
 

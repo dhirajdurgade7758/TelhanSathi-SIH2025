@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from models import Farmer, OTPRecord
 from extensions import db
 from utils import generate_otp, send_otp_sms, calculate_otp_expiry, is_farmer_eligible_for_subsidy
-from models_marketplace import Chat, ChatMessage
+from models_marketplace_keep import Chat, ChatMessage
 
 auth_bp = Blueprint('auth', __name__)
 
