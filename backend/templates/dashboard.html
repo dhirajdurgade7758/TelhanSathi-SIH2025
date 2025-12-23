@@ -401,6 +401,13 @@
         <div class="feature-label">रिडेम्पशन</div>
       </a>
 
+      <a href="{{ url_for('bidding.farmer_dashboard') }}" class="feature-card" style="text-decoration: none; color: inherit;">
+        <div class="feature-icon">
+          <span class="material-symbols-outlined">gavel</span>
+        </div>
+        <div class="feature-label">निलामी (Nilami)</div>
+      </a>
+
     </div>
   </section>
 
@@ -470,7 +477,20 @@
       </div>
     </div>
 
-    <!-- CARD 3: आपका डिजिटल कृषि प्लेटफ़ॉर्म -->
+    <!-- CARD 3: निलामी (Nilami) - ऑयलसीड की बोली प्रणाली -->
+    <div class="info-card-slide-2" onclick="window.location.href='{{ url_for(\"bidding.farmer_dashboard\") }}'">
+      <img class="info-card-img-2"
+        src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=600&h=400&fit=crop">
+      <div class="info-card-content-2">
+        <div class="info-card-title-2">निलामी - फसल की बोली</div>
+        <div class="info-card-sub-2">
+          अपनी तेल बीज की फसल की निलामी करें, प्रतिस्पर्धी बोलियाँ पाएँ, सर्वश्रेष्ठ मूल्य प्राप्त करें।
+        </div>
+        <span class="material-symbols-outlined info-card-arrow-2">arrow_forward</span>
+      </div>
+    </div>
+
+    <!-- CARD 4: आपका डिजिटल कृषि प्लेटफ़ॉर्म -->
     <div class="info-card-slide-2" onclick="window.location.href='/platform'">
       <img class="info-card-img-2"
         src="static/img/1.png">
