@@ -48,8 +48,6 @@ app.register_blueprint(iot)
 from routes.weather import weather_bp
 from routes.redemption_store import redemption_bp
 from routes.buyer_auth import buyer_auth_bp
-from routes.translation import translation_bp
-from translations import get_translation, TRANSLATIONS
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(onboarding_bp)
@@ -65,7 +63,6 @@ app.register_blueprint(profit_bp)
 app.register_blueprint(weather_bp)
 app.register_blueprint(redemption_bp)
 app.register_blueprint(buyer_auth_bp)
-app.register_blueprint(translation_bp)
 
 # ----------------------- ROOT-LEVEL ESP32 ENDPOINTS -----------------------
 # Import the handler function from field_monitoring
@@ -111,24 +108,10 @@ def inject_now():
     return {'now': datetime.utcnow}
 
 
-@app.context_processor
-def inject_languages():
-    """Inject supported languages into all templates"""
-    return {'supported_languages': {'en': 'English', 'hi': 'हिंदी', 'mr': 'मराठी', 'gu': 'ગુજરાતી'}}
-
-
-@app.template_filter('translate')
-def translate_filter(text, target_lang='en'):
-    """Jinja template filter for translation"""
-    if not text or target_lang == 'en':
-        return text
-    return get_translation(text, target_lang)
-
-
 @app.before_request
 def set_language_context():
-    """Set language context before each request"""
-    g.language = session.get('language', request.accept_languages.best_match(['en', 'hi', 'mr', 'gu']) or 'en')
+    """Set language context before each request (static English only)"""
+    g.language = 'en'
 
 
 # ----------------------- APP RUN -----------------------
