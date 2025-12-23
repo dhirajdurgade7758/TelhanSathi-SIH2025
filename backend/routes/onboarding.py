@@ -7,8 +7,6 @@ from datetime import datetime
 # ensure imports resolve
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from ml.uj_model_stub import get_farm_analysis
-
 onboarding_bp = Blueprint('onboarding', __name__)
 
 
@@ -100,18 +98,6 @@ def onboarding_post():
         'soil': soil,
         'harvest_date': harvest_date
     }
-
-    # ML Stub → store analysis
-    try:
-        analysis = get_farm_analysis(
-            district=district,
-            acres=acres_float,
-            crop=crop
-        )
-        session['analysis'] = analysis
-    except Exception as e:
-        print("ML stub error:", e)
-        session['analysis'] = None
 
     return redirect(url_for('dashboard'))
 
