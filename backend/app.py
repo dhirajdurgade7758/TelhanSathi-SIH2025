@@ -41,6 +41,7 @@ from routes.notifications import notifications_bp
 from routes.crop_economics import crop_economics_bp
 from routes.profit_simulator import profit_bp
 from routes.field_monitoring import iot
+from routes.bidding import bidding_bp
 app.register_blueprint(iot)
 
 
@@ -58,6 +59,7 @@ app.register_blueprint(admin_bp)
 app.register_blueprint(notifications_bp)
 app.register_blueprint(crop_economics_bp)   
 app.register_blueprint(profit_bp)
+app.register_blueprint(bidding_bp)
 
 
 app.register_blueprint(weather_bp)

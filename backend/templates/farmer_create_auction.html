@@ -1,0 +1,475 @@
+{% extends "base.html" %}
+
+{% block title %}Create Auction - तेलहान साथी{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-container">
+        <div class="form-header">
+            <h1>🎯 Create New Auction</h1>
+            <p>List your oilseed harvest for bidding</p>
+        </div>
+
+        <form id="createAuctionForm" class="auction-form">
+            <!-- Crop Information Section -->
+            <fieldset class="form-section">
+                <legend>Crop Information</legend>
+                
+                <div class="form-group">
+                    <label for="cropName">Crop Type *</label>
+                    <select id="cropName" name="cropName" required>
+                        <option value="">Select Crop</option>
+                        <option value="Mustard">Mustard (सरसों)</option>
+                        <option value="Groundnut">Groundnut (मूंगफली)</option>
+                        <option value="Sunflower">Sunflower (सूरजमुखी)</option>
+                        <option value="Soybean">Soybean (सोयाबीन)</option>
+                        <option value="Sesame">Sesame (तिल)</option>
+                        <option value="Safflower">Safflower (कुसुम)</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="quantity">Quantity (Quintals) *</label>
+                        <input type="number" id="quantity" name="quantity_quintals" min="1" step="0.1" required>
+                        <small>1 quintal = 100 kg</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="quality">Quality Grade</label>
+                        <select id="quality" name="quality_grade">
+                            <option value="Standard">Standard</option>
+                            <option value="A">Grade A - Premium</option>
+                            <option value="B">Grade B - Good</option>
+                            <option value="C">Grade C - Fair</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description (Optional)</label>
+                    <textarea id="description" name="description" rows="3" placeholder="Add details about your harvest..."></textarea>
+                </div>
+            </fieldset>
+
+            <!-- Pricing Section -->
+            <fieldset class="form-section">
+                <legend>Pricing & Bidding</legend>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="basePrice">Base Price (₹/Quintal) *</label>
+                        <input type="number" id="basePrice" name="base_price" min="100" step="10" required>
+                        <small>Starting price for bidding</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="minIncrement">Minimum Bid Increment (₹)</label>
+                        <input type="number" id="minIncrement" name="minimum_bid_increment" min="10" step="10" value="50">
+                        <small>Minimum increase per bid</small>
+                    </div>
+                </div>
+
+                <div class="price-guide">
+                    <strong>📊 Market Reference Prices (Today):</strong>
+                    <div class="price-list" id="priceList">
+                        <div class="loading-small">Loading market prices...</div>
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- Timeline Section -->
+            <fieldset class="form-section">
+                <legend>Auction Duration</legend>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="duration">Auction Duration (Hours) *</label>
+                        <select id="duration" name="duration_hours" required>
+                            <option value="">Select Duration</option>
+                            <option value="1">1 Hour</option>
+                            <option value="2">2 Hours</option>
+                            <option value="4">4 Hours</option>
+                            <option value="6">6 Hours</option>
+                            <option value="12">12 Hours</option>
+                            <option value="24">24 Hours (1 Day)</option>
+                            <option value="48">48 Hours (2 Days)</option>
+                            <option value="72">72 Hours (3 Days)</option>
+                            <option value="168">7 Days</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Auction Start Time</label>
+                        <input type="text" value="Now" disabled>
+                        <small>Auction starts immediately after creation</small>
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- Location Section -->
+            <fieldset class="form-section">
+                <legend>Location & Logistics</legend>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="location">Farm Location *</label>
+                        <input type="text" id="location" name="location" placeholder="Address" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="district">District *</label>
+                        <input type="text" id="district" name="district" value="{{ farmer.district }}" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="state">State</label>
+                        <input type="text" id="state" name="state" value="Maharashtra">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="storage">Storage Location (Optional)</label>
+                        <input type="text" id="storage" name="storage_location" placeholder="Where crop is stored">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="harvestDate">Harvest Date (Optional)</label>
+                    <input type="date" id="harvestDate" name="harvest_date">
+                </div>
+            </fieldset>
+
+            <!-- Submit Section -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <span>🎯</span> Create Auction
+                </button>
+                <button type="button" class="btn btn-secondary btn-lg" onclick="window.history.back()">
+                    Cancel
+                </button>
+            </div>
+
+            <div id="formMessage" class="form-message" style="display: none;"></div>
+        </form>
+    </div>
+</div>
+
+<style>
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.form-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.form-header {
+    background: linear-gradient(135deg, #388e3c 0%, #1b5e20 100%);
+    color: white;
+    padding: 30px 20px;
+    text-align: center;
+}
+
+.form-header h1 {
+    margin: 0;
+    font-size: 2em;
+    font-weight: 700;
+}
+
+.form-header p {
+    margin: 10px 0 0 0;
+    opacity: 0.9;
+}
+
+.auction-form {
+    padding: 30px;
+}
+
+.form-section {
+    margin-bottom: 30px;
+    padding-bottom: 30px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.form-section:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+fieldset {
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+legend {
+    font-size: 1.3em;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 20px;
+    padding: 0;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+    font-size: 0.95em;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1em;
+    font-family: inherit;
+    transition: all 0.3s;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #388e3c;
+    box-shadow: 0 0 0 3px rgba(56, 142, 60, 0.1);
+}
+
+input[disabled] {
+    background: #f5f5f5;
+    color: #999;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+small {
+    display: block;
+    margin-top: 5px;
+    color: #999;
+    font-size: 0.85em;
+}
+
+.price-guide {
+    background: #f5f5f5;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+.price-guide strong {
+    display: block;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.price-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.price-item {
+    background: white;
+    padding: 10px;
+    border-radius: 6px;
+    border-left: 3px solid #ff9800;
+}
+
+.price-item-name {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.price-item-value {
+    color: #388e3c;
+    font-size: 1.2em;
+    font-weight: 700;
+}
+
+.loading-small {
+    color: #999;
+    text-align: center;
+    padding: 10px;
+}
+
+.form-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.btn {
+    padding: 14px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.btn-lg {
+    padding: 14px 32px;
+    font-size: 1.05em;
+}
+
+.btn-primary {
+    background: #388e3c;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2e7d34;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: #e0e0e0;
+    color: #333;
+}
+
+.btn-secondary:hover {
+    background: #d0d0d0;
+}
+
+.form-message {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.form-message.success {
+    background: #c8e6c9;
+    color: #1b5e20;
+}
+
+.form-message.error {
+    background: #ffccbc;
+    color: #bf360c;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .form-header h1 {
+        font-size: 1.5em;
+    }
+
+    .auction-form {
+        padding: 20px;
+    }
+}
+</style>
+
+<script>
+document.getElementById('createAuctionForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = {
+        crop_name: document.getElementById('cropName').value,
+        quantity_quintals: document.getElementById('quantity').value,
+        quality_grade: document.getElementById('quality').value,
+        base_price: document.getElementById('basePrice').value,
+        minimum_bid_increment: document.getElementById('minIncrement').value,
+        duration_hours: document.getElementById('duration').value,
+        location: document.getElementById('location').value,
+        district: document.getElementById('district').value,
+        state: document.getElementById('state').value,
+        description: document.getElementById('description').value,
+        harvest_date: document.getElementById('harvestDate').value || null,
+        storage_location: document.getElementById('storage').value
+    };
+
+    try {
+        const response = await fetch('/bidding/farmer/create-auction', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+        const messageDiv = document.getElementById('formMessage');
+
+        if (response.ok) {
+            messageDiv.className = 'form-message success';
+            messageDiv.textContent = '✅ Auction created successfully! Redirecting...';
+            messageDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                window.location.href = '/bidding/farmer/dashboard';
+            }, 2000);
+        } else {
+            messageDiv.className = 'form-message error';
+            messageDiv.textContent = '❌ Error: ' + (data.error || 'Failed to create auction');
+            messageDiv.style.display = 'block';
+        }
+    } catch (error) {
+        document.getElementById('formMessage').className = 'form-message error';
+        document.getElementById('formMessage').textContent = '❌ Error: ' + error.message;
+        document.getElementById('formMessage').style.display = 'block';
+    }
+});
+
+// Load market prices (sample data)
+function loadMarketPrices() {
+    const prices = {
+        'Mustard': '₹5,200 - ₹5,500',
+        'Groundnut': '₹6,000 - ₹6,500',
+        'Sunflower': '₹4,700 - ₹5,200',
+        'Soybean': '₹4,400 - ₹4,800'
+    };
+
+    const priceList = document.getElementById('priceList');
+    priceList.innerHTML = Object.entries(prices).map(([crop, price]) => `
+        <div class="price-item">
+            <div class="price-item-name">${crop}</div>
+            <div class="price-item-value">${price}</div>
+        </div>
+    `).join('');
+}
+
+document.addEventListener('DOMContentLoaded', loadMarketPrices);
+</script>
+{% endblock %}
