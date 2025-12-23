@@ -131,18 +131,10 @@ def set_language_context():
     g.language = session.get('language', request.accept_languages.best_match(['en', 'hi', 'mr', 'gu']) or 'en')
 
 
-# ==================== WebSocket Initialization ====================
-# DISABLED: WebSocket server disabled after Nilami removal
-# from ml.websocket_server import socketio as ws_socketio
-# ws_socketio.init_app(app)
-
-
 # ----------------------- APP RUN -----------------------
 if __name__ == '__main__':
     # ❗️IMPORTANT: Do NOT use db.create_all() when using Flask-Migrate
     # Migrations now handle schema updates.
     
-    # Run with WebSocket support
-    ws_socketio.run(app, debug=True, host='0.0.0.0', port=5000)
-        # ----------------------- CUSTOM CLI COMMANDS -----------------------
+    app.run(debug=True, host='0.0.0.0', port=5000)
 

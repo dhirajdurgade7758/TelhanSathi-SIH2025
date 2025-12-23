@@ -1,4 +1,0 @@
-root: google_genAI 
-path: C:\Program Files\nodejs 
-arch: 64 
-proxy: none
