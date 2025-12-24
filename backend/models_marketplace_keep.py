@@ -262,6 +262,12 @@ class Auction(db.Model):
     harvest_date = db.Column(db.Date)
     storage_location = db.Column(db.String(255))
     
+    # Photos of oilseed harvest
+    photo1_path = db.Column(db.String(255))
+    photo2_path = db.Column(db.String(255))
+    photo3_path = db.Column(db.String(255))
+    photo4_path = db.Column(db.String(255))
+    
     # Timestamps
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -269,6 +275,7 @@ class Auction(db.Model):
     # Relationships
     bids = db.relationship('Bid', backref='auction', lazy=True, cascade='all, delete-orphan')
     counter_offers = db.relationship('CounterOffer', backref='auction', lazy=True, cascade='all, delete-orphan')
+    farmer = db.relationship('Farmer', backref='auctions', lazy=True)
     
     def __repr__(self):
         return f'<Auction {self.crop_name} by Farmer {self.farmer_id}>'

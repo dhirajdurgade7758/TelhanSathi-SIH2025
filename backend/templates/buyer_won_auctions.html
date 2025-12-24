@@ -1,0 +1,402 @@
+{% extends "base.html" %}
+
+{% block title %}Won Auctions - Telhan Sathi{% endblock %}
+
+{% block content %}
+<style>
+    .won-auctions-container {
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .content-area {
+        flex: 1;
+        overflow-y: auto;
+        padding: 15px;
+    }
+
+    .summary-card {
+        background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .summary-title {
+        font-size: 14px;
+        opacity: 0.9;
+        margin: 0;
+        text-transform: uppercase;
+    }
+
+    .summary-value {
+        font-size: 36px;
+        font-weight: 700;
+        margin: 10px 0 0 0;
+    }
+
+    .summary-details {
+        font-size: 12px;
+        margin-top: 12px;
+        opacity: 0.95;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .detail {
+        text-align: center;
+    }
+
+    .detail-label {
+        opacity: 0.8;
+        font-size: 11px;
+    }
+
+    .detail-value {
+        font-size: 18px;
+        font-weight: 700;
+        margin-top: 4px;
+    }
+
+    .auctions-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .auction-card {
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 12px;
+        border-left: 4px solid #4caf50;
+        transition: all 0.3s;
+    }
+
+    .auction-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 8px;
+    }
+
+    .crop-name {
+        font-size: 15px;
+        font-weight: 600;
+        color: #1e3a24;
+    }
+
+    .won-badge {
+        background: #4caf50;
+        color: white;
+        font-size: 11px;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .card-body {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin: 10px 0;
+        font-size: 12px;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 4px 0;
+    }
+
+    .info-label {
+        color: #999;
+        font-weight: 500;
+    }
+
+    .info-value {
+        color: #1e3a24;
+        font-weight: 600;
+    }
+
+    .price-highlight {
+        color: #4caf50;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .total-highlight {
+        color: #d32f2f;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #f0f0f0;
+        font-size: 11px;
+    }
+
+    .farmer-info {
+        color: #999;
+    }
+
+    .action-button {
+        background: #388e3c;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 11px;
+        font-weight: 500;
+        transition: background 0.3s;
+    }
+
+    .action-button:hover {
+        background: #2d5735;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #999;
+    }
+
+    .empty-icon {
+        font-size: 48px;
+        margin-bottom: 10px;
+    }
+
+    .empty-text {
+        font-size: 14px;
+        margin-bottom: 15px;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+    }
+
+    .status-timeline {
+        background: #f9f9f9;
+        padding: 10px;
+        border-radius: 4px;
+        font-size: 11px;
+        color: #666;
+        margin-top: 8px;
+    }
+
+    .timeline-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 4px 0;
+    }
+
+    .timeline-dot {
+        width: 8px;
+        height: 8px;
+        background: #4caf50;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    @media (max-width: 600px) {
+        .card-body {
+            grid-template-columns: 1fr;
+        }
+
+        .summary-details {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="won-auctions-container">
+    <!-- Header -->
+    <div class="header">
+        <div>
+            <h1 class="header-title">Won Auctions</h1>
+            <p class="header-subtitle">Your Successful Bids</p>
+        </div>
+        <button class="header-btn" onclick="window.location.href='/bidding/buyer/dashboard'">←</button>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content-area">
+        <!-- Summary Card -->
+        <div class="summary-card" id="summaryCard" style="display: none;">
+            <div class="summary-title">🏆 Your Wins</div>
+            <div class="summary-value" id="wonCount">0</div>
+            <div class="summary-details">
+                <div class="detail">
+                    <div class="detail-label">Total Value</div>
+                    <div class="detail-value" id="totalValue">₹0</div>
+                </div>
+                <div class="detail">
+                    <div class="detail-label">Total Quantity</div>
+                    <div class="detail-value" id="totalQuantity">0q</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Auctions List -->
+        <div class="auctions-list" id="auctionsList">
+            <div class="loading">🔍 Loading won auctions...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let wonAuctionsData = [];
+
+    // Load won auctions
+    async function loadWonAuctions() {
+        try {
+            const response = await fetch('/bidding/buyer/won-auctions/api');
+            const data = await response.json();
+
+            wonAuctionsData = data.auctions;
+
+            if (wonAuctionsData.length === 0) {
+                document.getElementById('auctionsList').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🏆</div>
+                        <div class="empty-text">No won auctions yet</div>
+                        <p style="font-size: 12px; color: #ccc; margin: 0;">
+                            Keep bidding to win auctions and complete transactions
+                        </p>
+                        <button class="action-button" onclick="window.location.href='/bidding/buyer/browse-auctions'" 
+                                style="margin-top: 15px;">
+                            Browse Auctions
+                        </button>
+                    </div>
+                `;
+                document.getElementById('summaryCard').style.display = 'none';
+                return;
+            }
+
+            displayWonAuctions();
+            updateSummary();
+            document.getElementById('summaryCard').style.display = 'block';
+        } catch (error) {
+            console.error('Error loading won auctions:', error);
+            document.getElementById('auctionsList').innerHTML = `
+                <div class="empty-state">
+                    <p>❌ Error loading auctions</p>
+                </div>
+            `;
+        }
+    }
+
+    // Update summary
+    function updateSummary() {
+        let totalValue = 0;
+        let totalQuantity = 0;
+
+        wonAuctionsData.forEach(auction => {
+            totalValue += auction.total_amount;
+            totalQuantity += auction.quantity;
+        });
+
+        document.getElementById('wonCount').textContent = wonAuctionsData.length;
+        document.getElementById('totalValue').textContent = `₹${totalValue.toLocaleString()}`;
+        document.getElementById('totalQuantity').textContent = `${totalQuantity}q`;
+    }
+
+    // Display won auctions
+    function displayWonAuctions() {
+        const container = document.getElementById('auctionsList');
+
+        container.innerHTML = wonAuctionsData.map(auction => {
+            const winDate = new Date(auction.auction_date);
+            const completedDate = new Date(auction.completed_date);
+            const daysElapsed = Math.floor((completedDate - winDate) / (1000 * 60 * 60 * 24));
+
+            return `
+                <div class="auction-card">
+                    <div class="card-header">
+                        <div class="crop-name">${auction.crop_name}</div>
+                        <div class="won-badge">✓ WON</div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="info-item">
+                            <span class="info-label">Winning Price</span>
+                            <span class="info-value price-highlight">₹${auction.winning_price}/q</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Total Amount</span>
+                            <span class="info-value total-highlight">₹${auction.total_amount.toLocaleString()}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Quantity</span>
+                            <span class="info-value">${auction.quantity} quintals</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Farmer</span>
+                            <span class="info-value">${auction.farmer_name}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Location</span>
+                            <span class="info-value">${auction.location}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Days to Completion</span>
+                            <span class="info-value">${daysElapsed} days</span>
+                        </div>
+                    </div>
+
+                    <div class="status-timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <span>Auction started: ${winDate.toLocaleDateString()}</span>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <span>Auction completed: ${completedDate.toLocaleDateString()}</span>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <span class="farmer-info">👨‍🌾 ${auction.farmer_name}</span>
+                        <button class="action-button" onclick="viewDetails('${auction.auction_id}')">
+                            View Details →
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // View details
+    function viewDetails(auctionId) {
+        window.location.href = `/bidding/buyer/auction/${auctionId}`;
+    }
+
+    // Initial load
+    window.addEventListener('load', () => {
+        loadWonAuctions();
+    });
+</script>
+
+{% endblock %}

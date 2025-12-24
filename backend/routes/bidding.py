@@ -10,6 +10,9 @@ from models import Farmer
 from models_marketplace_keep import Auction, Bid, CounterOffer, AuctionNotification, Buyer
 from datetime import datetime, timedelta, date
 import uuid
+import os
+from werkzeug.utils import secure_filename
+from werkzeug.exceptions import BadRequest
 
 bidding_bp = Blueprint('bidding', __name__, url_prefix='/bidding')
 
@@ -45,7 +48,33 @@ def create_auction():
     
     if request.method == 'POST':
         try:
-            data = request.get_json()
+            # Handle both FormData (with files) and JSON
+            if request.is_json:
+                data = request.get_json()
+                photo_paths = {}
+            else:
+                data = request.form.to_dict()
+                photo_paths = {}
+                
+                # Create uploads directory if it doesn't exist
+                uploads_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'uploads', 'auctions')
+                os.makedirs(uploads_dir, exist_ok=True)
+                
+                # Handle photo uploads
+                for i in range(1, 5):
+                    file_key = f'photo{i}'
+                    if file_key in request.files:
+                        file = request.files[file_key]
+                        if file and file.filename != '':
+                            try:
+                                filename = secure_filename(file.filename)
+                                unique_filename = f"{uuid.uuid4()}_{filename}"
+                                filepath = os.path.join(uploads_dir, unique_filename)
+                                file.save(filepath)
+                                # Store relative path for database
+                                photo_paths[f'photo{i}_path'] = f'/static/uploads/auctions/{unique_filename}'
+                            except Exception as e:
+                                print(f"Error saving photo {i}: {str(e)}")
             
             # Validate required fields
             required_fields = ['crop_name', 'quantity_quintals', 'base_price', 'duration_hours', 'location', 'district']
@@ -85,7 +114,11 @@ def create_auction():
                 harvest_date=harvest_date,
                 storage_location=data.get('storage_location', ''),
                 status='active',
-                current_highest_bid=float(data['base_price'])
+                current_highest_bid=float(data['base_price']),
+                photo1_path=photo_paths.get('photo1_path'),
+                photo2_path=photo_paths.get('photo2_path'),
+                photo3_path=photo_paths.get('photo3_path'),
+                photo4_path=photo_paths.get('photo4_path')
             )
             
             db.session.add(auction)
@@ -111,8 +144,9 @@ def my_auctions():
     farmer_id = session['farmer_id_verified']
     auctions = Auction.query.filter_by(farmer_id=farmer_id).order_by(Auction.created_at.desc()).all()
     
-    return jsonify({
-        'auctions': [{
+    auctions_data = []
+    for a in auctions:
+        auction_dict = {
             'id': a.id,
             'crop_name': a.crop_name,
             'quantity_quintals': a.quantity_quintals,
@@ -123,8 +157,34 @@ def my_auctions():
             'start_time': a.start_time.isoformat(),
             'end_time': a.end_time.isoformat(),
             'created_at': a.created_at.isoformat()
-        } for a in auctions]
-    })
+        }
+        
+        # If auction is completed, find the winning buyer
+        if a.status == 'completed' and a.bids:
+            # Get the highest bid (winning bid)
+            highest_bid = max(a.bids, key=lambda b: b.bid_price_per_quintal)
+            if highest_bid.buyer:
+                auction_dict['winning_buyer_name'] = highest_bid.buyer.buyer_name
+                auction_dict['winning_company_name'] = highest_bid.buyer.company_name or 'N/A'
+                auction_dict['winning_buyer_email'] = highest_bid.buyer.email
+                auction_dict['winning_buyer_phone'] = highest_bid.buyer.phone or 'N/A'
+                auction_dict['winning_buyer_address'] = highest_bid.buyer.location or 'N/A'
+                auction_dict['winning_buyer_district'] = highest_bid.buyer.district or 'N/A'
+                auction_dict['winning_buyer_state'] = highest_bid.buyer.state or 'N/A'
+                auction_dict['winning_bid_price'] = highest_bid.bid_price_per_quintal
+            else:
+                auction_dict['winning_buyer_name'] = 'Unknown'
+                auction_dict['winning_company_name'] = 'N/A'
+                auction_dict['winning_buyer_email'] = 'N/A'
+                auction_dict['winning_buyer_phone'] = 'N/A'
+                auction_dict['winning_buyer_address'] = 'N/A'
+                auction_dict['winning_buyer_district'] = 'N/A'
+                auction_dict['winning_buyer_state'] = 'N/A'
+                auction_dict['winning_bid_price'] = highest_bid.bid_price_per_quintal
+        
+        auctions_data.append(auction_dict)
+    
+    return jsonify({'auctions': auctions_data})
 
 
 @bidding_bp.route('/farmer/auction/<auction_id>')
@@ -165,7 +225,57 @@ def auction_detail(auction_id):
 
 @bidding_bp.route('/farmer/auction/<auction_id>/bids')
 def auction_bids(auction_id):
-    """Get all bids for an auction"""
+    """View all bids for an auction"""
+    if 'farmer_id_verified' not in session:
+        return redirect(url_for('auth.login'))
+    
+    auction = Auction.query.get(auction_id)
+    
+    if not auction:
+        return redirect(url_for('bidding.farmer_dashboard'))
+    
+    if auction.farmer_id != session['farmer_id_verified']:
+        return redirect(url_for('bidding.farmer_dashboard'))
+    
+    return render_template('farmer_auction_bids.html', auction=auction)
+
+
+@bidding_bp.route('/farmer/auction/<auction_id>/details')
+def auction_details_farmer(auction_id):
+    """View auction details"""
+    if 'farmer_id_verified' not in session:
+        return redirect(url_for('auth.login'))
+    
+    auction = Auction.query.get(auction_id)
+    
+    if not auction:
+        return redirect(url_for('bidding.farmer_dashboard'))
+    
+    if auction.farmer_id != session['farmer_id_verified']:
+        return redirect(url_for('bidding.farmer_dashboard'))
+    
+    # For completed auctions, fetch buyer details
+    buyer_details = None
+    if auction.status == 'completed' and auction.bids:
+        highest_bid = max(auction.bids, key=lambda b: b.bid_price_per_quintal)
+        if highest_bid.buyer:
+            buyer_details = {
+                'buyer_name': highest_bid.buyer.buyer_name,
+                'company_name': highest_bid.buyer.company_name or 'N/A',
+                'email': highest_bid.buyer.email,
+                'phone': highest_bid.buyer.phone or 'N/A',
+                'address': highest_bid.buyer.location or 'N/A',
+                'district': highest_bid.buyer.district or 'N/A',
+                'state': highest_bid.buyer.state or 'N/A',
+                'winning_price': highest_bid.bid_price_per_quintal
+            }
+    
+    return render_template('farmer_auction_details.html', auction=auction, buyer_details=buyer_details)
+
+
+@bidding_bp.route('/farmer/auction/<auction_id>/api/bids')
+def auction_bids_api(auction_id):
+    """Get all bids for an auction (API endpoint)"""
     if 'farmer_id_verified' not in session:
         return jsonify({'error': 'Not authenticated'}), 401
     
@@ -182,6 +292,7 @@ def auction_bids(auction_id):
     return jsonify({
         'bids': [{
             'id': b.id,
+            'bid_id': b.id,
             'buyer_id': b.buyer_id,
             'buyer_name': b.buyer.buyer_name if b.buyer else 'Unknown',
             'bid_price': b.bid_price_per_quintal,
@@ -189,6 +300,39 @@ def auction_bids(auction_id):
             'status': b.status,
             'created_at': b.created_at.isoformat()
         } for b in bids]
+    })
+
+
+@bidding_bp.route('/farmer/auction/<auction_id>/api')
+def farmer_auction_api(auction_id):
+    """Get auction details with bids (for counter offer selection)"""
+    if 'farmer_id_verified' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    auction = Auction.query.get(auction_id)
+    
+    if not auction:
+        return jsonify({'error': 'Auction not found'}), 404
+    
+    if auction.farmer_id != session['farmer_id_verified']:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    bids = Bid.query.filter_by(auction_id=auction_id).order_by(Bid.bid_price_per_quintal.desc()).all()
+    
+    return jsonify({
+        'auction': {
+            'id': auction.id,
+            'crop_name': auction.crop_name,
+            'bids': [{
+                'bid_id': b.id,
+                'buyer_id': b.buyer_id,
+                'buyer_name': b.buyer.buyer_name if b.buyer else 'Unknown',
+                'bid_price': b.bid_price_per_quintal,
+                'bid_total': b.bid_total_amount,
+                'status': b.status,
+                'created_at': b.created_at.isoformat()
+            } for b in bids]
+        }
     })
 
 
@@ -315,7 +459,19 @@ def send_counter_offer(auction_id):
     try:
         data = request.get_json()
         bid_id = data.get('bid_id')
-        counter_price = float(data.get('counter_price'))
+        counter_price = data.get('counter_price')
+        
+        # Validate inputs
+        if not bid_id or counter_price is None:
+            return jsonify({'error': 'Missing required fields: bid_id and counter_price'}), 400
+        
+        try:
+            counter_price = float(counter_price)
+        except (ValueError, TypeError):
+            return jsonify({'error': 'Invalid counter price. Must be a number.'}), 400
+        
+        if counter_price <= 0:
+            return jsonify({'error': 'Counter price must be positive'}), 400
         
         bid = Bid.query.get(bid_id)
         
@@ -418,7 +574,14 @@ def update_minimum_price(auction_id):
     
     try:
         data = request.get_json()
-        new_minimum = float(data.get('minimum_price'))
+        
+        # Accept both 'new_minimum_price' and 'minimum_price' keys
+        new_minimum = data.get('new_minimum_price') or data.get('minimum_price')
+        
+        if not new_minimum:
+            return jsonify({'error': 'Minimum price is required'}), 400
+        
+        new_minimum = float(new_minimum)
         
         if new_minimum <= 0:
             return jsonify({'error': 'Minimum price must be positive'}), 400
@@ -429,9 +592,11 @@ def update_minimum_price(auction_id):
         return jsonify({
             'success': True,
             'new_minimum': new_minimum,
-            'message': 'Minimum price updated'
+            'message': 'Minimum price updated successfully'
         }), 200
         
+    except ValueError:
+        return jsonify({'error': 'Invalid price format. Please enter a valid number'}), 400
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
@@ -507,3 +672,674 @@ def farmer_stats():
         'best_price': best_price,
         'total_bids': total_bids
     })
+
+
+# ==================== BUYER-SIDE ENDPOINTS ====================
+
+@bidding_bp.route('/buyer/dashboard')
+def buyer_dashboard():
+    """Buyer's main dashboard"""
+    if 'buyer_id_verified' not in session:
+        return redirect(url_for('buyer_auth.buyer_login'))
+    
+    buyer_id = session['buyer_id_verified']
+    buyer = Buyer.query.get(buyer_id)
+    
+    if not buyer:
+        return redirect(url_for('buyer_auth.buyer_login'))
+    
+    return render_template('buyer_auction_dashboard.html', buyer=buyer)
+
+
+@bidding_bp.route('/buyer/browse-auctions')
+def browse_auctions():
+    """Browse all active auctions"""
+    if 'buyer_id_verified' not in session:
+        return redirect(url_for('buyer_auth.buyer_login'))
+    
+    buyer_id = session['buyer_id_verified']
+    return render_template('buyer_browse_auctions.html')
+
+
+@bidding_bp.route('/buyer/auctions/api', methods=['GET'])
+def get_auctions():
+    """Get list of active auctions with filters"""
+    if 'buyer_id_verified' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    try:
+        # Get filter parameters
+        crop_filter = request.args.get('crop', '').strip()
+        district_filter = request.args.get('district', '').strip()
+        page = request.args.get('page', 1, type=int)
+        per_page = 12
+        
+        # Build query
+        query = Auction.query.filter_by(status='active')
+        
+        if crop_filter:
+            query = query.filter(Auction.crop_name.ilike(f'%{crop_filter}%'))
+        
+        if district_filter:
+            query = query.filter(Auction.district.ilike(f'%{district_filter}%'))
+        
+        # Get total count before pagination
+        total = query.count()
+        
+        # Apply pagination
+        auctions = query.order_by(Auction.created_at.desc()).paginate(
+            page=page, per_page=per_page, error_out=False
+        )
+        
+        result = {
+            'total': total,
+            'page': page,
+            'pages': auctions.pages,
+            'auctions': []
+        }
+        
+        for auction in auctions.items:
+            farmer = Farmer.query.get(auction.farmer_id)
+            bids_count = len(auction.bids)
+            highest_bid = auction.current_highest_bid
+            
+            # Calculate time remaining
+            now = datetime.utcnow()
+            time_remaining = (auction.end_time - now).total_seconds()
+            
+            result['auctions'].append({
+                'id': auction.id,
+                'crop_name': auction.crop_name,
+                'quantity_quintals': auction.quantity_quintals,
+                'base_price': auction.base_price_per_quintal,
+                'highest_bid': highest_bid,
+                'quality_grade': auction.quality_grade,
+                'location': auction.location,
+                'district': auction.district,
+                'farmer_name': farmer.name if farmer else 'Unknown',
+                'bids_count': bids_count,
+                'status': auction.status,
+                'time_remaining': max(0, time_remaining),
+                'created_at': auction.created_at.isoformat()
+            })
+        
+        return jsonify(result), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@bidding_bp.route('/buyer/auction/<auction_id>')
+def auction_details(auction_id):
+    """View detailed auction information"""
+    if 'buyer_id_verified' not in session:
+        return redirect(url_for('buyer_auth.buyer_login'))
+    
+    return render_template('buyer_auction_details.html', auction_id=auction_id)
+
+
+@bidding_bp.route('/buyer/auction/<auction_id>/api', methods=['GET'])
+def get_auction_details(auction_id):
+    """Get detailed auction information"""
+    if 'buyer_id_verified' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    try:
+        auction = Auction.query.get(auction_id)
+        
+        if not auction:
+            return jsonify({'error': 'Auction not found'}), 404
+        
+        farmer = Farmer.query.get(auction.farmer_id)
+        buyer_id = session['buyer_id_verified']
+        
+        # Get buyer's bid if exists
+        my_bid = Bid.query.filter_by(auction_id=auction_id, buyer_id=buyer_id).first()
+        
+        # Get all bids for this auction
+        all_bids = Bid.query.filter_by(auction_id=auction_id).order_by(
+            Bid.bid_price_per_quintal.desc()
+        ).all()
+        
+        now = datetime.utcnow()
+        time_remaining = max(0, (auction.end_time - now).total_seconds())
+        
+        result = {
+            'id': auction.id,
+            'crop_name': auction.crop_name,
+            'quantity_quintals': auction.quantity_quintals,
+            'quality_grade': auction.quality_grade,
+            'base_price': auction.base_price_per_quintal,
+            'current_highest_bid': auction.current_highest_bid,
+            'minimum_bid_increment': auction.minimum_bid_increment,
+            'location': auction.location,
+            'district': auction.district,
+            'state': auction.state,
+            'description': auction.description or '',
+            'harvest_date': auction.harvest_date.isoformat() if auction.harvest_date else None,
+            'storage_location': auction.storage_location or '',
+            'start_time': auction.start_time.isoformat(),
+            'end_time': auction.end_time.isoformat(),
+            'time_remaining': time_remaining,
+            'status': auction.status,
+            'farmer_name': farmer.name if farmer else 'Unknown',
+            'farmer_location': farmer.district if farmer else 'Unknown',
+            'bids_count': len(all_bids),
+            'my_bid': {
+                'bid_id': my_bid.id,
+                'bid_price': my_bid.bid_price_per_quintal,
+                'bid_total': my_bid.bid_total_amount,
+                'status': my_bid.status,
+                'created_at': my_bid.created_at.isoformat()
+            } if my_bid else None,
+            'top_bids': [
+                {
+                    'buyer_id': bid.buyer_id,
+                    'bid_price': bid.bid_price_per_quintal,
+                    'bid_total': bid.bid_total_amount,
+                    'created_at': bid.created_at.isoformat()
+                }
+                for bid in all_bids[:5]
+            ]
+        }
+        
+        return jsonify(result), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@bidding_bp.route('/buyer/auction/<auction_id>/place-bid', methods=['POST'])
+def place_bid(auction_id):
+    """Place a bid on an auction"""
+    if 'buyer_id_verified' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    buyer_id = session['buyer_id_verified']
+    
+    try:
+        auction = Auction.query.get(auction_id)
+        
+        if not auction:
+            return jsonify({'error': 'Auction not found'}), 404
+        
+        if auction.status != 'active':
+            return jsonify({'error': 'This auction is no longer active'}), 400
+        
+        # Check if auction has ended
+        if datetime.utcnow() > auction.end_time:
+            auction.status = 'closed'
+            db.session.commit()
+            return jsonify({'error': 'Auction has ended'}), 400
+        
+        data = request.get_json()
+        bid_price = float(data.get('bid_price', 0))
+        
+        if bid_price <= 0:
+            return jsonify({'error': 'Bid price must be positive'}), 400
+        
+        # Check if bid meets minimum requirements
+        if bid_price < auction.base_price_per_quintal:
+            return jsonify({'error': f'Bid must be at least ₹{auction.base_price_per_quintal}/q'}), 400
+        
+        if bid_price < auction.current_highest_bid:
+            return jsonify({'error': f'Bid must be at least ₹{auction.current_highest_bid}/q'}), 400
+        
+        # Check minimum increment
+        if bid_price < auction.current_highest_bid + auction.minimum_bid_increment:
+            return jsonify({
+                'error': f'Bid must increase by at least ₹{auction.minimum_bid_increment}/q'
+            }), 400
+        
+        # Check if buyer already has a bid
+        existing_bid = Bid.query.filter_by(auction_id=auction_id, buyer_id=buyer_id).first()
+        
+        if existing_bid:
+            # Update existing bid
+            existing_bid.bid_price_per_quintal = bid_price
+            existing_bid.bid_total_amount = bid_price * auction.quantity_quintals
+            existing_bid.updated_at = datetime.utcnow()
+        else:
+            # Create new bid
+            bid = Bid(
+                id=str(uuid.uuid4()),
+                auction_id=auction_id,
+                buyer_id=buyer_id,
+                bid_price_per_quintal=bid_price,
+                bid_total_amount=bid_price * auction.quantity_quintals,
+                status='active'
+            )
+            db.session.add(bid)
+        
+        # Update auction's highest bid
+        auction.current_highest_bid = bid_price
+        auction.updated_at = datetime.utcnow()
+        
+        # Create notification for farmer
+        notification = AuctionNotification(
+            id=str(uuid.uuid4()),
+            user_id=auction.farmer_id,
+            user_type='farmer',
+            auction_id=auction_id,
+            notification_type='new_bid',
+            message=f'New bid received: ₹{bid_price}/q'
+        )
+        db.session.add(notification)
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Bid placed successfully',
+            'bid_id': existing_bid.id if existing_bid else bid.id,
+            'bid_price': bid_price,
+            'bid_total': bid_price * auction.quantity_quintals
+        }), 201
+        
+    except ValueError as e:
+        return jsonify({'error': 'Invalid bid price format'}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+@bidding_bp.route('/buyer/counter-offers/api', methods=['GET'])
+def get_buyer_counter_offers():
+    """Get counter offers received by buyer"""
+    if 'buyer_id_verified' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    buyer_id = session['buyer_id_verified']
+    
+    try:
+        # Get all counter offers for this buyer
+        counter_offers = CounterOffer.query.filter_by(buyer_id=buyer_id).all()
+        
+        offers_data = []
+        for co in counter_offers:
+            bid = Bid.query.get(co.bid_id)
+            auction = Auction.query.get(co.auction_id)
+            
+            if auction and bid:
+                offers_data.append({
+                    'id': co.id,
+                    'counter_offer_id': co.id,
+                    'auction_id': co.auction_id,
+                    'bid_id': co.bid_id,
+                    'crop_name': auction.crop_name,
+                    'quantity_quintals': auction.quantity_quintals,
+                    'your_bid': bid.bid_price_per_quintal,
+                    'counter_price': co.counter_price_per_quintal,
+                    'status': co.status,
+                    'created_at': co.created_at.isoformat(),
+                    'farmer_name': auction.farmer.name if auction.farmer else 'Unknown',
+                    'location': auction.location,
+                    'district': auction.district
+                })
+        
+        return jsonify({
+            'counter_offers': offers_data,
+            'total': len(offers_data)
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@bidding_bp.route('/buyer/counter-offer/<counter_offer_id>/accept', methods=['POST'])
+def accept_counter_offer(counter_offer_id):
+    """Accept a counter offer from farmer"""
+    if 'buyer_id_verified' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    buyer_id = session['buyer_id_verified']
+    
+    try:
+        counter_offer = CounterOffer.query.get(counter_offer_id)
+        
+        if not counter_offer:
+            return jsonify({'error': 'Counter offer not found'}), 404
+        
+        if counter_offer.buyer_id != buyer_id:
+            return jsonify({'error': 'Unauthorized'}), 403
+        
+        # Update counter offer status
+        counter_offer.status = 'accepted'
+        counter_offer.updated_at = datetime.utcnow()
+        
+        # Update bid with counter price
+        bid = Bid.query.get(counter_offer.bid_id)
+        if bid:
+            bid.bid_price_per_quintal = counter_offer.counter_price_per_quintal
+            bid.bid_total_amount = counter_offer.counter_price_per_quintal * bid.auction.quantity_quintals
+            bid.updated_at = datetime.utcnow()
+        
+        # Update auction
+        auction = Auction.query.get(counter_offer.auction_id)
+        if auction:
+            auction.current_highest_bid = counter_offer.counter_price_per_quintal
+            auction.updated_at = datetime.utcnow()
+        
+        # Create notification for farmer
+        notification = AuctionNotification(
+            id=str(uuid.uuid4()),
+            user_id=auction.farmer_id,
+            user_type='farmer',
+            auction_id=counter_offer.auction_id,
+            notification_type='counter_offer_accepted',
+            message=f'Buyer accepted counter offer: ₹{counter_offer.counter_price_per_quintal}/quintal'
+        )
+        
+        db.session.add(notification)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Counter offer accepted successfully'
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+@bidding_bp.route('/buyer/counter-offer/<counter_offer_id>/reject', methods=['POST'])
+def reject_counter_offer(counter_offer_id):
+    """Reject a counter offer from farmer"""
+    if 'buyer_id_verified' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    buyer_id = session['buyer_id_verified']
+    
+    try:
+        counter_offer = CounterOffer.query.get(counter_offer_id)
+        
+        if not counter_offer:
+            return jsonify({'error': 'Counter offer not found'}), 404
+        
+        if counter_offer.buyer_id != buyer_id:
+            return jsonify({'error': 'Unauthorized'}), 403
+        
+        # Update counter offer status
+        counter_offer.status = 'rejected'
+        counter_offer.updated_at = datetime.utcnow()
+        
+        # Create notification for farmer
+        auction = Auction.query.get(counter_offer.auction_id)
+        if auction:
+            notification = AuctionNotification(
+                id=str(uuid.uuid4()),
+                user_id=auction.farmer_id,
+                user_type='farmer',
+                auction_id=counter_offer.auction_id,
+                notification_type='counter_offer_rejected',
+                message='Buyer rejected your counter offer'
+            )
+            db.session.add(notification)
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Counter offer rejected'
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+@bidding_bp.route('/buyer/my-bids')
+def my_bids():
+    """View buyer's bids"""
+    if 'buyer_id_verified' not in session:
+        return redirect(url_for('buyer_auth.buyer_login'))
+    
+    return render_template('buyer_my_bids.html')
+
+
+@bidding_bp.route('/buyer/bids/api', methods=['GET'])
+def get_my_bids():
+    """Get buyer's all bids"""
+    if 'buyer_id_verified' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    buyer_id = session['buyer_id_verified']
+    
+    try:
+        # Get all bids by this buyer
+        bids = Bid.query.filter_by(buyer_id=buyer_id).order_by(
+            Bid.created_at.desc()
+        ).all()
+        
+        result = {
+            'total_bids': len(bids),
+            'bids': []
+        }
+        
+        for bid in bids:
+            auction = Auction.query.get(bid.auction_id)
+            farmer = Farmer.query.get(auction.farmer_id)
+            
+            now = datetime.utcnow()
+            auction_active = auction.status == 'active' and now < auction.end_time
+            is_winning = bid.bid_price_per_quintal == auction.current_highest_bid
+            
+            # Determine bid status
+            # Status logic:
+            # - 'pending' if auction is still active and bid hasn't been accepted
+            # - 'won' if bid was accepted by farmer (auction completed)
+            # - 'cancelled' if auction was cancelled by farmer
+            # - 'ended' if auction ended but this bid was not accepted (auction closed)
+            
+            if auction.status == 'cancelled':
+                bid_status = 'cancelled'
+            elif auction.status == 'completed':
+                bid_status = 'won' if is_winning else 'ended'
+            elif auction.status == 'active' and now >= auction.end_time:
+                bid_status = 'ended'
+            elif auction.status == 'closed':
+                bid_status = 'ended'
+            else:
+                bid_status = 'pending'
+            
+            result['bids'].append({
+                'bid_id': bid.id,
+                'auction_id': bid.auction_id,
+                'crop_name': auction.crop_name,
+                'bid_price': bid.bid_price_per_quintal,
+                'bid_total': bid.bid_total_amount,
+                'quantity': auction.quantity_quintals,
+                'status': bid_status,
+                'auction_status': auction.status,
+                'is_winning': is_winning,
+                'auction_active': auction_active,
+                'farmer_name': farmer.name if farmer else 'Unknown',
+                'farmer_phone': farmer.phone_number if farmer else None,
+                'location': auction.location,
+                'bid_date': bid.created_at.isoformat(),
+                'auction_end': auction.end_time.isoformat()
+            })
+        
+        return jsonify(result), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@bidding_bp.route('/buyer/won-auctions')
+def won_auctions():
+    """View buyer's won auctions"""
+    if 'buyer_id_verified' not in session:
+        return redirect(url_for('buyer_auth.buyer_login'))
+    
+    return render_template('buyer_won_auctions.html')
+
+
+@bidding_bp.route('/buyer/won-auctions/api', methods=['GET'])
+def get_won_auctions():
+    """Get buyer's completed/won auctions"""
+    if 'buyer_id_verified' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    buyer_id = session['buyer_id_verified']
+    
+    try:
+        # Get all auctions where this buyer has the winning bid
+        won_auctions = []
+        
+        buyer_bids = Bid.query.filter_by(buyer_id=buyer_id).all()
+        
+        for bid in buyer_bids:
+            auction = Auction.query.get(bid.auction_id)
+            
+            # Check if this bid is the highest and auction is completed
+            if (bid.bid_price_per_quintal == auction.current_highest_bid and 
+                auction.status == 'completed'):
+                
+                farmer = Farmer.query.get(auction.farmer_id)
+                
+                won_auctions.append({
+                    'auction_id': auction.id,
+                    'crop_name': auction.crop_name,
+                    'quantity': auction.quantity_quintals,
+                    'winning_price': bid.bid_price_per_quintal,
+                    'total_amount': bid.bid_total_amount,
+                    'location': auction.location,
+                    'farmer_name': farmer.name if farmer else 'Unknown',
+                    'auction_date': auction.created_at.isoformat(),
+                    'completed_date': auction.updated_at.isoformat()
+                })
+        
+        result = {
+            'total_won': len(won_auctions),
+            'auctions': won_auctions
+        }
+        
+        return jsonify(result), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@bidding_bp.route('/buyer/notifications')
+def buyer_notifications():
+    """View buyer's notifications"""
+    if 'buyer_id_verified' not in session:
+        return redirect(url_for('buyer_auth.buyer_login'))
+    
+    return render_template('buyer_notifications.html')
+
+
+@bidding_bp.route('/buyer/notifications/api', methods=['GET'])
+def get_buyer_notifications():
+    """Get buyer's notifications"""
+    if 'buyer_id_verified' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    buyer_id = session['buyer_id_verified']
+    
+    try:
+        # Get all notifications for buyer
+        notifications = AuctionNotification.query.filter_by(
+            user_id=buyer_id,
+            user_type='buyer'
+        ).order_by(AuctionNotification.created_at.desc()).all()
+        
+        result = {
+            'unread_count': sum(1 for n in notifications if not n.is_read),
+            'total_count': len(notifications),
+            'notifications': []
+        }
+        
+        for notif in notifications:
+            auction = Auction.query.get(notif.auction_id)
+            
+            result['notifications'].append({
+                'notification_id': notif.id,
+                'type': notif.notification_type,
+                'message': notif.message,
+                'auction_id': notif.auction_id,
+                'crop_name': auction.crop_name if auction else 'Unknown',
+                'is_read': notif.is_read,
+                'created_at': notif.created_at.isoformat()
+            })
+        
+        return jsonify(result), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@bidding_bp.route('/buyer/notifications/<notification_id>/read', methods=['POST'])
+def mark_notification_read(notification_id):
+    """Mark notification as read"""
+    if 'buyer_id_verified' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    try:
+        notification = AuctionNotification.query.get(notification_id)
+        
+        if not notification:
+            return jsonify({'error': 'Notification not found'}), 404
+        
+        if notification.user_id != session['buyer_id_verified']:
+            return jsonify({'error': 'Unauthorized'}), 403
+        
+        notification.is_read = True
+        db.session.commit()
+        
+        return jsonify({'success': True}), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+@bidding_bp.route('/buyer/dashboard/stats')
+def buyer_stats():
+    """Get buyer's dashboard statistics"""
+    if 'buyer_id_verified' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    buyer_id = session['buyer_id_verified']
+    
+    try:
+        # Count bids
+        total_bids = Bid.query.filter_by(buyer_id=buyer_id).count()
+        
+        # Count active bids (auctions still open)
+        active_bids = 0
+        for bid in Bid.query.filter_by(buyer_id=buyer_id).all():
+            auction = Auction.query.get(bid.auction_id)
+            if auction.status == 'active' and datetime.utcnow() < auction.end_time:
+                active_bids += 1
+        
+        # Count winning bids
+        winning_bids = 0
+        for bid in Bid.query.filter_by(buyer_id=buyer_id).all():
+            auction = Auction.query.get(bid.auction_id)
+            if bid.bid_price_per_quintal == auction.current_highest_bid and auction.status != 'cancelled':
+                winning_bids += 1
+        
+        # Count won auctions (completed)
+        won_auctions = 0
+        for bid in Bid.query.filter_by(buyer_id=buyer_id).all():
+            auction = Auction.query.get(bid.auction_id)
+            if bid.bid_price_per_quintal == auction.current_highest_bid and auction.status == 'completed':
+                won_auctions += 1
+        
+        # Get unread notifications
+        unread_notifications = AuctionNotification.query.filter_by(
+            user_id=buyer_id,
+            user_type='buyer',
+            is_read=False
+        ).count()
+        
+        return jsonify({
+            'total_bids': total_bids,
+            'active_bids': active_bids,
+            'winning_bids': winning_bids,
+            'won_auctions': won_auctions,
+            'unread_notifications': unread_notifications
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

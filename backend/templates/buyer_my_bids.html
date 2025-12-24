@@ -1,0 +1,440 @@
+{% extends "base.html" %}
+
+{% block title %}My Bids - Telhan Sathi{% endblock %}
+
+{% block content %}
+<style>
+    .my-bids-container {
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .filter-bar {
+        background: white;
+        padding: 12px 15px;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+    }
+
+    .filter-btn {
+        padding: 6px 12px;
+        border: 1px solid #ddd;
+        background: white;
+        border-radius: 16px;
+        cursor: pointer;
+        font-size: 12px;
+        white-space: nowrap;
+        transition: all 0.3s;
+    }
+
+    .filter-btn.active {
+        background: #388e3c;
+        color: white;
+        border-color: #388e3c;
+    }
+
+    .filter-btn:hover {
+        border-color: #388e3c;
+        color: #388e3c;
+    }
+
+    .content-area {
+        flex: 1;
+        overflow-y: auto;
+        padding: 15px;
+    }
+
+    .stats-header {
+        background: linear-gradient(135deg, #388e3c 0%, #2d5735 100%);
+        color: white;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        font-size: 12px;
+    }
+
+    .stats-row {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 8px;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 18px;
+        font-weight: 700;
+        display: block;
+    }
+
+    .stat-label {
+        font-size: 10px;
+        opacity: 0.8;
+        margin-top: 4px;
+    }
+
+    .bids-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .bid-card {
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 12px;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+
+    .bid-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-color: #388e3c;
+    }
+
+    .bid-card.winning {
+        border-left: 4px solid #4caf50;
+        background: #f1f8f6;
+    }
+
+    .bid-card.closed {
+        background: #fafafa;
+        opacity: 0.8;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 8px;
+    }
+
+    .crop-name {
+        font-size: 15px;
+        font-weight: 600;
+        color: #1e3a24;
+    }
+
+    .status-badge {
+        font-size: 11px;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-weight: 500;
+        white-space: nowrap;
+        margin-left: 8px;
+    }
+
+    .status-winning {
+        background: #4caf50;
+        color: white;
+    }
+
+    .status-bidding {
+        background: #ff9800;
+        color: white;
+    }
+
+    .status-closed {
+        background: #bdbdbd;
+        color: white;
+    }
+
+    .bid-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin: 10px 0;
+        font-size: 12px;
+    }
+
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .detail-label {
+        color: #999;
+        font-weight: 500;
+    }
+
+    .detail-value {
+        color: #1e3a24;
+        font-weight: 600;
+    }
+
+    .bid-price-highlight {
+        color: #d32f2f;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #f0f0f0;
+        font-size: 11px;
+        color: #999;
+    }
+
+    .view-btn {
+        background: #388e3c;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 11px;
+        font-weight: 500;
+    }
+
+    .view-btn:hover {
+        background: #2d5735;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #999;
+    }
+
+    .empty-icon {
+        font-size: 48px;
+        margin-bottom: 10px;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+    }
+
+    .winning-indicator {
+        display: inline-block;
+        background: #4caf50;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 10px;
+        font-weight: 600;
+        margin-top: 4px;
+    }
+
+    @media (max-width: 600px) {
+        .bid-details {
+            grid-template-columns: 1fr;
+        }
+
+        .stats-row {
+            flex-direction: column;
+            gap: 8px;
+        }
+    }
+</style>
+
+<div class="my-bids-container">
+    <!-- Header -->
+    <div class="header">
+        <div>
+            <h1 class="header-title">My Bids</h1>
+            <p class="header-subtitle">Track Your Bids</p>
+        </div>
+        <button class="header-btn" onclick="window.location.href='/bidding/buyer/dashboard'">←</button>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <button class="filter-btn active" data-filter="all" onclick="filterBids('all')">All</button>
+        <button class="filter-btn" data-filter="active" onclick="filterBids('active')">🔵 Active</button>
+        <button class="filter-btn" data-filter="winning" onclick="filterBids('winning')">🏆 Winning</button>
+        <button class="filter-btn" data-filter="closed" onclick="filterBids('closed')">⏹ Closed</button>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content-area">
+        <!-- Stats Header -->
+        <div class="stats-header" id="statsHeader" style="display: none;">
+            <div style="text-align: center; font-weight: 600;">Your Bid Summary</div>
+            <div class="stats-row">
+                <div class="stat-item">
+                    <span class="stat-value" id="total-bids">0</span>
+                    <div class="stat-label">Total Bids</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="active-bids">0</span>
+                    <div class="stat-label">Active</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="winning-bids">0</span>
+                    <div class="stat-label">Winning</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bids List -->
+        <div class="bids-list" id="bidsList">
+            <div class="loading">📋 Loading your bids...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let allBids = [];
+    let currentFilter = 'all';
+
+    // Load my bids
+    async function loadMyBids() {
+        try {
+            const response = await fetch('/bidding/buyer/bids/api');
+            const data = await response.json();
+
+            allBids = data.bids;
+
+            if (allBids.length === 0) {
+                document.getElementById('bidsList').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <p>You haven't placed any bids yet</p>
+                        <button class="view-btn" onclick="window.location.href='/bidding/buyer/browse-auctions'" 
+                                style="margin-top: 15px; background: #388e3c;">
+                            Start Bidding
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            updateStats();
+            displayBids(allBids);
+        } catch (error) {
+            console.error('Error loading bids:', error);
+            document.getElementById('bidsList').innerHTML = `
+                <div class="empty-state">
+                    <p>❌ Error loading bids</p>
+                </div>
+            `;
+        }
+    }
+
+    // Update stats
+    function updateStats() {
+        const totalBids = allBids.length;
+        const activeBids = allBids.filter(b => b.auction_active).length;
+        const winningBids = allBids.filter(b => b.is_winning && b.auction_active).length;
+
+        document.getElementById('total-bids').textContent = totalBids;
+        document.getElementById('active-bids').textContent = activeBids;
+        document.getElementById('winning-bids').textContent = winningBids;
+
+        if (totalBids > 0) {
+            document.getElementById('statsHeader').style.display = 'block';
+        }
+    }
+
+    // Filter bids
+    function filterBids(filter) {
+        currentFilter = filter;
+
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+
+        let filtered = allBids;
+
+        if (filter === 'active') {
+            filtered = allBids.filter(b => b.auction_active);
+        } else if (filter === 'winning') {
+            filtered = allBids.filter(b => b.is_winning && b.auction_active);
+        } else if (filter === 'closed') {
+            filtered = allBids.filter(b => !b.auction_active || b.auction_status === 'closed');
+        }
+
+        displayBids(filtered);
+    }
+
+    // Display bids
+    function displayBids(bids) {
+        const container = document.getElementById('bidsList');
+
+        if (bids.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <p>No ${currentFilter !== 'all' ? currentFilter : ''} bids found</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = bids.map(bid => {
+            const isWinning = bid.is_winning && bid.auction_active;
+            const isClosed = !bid.auction_active || bid.auction_status === 'closed';
+            const cardClass = isWinning ? 'winning' : isClosed ? 'closed' : '';
+
+            return `
+                <div class="bid-card ${cardClass}">
+                    <div class="card-header">
+                        <div class="crop-name">${bid.crop_name}</div>
+                        <div class="status-badge ${isWinning ? 'status-winning' : isClosed ? 'status-closed' : 'status-bidding'}">
+                            ${isWinning ? '✓ Winning' : isClosed ? 'Closed' : 'Bidding'}
+                        </div>
+                    </div>
+
+                    ${isWinning ? '<div class="winning-indicator">🏆 You\'re Leading This Auction!</div>' : ''}
+
+                    <div class="bid-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Your Bid:</span>
+                            <span class="detail-value bid-price-highlight">₹${bid.bid_price}/q</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Total:</span>
+                            <span class="detail-value">₹${bid.bid_total}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Farmer:</span>
+                            <span class="detail-value">${bid.farmer_name}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Location:</span>
+                            <span class="detail-value">${bid.location}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Bid Status:</span>
+                            <span class="detail-value">${bid.status}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Auction:</span>
+                            <span class="detail-value">${bid.auction_active ? 'Active' : 'Closed'}</span>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <span>📅 Bid placed: ${new Date(bid.bid_date).toLocaleDateString()}</span>
+                        <button class="view-btn" onclick="goToAuctionDetails('${bid.auction_id}')">View Auction →</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Navigate to auction
+    function goToAuctionDetails(auctionId) {
+        window.location.href = `/bidding/buyer/auction/${auctionId}`;
+    }
+
+    // Initial load
+    window.addEventListener('load', () => {
+        loadMyBids();
+    });
+</script>
+
+{% endblock %}
