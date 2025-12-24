@@ -1,7 +1,7 @@
 """Add enhanced IoT device and sensor fields
 
 Revision ID: iot_enhancements_001
-Revises: 5b4b6fd4005b
+Revises: farmer_recommendations_001
 Create Date: 2025-12-09
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'iot_enhancements_001'
-down_revision = '5b4b6fd4005b'
+down_revision = 'farmer_recommendations_001'
 branch_labels = None
 depends_on = None
 

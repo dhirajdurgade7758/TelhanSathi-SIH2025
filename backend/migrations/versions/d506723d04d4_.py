@@ -1,7 +1,7 @@
 """empty message
 
 Revision ID: d506723d04d4
-Revises: farmer_recommendations_001
+Revises: 199be9da0596
 Create Date: 2025-12-08 00:41:11.069372
 
 """
@@ -11,7 +11,7 @@ from sqlalchemy.dialects import sqlite
 
 # revision identifiers, used by Alembic.
 revision = 'd506723d04d4'
-down_revision = 'farmer_recommendations_001'
+down_revision = '199be9da0596'
 branch_labels = None
 depends_on = None
 

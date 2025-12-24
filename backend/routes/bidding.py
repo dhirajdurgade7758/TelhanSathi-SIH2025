@@ -8,7 +8,7 @@ from flask import Blueprint, render_template, request, jsonify, session, redirec
 from extensions import db
 from models import Farmer
 from models_marketplace_keep import Auction, Bid, CounterOffer, AuctionNotification, Buyer
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import uuid
 
 bidding_bp = Blueprint('bidding', __name__, url_prefix='/bidding')
@@ -56,6 +56,18 @@ def create_auction():
             start_time = datetime.utcnow()
             end_time = start_time + timedelta(hours=int(data['duration_hours']))
             
+            # Convert harvest_date string to date object if provided
+            harvest_date = None
+            if data.get('harvest_date'):
+                try:
+                    harvest_date_str = data['harvest_date']
+                    if isinstance(harvest_date_str, str):
+                        harvest_date = datetime.strptime(harvest_date_str, '%Y-%m-%d').date()
+                    else:
+                        harvest_date = harvest_date_str
+                except:
+                    harvest_date = None
+            
             auction = Auction(
                 id=str(uuid.uuid4()),
                 farmer_id=farmer_id,
@@ -70,7 +82,7 @@ def create_auction():
                 district=data['district'],
                 state=data.get('state', 'Maharashtra'),
                 description=data.get('description', ''),
-                harvest_date=data.get('harvest_date'),
+                harvest_date=harvest_date,
                 storage_location=data.get('storage_location', ''),
                 status='active',
                 current_highest_bid=float(data['base_price'])

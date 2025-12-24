@@ -1,7 +1,7 @@
 """Add Buyer model for marketplace
 
 Revision ID: 199be9da0596
-Revises: d506723d04d4
+Revises: iot_enhancements_002
 Create Date: 2025-12-08 02:21:49.114065
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '199be9da0596'
-down_revision = 'd506723d04d4'
+down_revision = 'iot_enhancements_002'
 branch_labels = None
 depends_on = None
 
