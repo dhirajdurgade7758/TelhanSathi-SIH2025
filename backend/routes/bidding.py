@@ -135,6 +135,110 @@ def create_auction():
             return jsonify({'error': str(e)}), 500
 
 
+@bidding_bp.route('/farmer/auction/<auction_id>/edit', methods=['GET', 'POST'])
+def edit_auction(auction_id):
+    """Edit an existing auction"""
+    if 'farmer_id_verified' not in session:
+        return redirect(url_for('auth.login'))
+    
+    farmer_id = session['farmer_id_verified']
+    auction = Auction.query.get(auction_id)
+    
+    if not auction:
+        return redirect(url_for('bidding.my_auctions'))
+    
+    # Check if this auction belongs to the current farmer
+    if auction.farmer_id != farmer_id:
+        return redirect(url_for('bidding.my_auctions'))
+    
+    # Only allow editing of active auctions with no bids
+    if auction.status != 'active' or len(auction.bids) > 0:
+        return render_template('farmer_auction_details.html', auction=auction, error='Cannot edit this auction')
+    
+    if request.method == 'GET':
+        farmer = Farmer.query.get(farmer_id)
+        return render_template('farmer_edit_auction.html', auction=auction, farmer=farmer)
+    
+    if request.method == 'POST':
+        try:
+            # Handle both FormData (with files) and JSON
+            if request.is_json:
+                data = request.get_json()
+                photo_paths = {}
+            else:
+                data = request.form.to_dict()
+                photo_paths = {}
+                
+                # Create uploads directory if it doesn't exist
+                uploads_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'uploads', 'auctions')
+                os.makedirs(uploads_dir, exist_ok=True)
+                
+                # Handle photo uploads
+                for i in range(1, 5):
+                    file_key = f'photo{i}'
+                    if file_key in request.files:
+                        file = request.files[file_key]
+                        if file and file.filename != '':
+                            try:
+                                filename = secure_filename(file.filename)
+                                unique_filename = f"{uuid.uuid4()}_{filename}"
+                                filepath = os.path.join(uploads_dir, unique_filename)
+                                file.save(filepath)
+                                # Store relative path for database
+                                photo_paths[f'photo{i}_path'] = f'/static/uploads/auctions/{unique_filename}'
+                            except Exception as e:
+                                print(f"Error saving photo {i}: {str(e)}")
+            
+            # Validate required fields
+            required_fields = ['crop_name', 'quantity_quintals', 'base_price_per_quintal', 'location', 'district']
+            if not all(field in data for field in required_fields):
+                return jsonify({'error': 'Missing required fields'}), 400
+            
+            # Update auction fields
+            auction.crop_name = data['crop_name']
+            auction.quantity_quintals = float(data['quantity_quintals'])
+            auction.quality_grade = data.get('quality_grade', 'Standard')
+            auction.base_price_per_quintal = float(data['base_price_per_quintal'])
+            auction.minimum_bid_increment = float(data.get('minimum_bid_increment', 50))
+            auction.location = data['location']
+            auction.district = data['district']
+            auction.state = data.get('state', 'Maharashtra')
+            auction.description = data.get('description', '')
+            auction.storage_location = data.get('storage_location', '')
+            
+            # Update harvest_date if provided
+            if data.get('harvest_date'):
+                try:
+                    harvest_date_str = data['harvest_date']
+                    if isinstance(harvest_date_str, str):
+                        auction.harvest_date = datetime.strptime(harvest_date_str, '%Y-%m-%d').date()
+                    else:
+                        auction.harvest_date = harvest_date_str
+                except:
+                    pass
+            
+            # Update photos if new ones are provided
+            for i in range(1, 5):
+                if f'photo{i}_path' in photo_paths:
+                    setattr(auction, f'photo{i}_path', photo_paths[f'photo{i}_path'])
+            
+            # Update current highest bid if base price changed
+            if auction.current_highest_bid < float(data['base_price_per_quintal']):
+                auction.current_highest_bid = float(data['base_price_per_quintal'])
+            
+            db.session.commit()
+            
+            return jsonify({
+                'success': True,
+                'auction_id': auction.id,
+                'message': 'Auction updated successfully'
+            }), 200
+            
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+
+
 @bidding_bp.route('/farmer/my-auctions')
 def my_auctions():
     """Get farmer's auctions"""
@@ -327,6 +431,7 @@ def farmer_auction_api(auction_id):
                 'bid_id': b.id,
                 'buyer_id': b.buyer_id,
                 'buyer_name': b.buyer.buyer_name if b.buyer else 'Unknown',
+                'company_name': b.buyer.company_name if b.buyer else 'Unknown',
                 'bid_price': b.bid_price_per_quintal,
                 'bid_total': b.bid_total_amount,
                 'status': b.status,
@@ -334,6 +439,94 @@ def farmer_auction_api(auction_id):
             } for b in bids]
         }
     })
+
+
+@bidding_bp.route('/buyer/auction/<auction_id>/all-bids', methods=['GET'])
+def get_all_auction_bids(auction_id):
+    """Get all bids placed on an auction (for buyer to see competition)"""
+    if 'buyer_id_verified' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    try:
+        auction = Auction.query.get(auction_id)
+        
+        if not auction:
+            return jsonify({'error': 'Auction not found'}), 404
+        
+        # Get all bids sorted by price descending
+        bids = Bid.query.filter_by(auction_id=auction_id).order_by(
+            Bid.bid_price_per_quintal.desc()
+        ).all()
+        
+        bids_data = []
+        for idx, bid in enumerate(bids, 1):
+            buyer = Buyer.query.get(bid.buyer_id)
+            bids_data.append({
+                'rank': idx,
+                'bid_id': bid.id,
+                'buyer_id': bid.buyer_id,
+                'buyer_name': buyer.buyer_name if buyer else 'Unknown',
+                'company_name': buyer.company_name if buyer else 'Unknown',
+                'bid_price': bid.bid_price_per_quintal,
+                'bid_total': bid.bid_total_amount,
+                'status': bid.status,
+                'created_at': bid.created_at.isoformat(),
+                'is_my_bid': bid.buyer_id == session['buyer_id_verified']
+            })
+        
+        return jsonify({
+            'success': True,
+            'auction_id': auction_id,
+            'crop_name': auction.crop_name,
+            'quantity': auction.quantity_quintals,
+            'total_bids': len(bids_data),
+            'bids': bids_data
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@bidding_bp.route('/farmer/auction/<auction_id>/api/counter-offers', methods=['GET'])
+def get_counter_offers(auction_id):
+    """Get all counter offers sent for this auction"""
+    if 'farmer_id_verified' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    auction = Auction.query.get(auction_id)
+    
+    if not auction:
+        return jsonify({'error': 'Auction not found'}), 404
+    
+    if auction.farmer_id != session['farmer_id_verified']:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    counter_offers = CounterOffer.query.filter_by(auction_id=auction_id).order_by(CounterOffer.created_at.desc()).all()
+    
+    offers_list = []
+    for co in counter_offers:
+        # Get bid to fetch original bid price and buyer info
+        bid = Bid.query.get(co.bid_id)
+        company_name = 'Unknown'
+        original_bid = 0
+        
+        if bid:
+            original_bid = bid.bid_price_per_quintal
+            if bid.buyer:
+                company_name = bid.buyer.company_name or bid.buyer.buyer_name
+        
+        offers_list.append({
+            'id': co.id,
+            'bid_id': co.bid_id,
+            'buyer_id': co.buyer_id,
+            'company_name': company_name,
+            'original_bid': original_bid,
+            'counter_price': co.counter_price_per_quintal,
+            'status': co.status,
+            'created_at': co.created_at.isoformat()
+        })
+    
+    return jsonify({'counter_offers': offers_list})
 
 
 @bidding_bp.route('/farmer/auction/<auction_id>/accept-bid', methods=['POST'])
@@ -708,14 +901,24 @@ def get_auctions():
         return jsonify({'error': 'Not authenticated'}), 401
     
     try:
+        buyer_id = session['buyer_id_verified']
+        
         # Get filter parameters
         crop_filter = request.args.get('crop', '').strip()
         district_filter = request.args.get('district', '').strip()
         page = request.args.get('page', 1, type=int)
         per_page = 12
         
-        # Build query
+        # Build query - exclude auctions where buyer has already bid
         query = Auction.query.filter_by(status='active')
+        
+        # Get auction IDs where this buyer has already placed a bid
+        buyer_bid_auction_ids = db.session.query(Bid.auction_id).filter_by(buyer_id=buyer_id).all()
+        buyer_bid_auction_ids = [bid[0] for bid in buyer_bid_auction_ids]
+        
+        # Exclude those auctions
+        if buyer_bid_auction_ids:
+            query = query.filter(~Auction.id.in_(buyer_bid_auction_ids))
         
         if crop_filter:
             query = query.filter(Auction.crop_name.ilike(f'%{crop_filter}%'))
@@ -818,6 +1021,10 @@ def get_auction_details(auction_id):
             'description': auction.description or '',
             'harvest_date': auction.harvest_date.isoformat() if auction.harvest_date else None,
             'storage_location': auction.storage_location or '',
+            'photo1_path': auction.photo1_path,
+            'photo2_path': auction.photo2_path,
+            'photo3_path': auction.photo3_path,
+            'photo4_path': auction.photo4_path,
             'start_time': auction.start_time.isoformat(),
             'end_time': auction.end_time.isoformat(),
             'time_remaining': time_remaining,
@@ -1147,6 +1354,9 @@ def get_my_bids():
                 'bid_price': bid.bid_price_per_quintal,
                 'bid_total': bid.bid_total_amount,
                 'quantity': auction.quantity_quintals,
+                'highest_bid': auction.current_highest_bid,
+                'base_price': auction.base_price_per_quintal,
+                'minimum_bid_increment': auction.minimum_bid_increment or 0,
                 'status': bid_status,
                 'auction_status': auction.status,
                 'is_winning': is_winning,

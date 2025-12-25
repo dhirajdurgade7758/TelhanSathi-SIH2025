@@ -396,6 +396,10 @@
                             <span class="detail-value bid-price-highlight">₹${bid.bid_price}/q</span>
                         </div>
                         <div class="detail-item">
+                            <span class="detail-label">Highest Bid:</span>
+                            <span class="detail-value" style="color: ${bid.is_winning ? '#4caf50' : '#ff6f00'}; font-weight: 700;">₹${bid.highest_bid}/q</span>
+                        </div>
+                        <div class="detail-item">
                             <span class="detail-label">Total:</span>
                             <span class="detail-value">₹${bid.bid_total}</span>
                         </div>
@@ -411,11 +415,22 @@
                             <span class="detail-label">Bid Status:</span>
                             <span class="detail-value">${bid.status}</span>
                         </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Auction:</span>
-                            <span class="detail-value">${bid.auction_active ? 'Active' : 'Closed'}</span>
-                        </div>
                     </div>
+                    
+                    ${bid.auction_active && !isWinning ? `
+                        <div style="background: #f5f5f5; padding: 10px; border-radius: 6px; margin: 10px 0; border-left: 3px solid #ff9800;">
+                            <div style="font-size: 12px; color: #999; margin-bottom: 8px; font-weight: 600;">Increase Your Bid</div>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="number" id="newBid_${bid.bid_id}" placeholder="New price" min="${bid.highest_bid}" step="0.01" 
+                                       style="flex: 1; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+                                <button onclick="updateBid('${bid.auction_id}', '${bid.bid_id}', document.getElementById('newBid_${bid.bid_id}').value)" 
+                                        style="background: #ff9800; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; white-space: nowrap;">
+                                    Update Bid
+                                </button>
+                            </div>
+                            <div style="font-size: 11px; color: #999; margin-top: 6px;">Min: ₹${bid.highest_bid}/q</div>
+                        </div>
+                    ` : ''}
 
                     <div class="card-footer">
                         <span>📅 Bid placed: ${new Date(bid.bid_date).toLocaleDateString()}</span>
@@ -429,6 +444,51 @@
     // Navigate to auction
     function goToAuctionDetails(auctionId) {
         window.location.href = `/bidding/buyer/auction/${auctionId}`;
+    }
+
+    // Update bid price
+    function updateBid(auctionId, bidId, newPrice) {
+        const price = parseFloat(newPrice);
+        
+        if (isNaN(price) || price <= 0) {
+            alert('Please enter a valid bid price');
+            return;
+        }
+        
+        const bid = allBids.find(b => b.bid_id === bidId);
+        if (!bid) {
+            alert('Bid not found');
+            return;
+        }
+        
+        if (price <= bid.highest_bid) {
+            alert(`New bid must be higher than current highest bid (₹${bid.highest_bid}/q)`);
+            return;
+        }
+        
+        // Send update to backend
+        fetch(`/bidding/auction/${auctionId}/bid`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                bid_price: price
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert('Bid updated successfully!');
+                loadMyBids(); // Reload the bids list
+            } else {
+                alert('Error: ' + (data.message || data.error || 'Failed to update bid'));
+            }
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            alert('Error updating bid');
+        });
     }
 
     // Initial load

@@ -594,7 +594,7 @@
             </div>
 
             <!-- Auctions List -->
-            <div id="auctions-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px;">
+            <div id="auctions-container" style="display: flex; flex-direction: column; gap: 16px;">
                 <p style="text-align: center; color: #666; grid-column: 1 / -1;">Loading auctions...</p>
             </div>
             </div><!-- End browse-auctions subtab -->
@@ -693,6 +693,10 @@
                             <button id="submitBidBtn" style="width: 100%; padding: 12px; background: #27ae60; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px;">
                                 Submit Bid
                             </button>
+                            
+                            <button id="viewAllBidsBtn" onclick="viewAllBidsFromModal()" style="width: 100%; padding: 12px; background: #9c27b0; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px;">
+                                👥 View All Bids
+                            </button>
                         </div>
                         
                         <button onclick="closeAuctionModal()" style="width: 100%; padding: 10px; background: #f0f0f0; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px;">
@@ -719,6 +723,16 @@
                     <button onclick="closeBidDetailsModal()" style="width: 100%; padding: 12px; background: #f0f0f0; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; margin-top: 20px;">
                         Close
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Photo Modal -->
+        <div id="photoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
+            <div style="background: white; border-radius: 12px; width: 100%; max-width: 600px; margin: auto; box-shadow: 0 5px 40px rgba(0,0,0,0.3); position: relative;">
+                <button onclick="closePhotoModal()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: #999; z-index: 1001;">×</button>
+                <div style="padding: 20px; text-align: center;">
+                    <img id="modalPhotoImg" src="" alt="Full size photo" style="width: 100%; max-height: 500px; object-fit: contain; border-radius: 6px;">
                 </div>
             </div>
         </div>
@@ -1550,68 +1564,82 @@
             const container = document.getElementById('auctions-container');
             
             if (!auctions || auctions.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #666; grid-column: 1 / -1;">No auctions found. Try adjusting your filters.</p>';
+                container.innerHTML = '<div style="text-align: center; color: #666; padding: 40px; background: white; border-radius: 10px; border: 1px solid var(--border-color);"><p style="margin: 0;">No auctions found. Try adjusting your filters.</p></div>';
                 return;
             }
 
-            container.innerHTML = auctions.map(auction => {
+            let html = auctions.map(auction => {
                 const timeRemaining = Math.max(0, auction.time_remaining || 0);
                 const timeText = formatTimeRemaining(timeRemaining);
+                const statusBadgeColor = auction.status === 'active' ? '#27ae60' : '#e74c3c';
                 
                 return `
-                <div style="background: white; border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; transition: transform 0.2s; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-                    <!-- Auction Header -->
-                    <div style="padding: 16px; border-bottom: 1px solid var(--border-color);">
-                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
-                            <h3 style="margin: 0; font-size: 18px; color: var(--text-dark);">${auction.crop_name}</h3>
-                            <span style="background: ${auction.status === 'active' ? '#27ae60' : '#e74c3c'}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">${auction.status.toUpperCase()}</span>
-                        </div>
-                        <p style="margin: 0; color: #666; font-size: 14px;">by ${auction.farmer_name || 'Unknown Farmer'}</p>
-                    </div>
-
-                    <!-- Auction Details -->
-                    <div style="padding: 16px;">
-                        <div style="margin-bottom: 12px;">
-                            <div style="color: #666; font-size: 13px; margin-bottom: 4px;">📍 Location</div>
-                            <div style="font-weight: 600;">${auction.location || 'N/A'}</div>
-                        </div>
-                        <div style="margin-bottom: 12px;">
-                            <div style="color: #666; font-size: 13px; margin-bottom: 4px;">📦 Quantity</div>
-                            <div style="font-weight: 600;">${auction.quantity_quintals || 0} Quintals</div>
-                        </div>
-                        <div style="margin-bottom: 12px;">
-                            <div style="color: #666; font-size: 13px; margin-bottom: 4px;">💰 Base Price</div>
-                            <div style="font-weight: 600; font-size: 16px; color: var(--primary-color);">₹${auction.base_price || 0}/Quintal</div>
-                        </div>
-                        <div style="margin-bottom: 12px;">
-                            <div style="color: #666; font-size: 13px; margin-bottom: 4px;">📈 Highest Bid</div>
-                            <div style="font-weight: 600; font-size: 16px; color: ${auction.bids_count > 0 ? '#27ae60' : '#999'};">
-                                ${auction.bids_count > 0 ? '₹' + auction.highest_bid + '/Quintal' : 'no bid is initiated'}
+                    <div style="background: white; border-radius: 10px; border: 1px solid var(--border-color); padding: 16px; display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: start;">
+                        <!-- Left: Auction Details -->
+                        <div>
+                            <div style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: start;">
+                                <div>
+                                    <h4 style="margin: 0 0 6px 0; font-size: 16px; color: var(--text-dark);">${auction.crop_name}</h4>
+                                    <p style="margin: 0; color: #666; font-size: 13px;">👨‍🌾 by ${auction.farmer_name || 'Unknown Farmer'}</p>
+                                </div>
+                                <div>
+                                    <span style="display: inline-block; padding: 4px 12px; background: ${statusBadgeColor}; color: white; border-radius: 20px; font-size: 11px; font-weight: 600;">${auction.status.toUpperCase()}</span>
+                                </div>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 12px;">
+                                <div>
+                                    <div style="color: #666; font-size: 12px;">📍 Location</div>
+                                    <div style="font-weight: 600; color: #2c3e50;">${auction.location || 'N/A'}</div>
+                                </div>
+                                <div>
+                                    <div style="color: #666; font-size: 12px;">📦 Quantity</div>
+                                    <div style="font-weight: 600; color: #2c3e50;">${auction.quantity_quintals || 0}Q</div>
+                                </div>
+                                <div>
+                                    <div style="color: #666; font-size: 12px;">💰 Base Price</div>
+                                    <div style="font-weight: 600; color: var(--primary-color);">₹${auction.base_price || 0}/Q</div>
+                                </div>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <div style="color: #666; font-size: 12px;">📈 Highest Bid</div>
+                                    <div style="font-weight: 700; color: ${auction.bids_count > 0 ? '#27ae60' : '#999'};">${auction.bids_count > 0 ? '₹' + auction.highest_bid + '/Q' : 'No bid'}</div>
+                                </div>
+                                <div>
+                                    <div style="color: #666; font-size: 12px;">🎯 Bids</div>
+                                    <div style="font-weight: 700; color: #2196f3;">${auction.bids_count || 0}</div>
+                                </div>
+                                <div>
+                                    <div style="color: #666; font-size: 12px;">⏱️ Time Left</div>
+                                    <div style="font-weight: 600; color: ${timeRemaining > 3600 ? '#27ae60' : timeRemaining > 0 ? '#ff9800' : '#e74c3c'};">${timeText}</div>
+                                </div>
                             </div>
                         </div>
-                        <div style="margin-bottom: 12px;">
-                            <div style="color: #666; font-size: 13px; margin-bottom: 4px;">🎯 No. of Bids</div>
-                            <div style="font-weight: 600;">${auction.bids_count || 0} bids</div>
-                        </div>
-                        <div style="margin-bottom: 16px;">
-                            <div style="color: #666; font-size: 13px; margin-bottom: 4px;">⏱️ Time Left</div>
-                            <div style="font-weight: 600;" id="time-${auction.id}">${timeText}</div>
+                        
+                        <!-- Right: Action Buttons -->
+                        <div style="display: flex; flex-direction: column; gap: 8px; min-width: 160px;">
+                            <button class="view-auction-btn" data-auction-id="${auction.id}" style="padding: 10px; background: var(--primary-color); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; white-space: nowrap;">
+                                📊 View Details & place bid
+                            </button>
                         </div>
                     </div>
-
-                    <!-- View Details Button -->
-                    <div style="padding: 0 16px 16px 16px;">
-                        <button class="view-auction-btn" data-auction-id="${auction.id}" style="width: 100%; padding: 12px; background: var(--primary-color); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px;">
-                            View Details & Bid →
-                        </button>
-                    </div>
-                </div>
-            `;
+                `;
             }).join('');
+            
+            container.innerHTML = html;
             
             // Add event listeners to buttons after rendering
             setTimeout(() => {
                 document.querySelectorAll('.view-auction-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const auctionId = this.getAttribute('data-auction-id');
+                        viewAuctionDetails(auctionId);
+                    });
+                });
+                
+                document.querySelectorAll('.bid-auction-btn').forEach(btn => {
                     btn.addEventListener('click', function() {
                         const auctionId = this.getAttribute('data-auction-id');
                         viewAuctionDetails(auctionId);
@@ -1701,6 +1729,24 @@
                     </div>
 
                     <div style="margin-bottom: 20px;">
+                        <h4 style="margin-top: 0; margin-bottom: 12px; color: var(--primary-color);">📸 Auction Photos</h4>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                            <div style="text-align: center;">
+                                ${auction.photo1_path ? `<img src="${auction.photo1_path}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 6px; cursor: pointer; margin-bottom: 6px;" onclick="openPhotoModal('${auction.photo1_path}')"><p style="margin: 0; font-size: 12px; color: #666; font-weight: 500;">Main Harvest</p>` : `<div style="width: 100%; height: 120px; background: #f0f0f0; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #ccc; margin-bottom: 6px;">No Photo</div><p style="margin: 0; font-size: 12px; color: #999;">Main Harvest</p>`}
+                            </div>
+                            <div style="text-align: center;">
+                                ${auction.photo2_path ? `<img src="${auction.photo2_path}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 6px; cursor: pointer; margin-bottom: 6px;" onclick="openPhotoModal('${auction.photo2_path}')"><p style="margin: 0; font-size: 12px; color: #666; font-weight: 500;">Detail View</p>` : `<div style="width: 100%; height: 120px; background: #f0f0f0; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #ccc; margin-bottom: 6px;">No Photo</div><p style="margin: 0; font-size: 12px; color: #999;">Detail View</p>`}
+                            </div>
+                            <div style="text-align: center;">
+                                ${auction.photo3_path ? `<img src="${auction.photo3_path}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 6px; cursor: pointer; margin-bottom: 6px;" onclick="openPhotoModal('${auction.photo3_path}')"><p style="margin: 0; font-size: 12px; color: #666; font-weight: 500;">Quality/Grade</p>` : `<div style="width: 100%; height: 120px; background: #f0f0f0; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #ccc; margin-bottom: 6px;">No Photo</div><p style="margin: 0; font-size: 12px; color: #999;">Quality/Grade</p>`}
+                            </div>
+                            <div style="text-align: center;">
+                                ${auction.photo4_path ? `<img src="${auction.photo4_path}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 6px; cursor: pointer; margin-bottom: 6px;" onclick="openPhotoModal('${auction.photo4_path}')"><p style="margin: 0; font-size: 12px; color: #666; font-weight: 500;">Storage/Packaging</p>` : `<div style="width: 100%; height: 120px; background: #f0f0f0; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #ccc; margin-bottom: 6px;">No Photo</div><p style="margin: 0; font-size: 12px; color: #999;">Storage/Packaging</p>`}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
                         <h4 style="margin-top: 0; margin-bottom: 12px; color: var(--primary-color);">👨‍🌾 Farmer Information</h4>
                         <div style="padding: 12px; background: #f8f9fa; border-radius: 6px;">
                             <div style="font-weight: 600; margin-bottom: 8px;">${auction.farmer_name || 'Unknown'}</div>
@@ -1766,6 +1812,21 @@
             }
         }
 
+        // View All Bids From Modal
+        function viewAllBidsFromModal() {
+            const modal = document.getElementById('auctionModal');
+            const auctionId = modal.dataset.auctionId;
+            const title = document.getElementById('auctionModalTitle').textContent;
+            
+            if (auctionId) {
+                // Extract crop name from title
+                const cropName = title.replace(' Auction', '');
+                viewAllBids(auctionId, cropName);
+            } else {
+                showError('Unable to load bids. Please try again.');
+            }
+        }
+
         // Submit place bid
         async function submitPlaceBid(auctionId, minimumBid) {
             try {
@@ -1823,6 +1884,39 @@
             document.getElementById('bidDetailsModal').style.display = 'none';
             document.getElementById('bidDetailsContent').innerHTML = '';
         }
+
+        // Photo Modal Functions
+        function openPhotoModal(photoPath) {
+            const modal = document.getElementById('photoModal');
+            const img = document.getElementById('modalPhotoImg');
+            img.src = photoPath;
+            modal.style.display = 'flex';
+        }
+
+        function closePhotoModal() {
+            document.getElementById('photoModal').style.display = 'none';
+        }
+
+        // Close photo modal when clicking outside
+        document.getElementById('photoModal')?.addEventListener('click', function(event) {
+            if (event.target === this) {
+                closePhotoModal();
+            }
+        });
+
+        // Close bid details modal when clicking outside
+        document.getElementById('bidDetailsModal')?.addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeBidDetailsModal();
+            }
+        });
+
+        // Close auction modal when clicking outside
+        document.getElementById('auctionModal')?.addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeAuctionModal();
+            }
+        });
 
         // View Bid Details (from My Bids - view only, no bidding form)
         async function viewBidDetails(auctionId) {
@@ -1903,6 +1997,24 @@
                             </div>
                         </div>
                     ` : ''}
+                    
+                    <div style="background: #f5f5f5; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                        <h4 style="margin: 0 0 12px 0;">📸 Auction Photos</h4>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                            <div style="text-align: center;">
+                                ${auction.photo1_path ? `<img src="${auction.photo1_path}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 6px; cursor: pointer; margin-bottom: 6px;" onclick="openPhotoModal('${auction.photo1_path}')"><p style="margin: 0; font-size: 12px; color: #666; font-weight: 500;">Main Harvest</p>` : `<div style="width: 100%; height: 120px; background: #f0f0f0; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #ccc; margin-bottom: 6px;">No Photo</div><p style="margin: 0; font-size: 12px; color: #999;">Main Harvest</p>`}
+                            </div>
+                            <div style="text-align: center;">
+                                ${auction.photo2_path ? `<img src="${auction.photo2_path}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 6px; cursor: pointer; margin-bottom: 6px;" onclick="openPhotoModal('${auction.photo2_path}')"><p style="margin: 0; font-size: 12px; color: #666; font-weight: 500;">Detail View</p>` : `<div style="width: 100%; height: 120px; background: #f0f0f0; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #ccc; margin-bottom: 6px;">No Photo</div><p style="margin: 0; font-size: 12px; color: #999;">Detail View</p>`}
+                            </div>
+                            <div style="text-align: center;">
+                                ${auction.photo3_path ? `<img src="${auction.photo3_path}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 6px; cursor: pointer; margin-bottom: 6px;" onclick="openPhotoModal('${auction.photo3_path}')"><p style="margin: 0; font-size: 12px; color: #666; font-weight: 500;">Quality/Grade</p>` : `<div style="width: 100%; height: 120px; background: #f0f0f0; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #ccc; margin-bottom: 6px;">No Photo</div><p style="margin: 0; font-size: 12px; color: #999;">Quality/Grade</p>`}
+                            </div>
+                            <div style="text-align: center;">
+                                ${auction.photo4_path ? `<img src="${auction.photo4_path}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 6px; cursor: pointer; margin-bottom: 6px;" onclick="openPhotoModal('${auction.photo4_path}')"><p style="margin: 0; font-size: 12px; color: #666; font-weight: 500;">Storage/Packaging</p>` : `<div style="width: 100%; height: 120px; background: #f0f0f0; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #ccc; margin-bottom: 6px;">No Photo</div><p style="margin: 0; font-size: 12px; color: #999;">Storage/Packaging</p>`}
+                            </div>
+                        </div>
+                    </div>
                     
                     ${auction.description ? `
                         <div style="background: #f5f5f5; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
@@ -2083,14 +2195,29 @@
                                     <div style="font-weight: 600; color: #2c3e50;">₹${bid.bid_price}/Q</div>
                                 </div>
                                 <div>
-                                    <div style="color: #666; font-size: 12px;">Quantity</div>
-                                    <div style="font-weight: 600;">${bid.quantity} Q</div>
+                                    <div style="color: #666; font-size: 12px;">Highest Bid</div>
+                                    <div style="font-weight: 700; color: ${bid.is_winning ? '#4caf50' : '#ff6f00'};">₹${bid.highest_bid}/Q</div>
                                 </div>
                                 <div>
                                     <div style="color: #666; font-size: 12px;">Position</div>
                                     <div style="font-weight: 600; color: ${bid.is_winning ? '#27ae60' : '#ffc107'};">${bid.is_winning ? '🥇 Winning' : '🥈 Not Winning'}</div>
                                 </div>
                             </div>
+                            
+                            ${bid.auction_active && !bid.is_winning ? `
+                                <div style="background: #f5f5f5; padding: 10px; border-radius: 6px; margin-bottom: 12px; border-left: 3px solid #ff9800;">
+                                    <div style="font-size: 12px; color: #999; margin-bottom: 8px; font-weight: 600;">⬆️ Increase Your Bid</div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <input type="number" id="newBid_${bid.bid_id}" placeholder="New price" min="${bid.highest_bid + (bid.minimum_bid_increment || 0)}" step="0.01" 
+                                               style="flex: 1; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+                                        <button onclick="updateBid('${bid.auction_id}', '${bid.bid_id}', document.getElementById('newBid_${bid.bid_id}').value, ${bid.highest_bid}, ${bid.minimum_bid_increment || 0})" 
+                                                style="background: #ff9800; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; white-space: nowrap;">
+                                            Update
+                                        </button>
+                                    </div>
+                                    <div style="font-size: 11px; color: #999; margin-top: 4px;">Min: ₹${(bid.highest_bid + (bid.minimum_bid_increment || 0)).toFixed(2)}/Q</div>
+                                </div>
+                            ` : ''}
                             
                             ${counterOffer ? `
                                 <div style="padding: 12px; background: #fff3cd; border-radius: 6px; border-left: 4px solid #ff9800; margin-bottom: 12px;">
@@ -2111,6 +2238,10 @@
                         <div style="display: flex; flex-direction: column; gap: 8px; min-width: 160px;">
                             <button onclick="viewBidDetails('${bid.auction_id}')" style="padding: 10px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; white-space: nowrap;">
                                 📊 View Details
+                            </button>
+                            
+                            <button onclick="viewAllBids('${bid.auction_id}', '${bid.crop_name}')" style="padding: 10px; background: #9c27b0; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; white-space: nowrap;">
+                                👥 View All Bids
                             </button>
                             
                             ${bid.status === 'won' ? `
@@ -2287,6 +2418,161 @@
                 console.error('Error rejecting counter offer:', error);
                 showError('Error rejecting counter offer');
             }
+        }
+
+        // View All Bids for an Auction
+        async function viewAllBids(auctionId, cropName) {
+            try {
+                const response = await fetch(`/bidding/buyer/auction/${auctionId}/all-bids`);
+                const data = await response.json();
+                
+                if (!data.success) {
+                    showError(data.error || 'Failed to load bids');
+                    return;
+                }
+                
+                // Create modal
+                const modal = document.createElement('div');
+                modal.id = 'allBidsModal';
+                modal.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                    background: rgba(0,0,0,0.7); display: flex; align-items: center; 
+                    justify-content: center; z-index: 3000; padding: 20px;
+                `;
+                
+                const bidsHtml = data.bids.map(bid => `
+                    <div style="display: grid; grid-template-columns: 40px 1fr 1fr 1fr 80px; gap: 12px; align-items: center; padding: 12px; background: ${bid.is_my_bid ? '#e3f2fd' : 'white'}; border-radius: 6px; border-left: ${bid.is_my_bid ? '4px solid #2196f3' : 'none'}; border-bottom: 1px solid #e0e0e0;">
+                        <div style="text-align: center; font-weight: 700; color: ${bid.rank === 1 ? '#ffc107' : '#666'}; font-size: 16px;">
+                            ${bid.rank === 1 ? '🥇' : bid.rank === 2 ? '🥈' : bid.rank === 3 ? '🥉' : bid.rank}
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; color: #333; font-size: 13px;">${bid.company_name}</div>
+                            <div style="font-size: 11px; color: #999;">${bid.buyer_name}</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-weight: 600; color: #27ae60; font-size: 13px;">₹${parseFloat(bid.bid_price).toFixed(2)}/Q</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-weight: 600; color: #2196f3; font-size: 12px;">₹${parseFloat(bid.bid_total).toFixed(2)}</div>
+                            <div style="font-size: 10px; color: #999;">Total</div>
+                        </div>
+                        <div style="text-align: center;">
+                            ${bid.is_my_bid ? `
+                                <span style="display: inline-block; padding: 4px 8px; background: #2196f3; color: white; border-radius: 12px; font-weight: 600; font-size: 11px;">You</span>
+                            ` : `
+                                <span style="display: inline-block; padding: 4px 8px; background: #f0f0f0; color: #666; border-radius: 12px; font-size: 11px;">Bid #${bid.rank}</span>
+                            `}
+                        </div>
+                    </div>
+                `).join('');
+                
+                const contentHtml = `
+                    <div style="background: white; border-radius: 12px; padding: 30px; max-width: 800px; width: 100%; max-height: 80vh; overflow-y: auto; box-shadow: 0 5px 40px rgba(0,0,0,0.3);">
+                        <!-- Header -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 2px solid #f0f0f0; padding-bottom: 15px;">
+                            <div>
+                                <h3 style="margin: 0 0 4px 0; color: #2c3e50; font-size: 20px;">👥 All Bids</h3>
+                                <p style="margin: 0; color: #999; font-size: 13px;">${data.crop_name} • ${data.quantity}Q</p>
+                            </div>
+                            <button onclick="document.getElementById('allBidsModal').remove()" style="background: #f0f0f0; color: #666; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 20px; cursor: pointer;">✕</button>
+                        </div>
+                        
+                        <!-- Stats -->
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px;">
+                            <div style="padding: 12px; background: #f0f8ff; border-radius: 8px; border-left: 4px solid #2196f3; text-align: center;">
+                                <div style="font-size: 11px; color: #666;">Total Bids</div>
+                                <div style="font-weight: 700; color: #2196f3; font-size: 18px;">${data.total_bids}</div>
+                            </div>
+                            <div style="padding: 12px; background: #f0f8ff; border-radius: 8px; border-left: 4px solid #27ae60; text-align: center;">
+                                <div style="font-size: 11px; color: #666;">Highest Bid</div>
+                                <div style="font-weight: 700; color: #27ae60; font-size: 18px;">₹${data.bids.length > 0 ? parseFloat(data.bids[0].bid_price).toFixed(2) : '0'}/Q</div>
+                            </div>
+                            
+                        </div>
+                        
+                        <!-- Bids Table Header -->
+                        <div style="display: grid; grid-template-columns: 40px 1fr 1fr 1fr 80px; gap: 12px; padding: 12px; background: #f5f5f5; border-radius: 6px; margin-bottom: 10px; font-weight: 600; color: #666; font-size: 12px;">
+                            <div style="text-align: center;">Rank</div>
+                            <div>Company</div>
+                            <div style="text-align: center;">Bid Price</div>
+                            <div style="text-align: center;">Total</div>
+                            <div style="text-align: center;">Status</div>
+                        </div>
+                        
+                        <!-- Bids List -->
+                        <div style="display: flex; flex-direction: column; gap: 0;">
+                            ${bidsHtml}
+                        </div>
+                        
+                        <!-- Footer Message -->
+                        <div style="margin-top: 20px; padding: 12px; background: #e8f5e9; border-radius: 8px; border-left: 4px solid #27ae60;">
+                            <div style="font-size: 12px; color: #27ae60;">
+                                <strong>💡 Tip:</strong> Analyze competitor bids and adjust your strategy accordingly. You can update your bid to stay competitive.
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                modal.innerHTML = contentHtml;
+                
+                // Close modal when clicking outside
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        modal.remove();
+                    }
+                });
+                
+                document.body.appendChild(modal);
+                
+            } catch (error) {
+                console.error('Error loading all bids:', error);
+                showError('Error loading bids. Please try again.');
+            }
+        }
+
+        // Update bid price
+        function updateBid(auctionId, bidId, newPrice, highestBid, minIncrement) {
+            const price = parseFloat(newPrice);
+            const minimumRequired = parseFloat(highestBid) + parseFloat(minIncrement);
+            
+            if (isNaN(price) || price <= 0) {
+                alert('Please enter a valid bid price');
+                return;
+            }
+            
+            if (price <= parseFloat(highestBid)) {
+                alert(`New bid must be higher than the current highest bid (₹${parseFloat(highestBid).toFixed(2)}/Q)`);
+                return;
+            }
+            
+            if (price < minimumRequired) {
+                alert(`New bid must be at least ₹${minimumRequired.toFixed(2)}/Q (Highest: ₹${parseFloat(highestBid).toFixed(2)} + Increment: ₹${parseFloat(minIncrement).toFixed(2)})`);
+                return;
+            }
+            
+            // Send update to backend using the correct endpoint
+            fetch(`/bidding/buyer/auction/${auctionId}/place-bid`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    bid_price: price
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showSuccess('Bid updated successfully!');
+                    loadMyBids(); // Reload the bids list
+                } else {
+                    alert('Error: ' + (data.message || data.error || 'Failed to update bid'));
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                alert('Error updating bid');
+            });
         }
     </script>
 </body>
