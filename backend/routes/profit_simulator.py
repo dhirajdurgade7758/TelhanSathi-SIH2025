@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for
 from extensions import db
 from models import Farmer
-from models_marketplace_keep import SellRequest
 from datetime import datetime
 import sys
 import os
@@ -13,16 +12,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 def get_market_price(crop_name):
-    """Fetch average market price from SellRequest listings or return fallback."""
-    try:
-        listings = SellRequest.query.filter_by(crop_name=crop_name).all()
-        if listings:
-            prices = [l.expected_price for l in listings if l.expected_price]
-            if prices:
-                return round(sum(prices) / len(prices), 2)
-    except Exception:
-        pass
-
+    """
+    Return default market prices for crops (₹/quintal).
+    Previously fetched from marketplace listings, now using hardcoded defaults.
+    """
     # Fallback defaults (₹/quintal)
     defaults = {
         'Paddy': 2200,

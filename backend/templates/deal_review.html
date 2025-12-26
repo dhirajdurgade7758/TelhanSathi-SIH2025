@@ -603,6 +603,10 @@
         if (photo3) formData.append('photo3', photo3);
 
         try {
+            alert('Marketplace has been removed. Please use the Bidding System to sell your crops.');
+            window.location.href = '/bidding/dashboard';
+            return;
+            
             const response = await fetch('/market/sell/create', {
                 method: 'POST',
                 body: formData
@@ -613,7 +617,7 @@
                 btn.style.background = '#2d6a4f'; // Change to green on success
                 setTimeout(() => {
                     alert("Request Submitted! \nYour Price: ₹" + price + "/Qtl");
-                    window.location.href = '/market/all-deals';
+                    window.location.href = '/bidding/dashboard';
                 }, 500);
             } else {
                 const error = await response.json();

@@ -9,7 +9,6 @@ from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import requests
 from extensions import db
-from models_marketplace_keep import SellRequest, CropListing, MarketPrice
 
 crop_economics_bp = Blueprint('crop_economics', __name__, url_prefix='/crop-economics')
 
@@ -97,42 +96,11 @@ def fetch_live_prices_from_api(commodity_name, state_filter=None):
                 print(f"Prices parsed for {commodity_name}: {len(prices)} valid entries")
                 return prices
     except requests.exceptions.Timeout:
-        print(f"API Timeout for {commodity_name} - switching to fast fallback")
+        print(f"API Timeout for {commodity_name} - switching to mock data")
     except requests.exceptions.RequestException as e:
         print(f"API Error fetching prices for {commodity_name}: {str(e)}")
     
-    # Fallback to database prices - much faster
-    print(f"Falling back to database for {commodity_name}")
-    try:
-        query = MarketPrice.query.filter(
-            MarketPrice.commodity_name.ilike(f'%{commodity_name}%')
-        ).order_by(MarketPrice.updated_at.desc()).limit(50)
-        
-        market_prices = query.all()
-        
-        prices = []
-        for mp in market_prices:
-            mp_state = mp.market_state or 'Unknown'
-            # Filter by state if provided
-            if state_filter and mp_state.lower() != state_filter.lower():
-                continue
-            
-            prices.append({
-                'price': mp.close_price or mp.open_price or 0,
-                'market': mp.market_name or 'Unknown',
-                'state': mp_state,
-                'date': mp.price_date.isoformat() if mp.price_date else datetime.now().strftime('%Y-%m-%d'),
-                'min_price': mp.low_price or 0,
-                'max_price': mp.high_price or 0
-            })
-        
-        if prices:
-            print(f"Database prices for {commodity_name}: {len(prices)} entries")
-            return prices
-    except Exception as db_error:
-        print(f"Database error: {str(db_error)}")
-    
-    # If no API or database data, return mock data for demonstration
+    # If no API data, return mock data for demonstration
     print(f"Using mock data for {commodity_name}")
     return get_mock_prices(commodity_name, state_filter=state_filter)
 
@@ -211,22 +179,11 @@ def dashboard():
 @login_required
 def get_states():
     """
-    Get list of all available states from mandi/market data
+    Get list of all available states for mandi/market data
+    Returns hardcoded list of major oilseed-growing states in India
     """
     try:
-        # Query all unique states from MarketPrice table
-        states = db.session.query(MarketPrice.market_state).distinct().filter(
-            MarketPrice.market_state.isnot(None),
-            MarketPrice.market_state != ''
-        ).order_by(MarketPrice.market_state).all()
-        
-        state_list = [s[0] for s in states if s[0]]
-        
-        # If database has states, return them
-        if state_list:
-            return jsonify({'states': state_list})
-        
-        # Fallback to known oilseed-growing states in India
+        # Return known oilseed-growing states in India
         default_states = [
             'Andhra Pradesh',
             'Gujarat',

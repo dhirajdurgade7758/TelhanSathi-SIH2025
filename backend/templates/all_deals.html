@@ -222,6 +222,18 @@
 
         async function loadDeals() {
             try {
+                // Marketplace removed - show deprecation message
+                const container = document.getElementById('dealsContainer');
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🚫</div>
+                        <div class="empty-title">Marketplace Closed</div>
+                        <div class="empty-text">The marketplace has been removed. Please use the Bidding System to sell your crops.</div>
+                        <button class="btn-create" onclick="window.location.href='/bidding/dashboard'">Go to Bidding System</button>
+                    </div>
+                `;
+                return;
+                
                 const response = await fetch('/market/deals-list');
                 if (response.ok) {
                     allDeals = await response.json();
@@ -262,9 +274,9 @@
                 container.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-icon">📋</div>
-                        <div class="empty-title">No Deals Yet</div>
-                        <div class="empty-text">Create your first sell request to get started</div>
-                        <button class="btn-create" onclick="window.location.href='/market/select'">Create Sell Request</button>
+                        <div class="empty-title">Marketplace Closed</div>
+                        <div class="empty-text">Marketplace has been removed. Please use the Bidding System to sell your crops.</div>
+                        <button class="btn-create" onclick="window.location.href='/bidding/dashboard'">Go to Bidding System</button>
                     </div>
                 `;
                 return;
@@ -328,7 +340,8 @@
         }
 
         function viewDealDetails(dealId) {
-            window.location.href = `/market/deal-details/${dealId}`;
+            alert('Marketplace has been removed. Please use the Bidding System.');
+            window.location.href = '/bidding/dashboard';
         }
 
         function goBack() {

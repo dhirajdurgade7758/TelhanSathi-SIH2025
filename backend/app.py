@@ -34,7 +34,6 @@ migrate = Migrate(app, db)     # ✅ Added (Important for flask db migrate/upgra
 from routes.auth import auth_bp
 from routes.onboarding import onboarding_bp
 from routes.sahayak import sahayak_bp
-from routes.marketplace import market_bp
 from routes.subsidies import subsidies_bp
 from routes.admin import admin_bp
 from routes.notifications import notifications_bp
@@ -53,7 +52,6 @@ from routes.buyer_auth import buyer_auth_bp
 app.register_blueprint(auth_bp)
 app.register_blueprint(onboarding_bp)
 app.register_blueprint(sahayak_bp)
-app.register_blueprint(market_bp)
 app.register_blueprint(subsidies_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(notifications_bp)

@@ -28,58 +28,159 @@
             color: var(--text-dark);
         }
 
-        /* HEADER */
-        .header {
-            background: white;
-            border-bottom: 1px solid var(--border-color);
-            padding: 15px 20px;
+        /* NAVBAR */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            padding: 0;
             position: sticky;
             top: 0;
-            z-index: 100;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
         }
 
-        .header-content {
+        .navbar-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
+            padding: 0 30px;
+            height: 70px;
         }
 
-        .header-title {
-            font-size: 20px;
+        .navbar-brand {
+            font-size: 24px;
             font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .navbar-menu {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            flex: 1;
+            margin-left: 40px;
+        }
+
+        .navbar-item {
+            position: relative;
+        }
+
+        .navbar-link {
+            color: rgba(255, 255, 255, 0.9);
+            padding: 24px 18px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            font-size: 15px;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            height: 70px;
+        }
+
+        .navbar-link:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom-color: white;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin-left: auto;
+        }
+
+        .profile-dropdown {
+            position: relative;
+        }
+
+        .profile-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .profile-icon:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .profile-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+            min-width: 200px;
+            list-style: none;
+            margin: 8px 0 0 0;
+            padding: 0;
+            display: none;
+            z-index: 1001;
+        }
+
+        .profile-dropdown:hover .profile-dropdown-menu {
+            display: block;
+        }
+
+        .profile-dropdown-item {
+            padding: 12px 18px;
+            color: var(--text-dark);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .profile-dropdown-item:first-child {
+            border-top-left-radius: 7px;
+            border-top-right-radius: 7px;
+        }
+
+        .profile-dropdown-item:last-child {
+            border-bottom-left-radius: 7px;
+            border-bottom-right-radius: 7px;
+        }
+
+        .profile-dropdown-item:hover {
+            background: var(--bg-light);
+            border-left-color: var(--primary-color);
             color: var(--primary-color);
         }
 
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
+        .profile-dropdown-item.logout {
+            border-top: 1px solid var(--border-color);
+            color: var(--danger-color);
         }
 
-        .buyer-name {
-            font-size: 14px;
-            color: #666;
-        }
-
-        .logout-btn {
-            padding: 8px 16px;
-            background: var(--danger-color);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s;
-            text-decoration: none;
-        }
-
-        .logout-btn:hover {
-            background: #dc2626;
-            transform: translateY(-2px);
+        .profile-dropdown-item.logout:hover {
+            background: #fee2e2;
+            border-left-color: var(--danger-color);
         }
 
         /* MAIN CONTAINER */
@@ -87,6 +188,24 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 30px 20px;
+            min-height: calc(100vh - 200px);
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0 0 8px 0;
+        }
+
+        .page-header p {
+            color: #666;
+            font-size: 15px;
+            margin: 0;
         }
 
         /* TABS */
@@ -343,212 +462,48 @@
     </style>
 </head>
 <body>
-    <!-- HEADER -->
-    <div class="header">
-        <div class="header-content">
-            <div class="header-title">🛒 Buyer Dashboard</div>
-            <div class="header-right">
-                <div class="buyer-name">Welcome, <strong>{{ buyer.buyer_name }}</strong></div>
-                <a href="{{ url_for('buyer_auth.buyer_logout') }}" class="logout-btn">Logout</a>
+    <!-- PROFESSIONAL NAVBAR -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="#" class="navbar-brand">
+                🛒 TelhanSathi
+            </a>
+
+            <ul class="navbar-menu">
+                <li class="navbar-item">
+                    <a href="#" onclick="switchTab('auctions'); switchAuctionSubtab('browse-auctions'); return false;" class="navbar-link">🔍 Browse Auctions</a>
+                </li>
+
+                <li class="navbar-item">
+                    <a href="#" onclick="switchTab('auctions'); switchAuctionSubtab('my-bids'); return false;" class="navbar-link">📊 My Bids</a>
+                </li>
+
+                <li class="navbar-item">
+                    <a href="#" onclick="switchTab('chats'); return false;" class="navbar-link">💬 Chat</a>
+                </li>
+            </ul>
+
+            <div class="navbar-right">
+                <div class="profile-dropdown">
+                    <div class="profile-icon">👤</div>
+                    <ul class="profile-dropdown-menu">
+                        <li><a href="#" onclick="switchTab('profile'); return false;" class="profile-dropdown-item">👤 My Profile</a></li>
+                        <li><a href="#" class="profile-dropdown-item">⚙️ Settings</a></li>
+                        <li><a href="{{ url_for('buyer_auth.buyer_logout') }}" class="profile-dropdown-item logout">🚪 Logout</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
-    </div>
+    </nav>
 
     <!-- MAIN CONTENT -->
     <div class="main-container">
-        <!-- TABS -->
-        <div class="nav-tabs" style="display: flex;">
-            <button class="nav-link active" onclick="switchTab('create-offer')">
-                ➕ Create New Offer
-            </button>
-            <button class="nav-link" onclick="switchTab('my-offers')">
-                💼 My Offers
-            </button>
-            <button class="nav-link" onclick="switchTab('sell-requests')">
-                📋 Sell Requests
-            </button>
-            <button class="nav-link" onclick="switchTab('auctions')">
-                🏪 Live Auctions
-            </button>
-            <button class="nav-link" onclick="switchTab('chats')">
-                💬 Chats
-            </button>
-            <button class="nav-link" onclick="switchTab('profile')">
-                👤 Profile
-            </button>
-        </div>
 
-        <!-- TAB 1: CREATE NEW OFFER -->
-        <div id="create-offer" class="tab-content active">
-            <div style="margin-bottom: 20px;">
-                <h2 style="font-size: 22px; margin-bottom: 15px;">➕ Create New Crop Offer</h2>
-                <p style="color: #666;">Post a new offer for crops you want to buy. Farmers in the marketplace will see your offer and can respond to you.</p>
-            </div>
-            
-            <!-- Create Offer Form -->
-            <div style="max-width: 600px; background: white; padding: 25px; border-radius: 12px; border: 1px solid var(--border-color);">
-                <form id="create-offer-form" onsubmit="handleCreateOffer(event)">
-                    
-                    <!-- Error Messages -->
-                    <div id="form-error" style="display: none;"></div>
-                    
-                    <!-- Crop Name -->
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-dark);">Crop Name *</label>
-                        <input 
-                            type="text" 
-                            name="crop_name" 
-                            placeholder="e.g., Wheat, Rice, Cotton" 
-                            required
-                            style="width: 100%; padding: 12px 15px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 16px; box-sizing: border-box; font-family: inherit;"
-                        />
-                    </div>
-
-                    <!-- Quantity -->
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-dark);">Quantity (Quintals) *</label>
-                        <input 
-                            type="number" 
-                            name="quantity_quintal" 
-                            placeholder="e.g., 100" 
-                            min="0.01"
-                            step="0.01"
-                            required
-                            style="width: 100%; padding: 12px 15px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 16px; box-sizing: border-box; font-family: inherit;"
-                        />
-                    </div>
-
-                    <!-- Offer Price -->
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-dark);">Your Offer Price (₹/Quintal) *</label>
-                        <input 
-                            type="number" 
-                            name="initial_price" 
-                            placeholder="e.g., 5000" 
-                            min="0.01"
-                            step="0.01"
-                            required
-                            style="width: 100%; padding: 12px 15px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 16px; box-sizing: border-box; font-family: inherit;"
-                        />
-                    </div>
-
-                    <!-- Location Wanted -->
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-dark);">Preferred Location</label>
-                        <input 
-                            type="text" 
-                            name="location_wanted" 
-                            placeholder="e.g., Maharashtra, Gujarat" 
-                            style="width: 100%; padding: 12px 15px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 16px; box-sizing: border-box; font-family: inherit;"
-                        />
-                    </div>
-
-                    <!-- District Wanted -->
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-dark);">Preferred District</label>
-                        <input 
-                            type="text" 
-                            name="district_wanted" 
-                            placeholder="e.g., Nashik, Pune" 
-                            style="width: 100%; padding: 12px 15px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 16px; box-sizing: border-box; font-family: inherit;"
-                        />
-                    </div>
-
-                    <!-- Submit Button -->
-                    <button type="submit" style="width: 100%; padding: 14px 20px; background: var(--primary-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 16px; transition: all 0.3s;">
-                        Post Your Offer 🚀
-                    </button>
-                </form>
-
-                <!-- Success Message -->
-                <div id="form-success" style="display: none; margin-top: 15px; padding: 15px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; color: #155724;"></div>
-            </div>
-        </div>
-
-        <!-- TAB 2: MY OFFERS -->
-        <div id="my-offers" class="tab-content">
-            <div style="margin-bottom: 20px;">
-                <h2 style="font-size: 22px; margin-bottom: 15px;">💼 My Offers</h2>
-                <p style="color: #666;">Track your offers and ongoing negotiations</p>
-            </div>
-            <div id="offers-container">
-                <div class="loader"></div>
-            </div>
-        </div>
-
-        <!-- TAB 3: PROFILE -->
-        <div id="profile" class="tab-content">
-            <div style="margin-bottom: 20px;">
-                <h2 style="font-size: 22px; margin-bottom: 15px;">👤 My Profile</h2>
-            </div>
-            <div class="profile-section">
-                <!-- Profile Info Card -->
-                <div class="card">
-                    <div class="card-header">Account Information</div>
-                    <div class="card-body">
-                        <div class="info-row">
-                            <span class="info-label">Name:</span>
-                            <span class="info-value">{{ buyer.buyer_name }}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Email:</span>
-                            <span class="info-value">{{ buyer.email }}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Phone:</span>
-                            <span class="info-value">{{ buyer.phone or '-' }}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Company:</span>
-                            <span class="info-value">{{ buyer.company_name or '-' }}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">District:</span>
-                            <span class="info-value">{{ buyer.district or '-' }}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">State:</span>
-                            <span class="info-value">{{ buyer.state or '-' }}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Joined:</span>
-                            <span class="info-value">{{ buyer.created_at.strftime('%d %b %Y') if buyer.created_at else '-' }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quick Stats Card -->
-                <div class="card">
-                    <div class="card-header">Quick Stats</div>
-                    <div class="card-body" style="text-align: center;">
-                        <div style="margin: 20px 0;">
-                            <div style="font-size: 32px; font-weight: 700; color: var(--primary-color);" id="offers-count">0</div>
-                            <div style="color: #666;">Total Offers Made</div>
-                        </div>
-                        <div style="margin: 20px 0; border-top: 1px solid var(--border-color); padding-top: 15px;">
-                            <div style="font-size: 32px; font-weight: 700; color: var(--secondary-color);" id="deals-count">0</div>
-                            <div style="color: #666;">Available Deals</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB 4: LIVE AUCTIONS -->
-        <div id="auctions" class="tab-content">
-            <div style="margin-bottom: 20px;">
-                <h2 style="font-size: 22px; margin-bottom: 15px;">🏪 Live Auctions (NILAMI)</h2>
-                <p style="color: #666;">Browse and bid on live auctions from farmers. Place your bids to secure crops at competitive prices.</p>
-            </div>
-
-            <!-- Auction Subtabs Navigation -->
-            <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">
-                <button class="auction-subtab-btn active" onclick="switchAuctionSubtab('browse-auctions')" style="padding: 10px 20px; border: none; background: none; cursor: pointer; font-weight: 600; color: var(--text-dark); border-bottom: 3px solid transparent; transition: all 0.3s; margin-bottom: -10px;">
-                    🔍 Browse Auctions
-                </button>
-                <button class="auction-subtab-btn" onclick="switchAuctionSubtab('my-bids')" style="padding: 10px 20px; border: none; background: none; cursor: pointer; font-weight: 600; color: #999; border-bottom: 3px solid transparent; transition: all 0.3s; margin-bottom: -10px;">
-                    📊 My Bids
-                </button>
+        <!-- TAB 1: LIVE AUCTIONS -->
+        <div id="auctions" class="tab-content active">
+            <div class="page-header">
+                <h1>🏪 Live Auctions (NILAMI)</h1>
+                <p>Browse and bid on live auctions from farmers. Place your bids to secure crops at competitive prices.</p>
             </div>
 
             <!-- Browse Auctions Subtab -->
@@ -737,23 +692,94 @@
             </div>
         </div>
 
-        <!-- Sell Requests Tab Content -->
-        <div id="sell-requests" class="tab-content">
-            <div style="margin-bottom: 20px;">
-                <h2 style="font-size: 22px; margin-bottom: 15px;">📋 Sell Requests from Farmers</h2>
-            </div>
-            <div id="sell-requests-container">
-                <p style="text-align: center; color: #666;">Loading sell requests...</p>
-            </div>
-        </div>
-
         <!-- Chats Tab Content -->
         <div id="chats" class="tab-content">
-            <div style="margin-bottom: 20px;">
-                <h2 style="font-size: 22px; margin-bottom: 15px;">💬 My Chats</h2>
+            <div class="page-header">
+                <h1>💬 My Chats</h1>
+                <p>View all your conversations with farmers. Chat to discuss offers, negotiate prices, and confirm transactions.</p>
             </div>
             <div id="chats-container">
                 <p style="text-align: center; color: #666;">Loading chats...</p>
+            </div>
+        </div>
+
+        <!-- Profile Tab Content -->
+        <div id="profile" class="tab-content">
+            <div class="page-header">
+                <h1>👤 My Profile</h1>
+                <p>Manage your buyer profile and account settings.</p>
+            </div>
+            
+            <!-- Profile Content -->
+            <div id="profile-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                <!-- Left: Profile Info -->
+                <div>
+                    <div style="background: white; border-radius: 12px; border: 1px solid var(--border-color); padding: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <h3 style="margin-top: 0; margin-bottom: 20px; color: var(--primary-color);">📋 Profile Information</h3>
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            <div>
+                                <label style="display: block; font-size: 13px; font-weight: 600; color: #666; margin-bottom: 6px;">Name</label>
+                                <div style="font-size: 16px; font-weight: 600; color: var(--text-dark);">{{ buyer.buyer_name }}</div>
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 13px; font-weight: 600; color: #666; margin-bottom: 6px;">Email</label>
+                                <div style="font-size: 16px; font-weight: 600; color: var(--text-dark);">{{ buyer.buyer_email }}</div>
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 13px; font-weight: 600; color: #666; margin-bottom: 6px;">Phone</label>
+                                <div style="font-size: 16px; font-weight: 600; color: var(--text-dark);">{{ buyer.buyer_phone or 'Not provided' }}</div>
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 13px; font-weight: 600; color: #666; margin-bottom: 6px;">Company/Business</label>
+                                <div style="font-size: 16px; font-weight: 600; color: var(--text-dark);">{{ buyer.company_name or 'Not provided' }}</div>
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 13px; font-weight: 600; color: #666; margin-bottom: 6px;">Location</label>
+                                <div style="font-size: 16px; font-weight: 600; color: var(--text-dark);">{{ buyer.city or 'Not provided' }}, {{ buyer.state or 'India' }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Statistics & Activity -->
+                <div>
+                    <div style="background: white; border-radius: 12px; border: 1px solid var(--border-color); padding: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 20px;">
+                        <h3 style="margin-top: 0; margin-bottom: 20px; color: var(--primary-color);">📊 Your Statistics</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div style="background: #f0fdf4; padding: 16px; border-radius: 10px; text-align: center;">
+                                <div style="font-size: 28px; font-weight: 700; color: var(--primary-color);">0</div>
+                                <div style="font-size: 12px; color: #666; margin-top: 6px;">Active Auctions</div>
+                            </div>
+                            <div style="background: #fef3c7; padding: 16px; border-radius: 10px; text-align: center;">
+                                <div style="font-size: 28px; font-weight: 700; color: var(--secondary-color);">0</div>
+                                <div style="font-size: 12px; color: #666; margin-top: 6px;">Won Auctions</div>
+                            </div>
+                            <div style="background: #dbeafe; padding: 16px; border-radius: 10px; text-align: center;">
+                                <div style="font-size: 28px; font-weight: 700; color: #0284c7;">0</div>
+                                <div style="font-size: 12px; color: #666; margin-top: 6px;">Total Spent</div>
+                            </div>
+                            <div style="background: #f3e8ff; padding: 16px; border-radius: 10px; text-align: center;">
+                                <div style="font-size: 28px; font-weight: 700; color: #a855f7;">0</div>
+                                <div style="font-size: 12px; color: #666; margin-top: 6px;">Conversations</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background: white; border-radius: 12px; border: 1px solid var(--border-color); padding: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <h3 style="margin-top: 0; margin-bottom: 20px; color: var(--primary-color);">⚙️ Account Settings</h3>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <button style="padding: 12px 20px; background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; text-align: left; font-weight: 500; transition: all 0.3s;">
+                                ✏️ Edit Profile
+                            </button>
+                            <button style="padding: 12px 20px; background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; text-align: left; font-weight: 500; transition: all 0.3s;">
+                                🔐 Change Password
+                            </button>
+                            <button style="padding: 12px 20px; background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; text-align: left; font-weight: 500; transition: all 0.3s;">
+                                🔔 Notification Settings
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -786,7 +812,6 @@
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
         // Tab switching
         function switchTab(tabName) {
@@ -794,25 +819,16 @@
             const tabs = document.querySelectorAll('.tab-content');
             tabs.forEach(tab => tab.classList.remove('active'));
 
-            // Remove active class from all nav links
-            const navLinks = document.querySelectorAll('.nav-link');
-            navLinks.forEach(link => link.classList.remove('active'));
-
             // Show selected tab
             document.getElementById(tabName).classList.add('active');
 
-            // Add active class to clicked nav link
-            event.target.classList.add('active');
-
             // Load data if needed
-            if (tabName === 'my-offers') {
-                loadMyOffers();
-            } else if (tabName === 'sell-requests') {
-                loadSellRequests();
-            } else if (tabName === 'chats') {
+            if (tabName === 'chats') {
                 loadChats();
             } else if (tabName === 'auctions') {
                 loadAuctions();
+            } else if (tabName === 'profile') {
+                // Profile doesn't need loading as it's static data
             }
         }
 
@@ -1032,9 +1048,10 @@
             if (offers.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-state-icon">💼</div>
-                        <p>You haven't created any offers yet</p>
-                        <p style="font-size: 12px; color: #999; margin-top: 10px;">Go to "➕ Create New Offer" tab to post your first offer. Farmers will see it in the marketplace and can respond!</p>
+                        <div class="empty-state-icon">🚫</div>
+                        <p>Marketplace functionality has been removed</p>
+                        <p style="font-size: 12px; color: #999; margin-top: 10px;">Please use the Bidding System to buy crops from farmers.</p>
+                        <button onclick="window.location.href='/bidding/dashboard'" style="margin-top: 15px; padding: 8px 16px; background: #388e3c; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px;">Go to Bidding System</button>
                     </div>
                 `;
                 return;
@@ -1146,124 +1163,7 @@
         }
 
         // Load initial data on page load
-        loadMyOffers();
-        
-        // Load Sell Requests
-        async function loadSellRequests() {
-            try {
-                const container = document.getElementById('sell-requests-container');
-                container.innerHTML = '<p style="text-align: center; color: #666;">Loading sell requests...</p>';
-
-                const response = await fetch('/buyer/api/sell-requests');
-                if (!response.ok) throw new Error('Failed to load sell requests');
-
-                const requests = await response.json();
-                displaySellRequests(requests);
-            } catch (error) {
-                console.error('Error loading sell requests:', error);
-                document.getElementById('sell-requests-container').innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">⚠️</div>
-                        <p>Failed to load sell requests</p>
-                    </div>
-                `;
-            }
-        }
-
-        // Display Sell Requests
-        function displaySellRequests(requests) {
-            const container = document.getElementById('sell-requests-container');
-
-            if (requests.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">📭</div>
-                        <p>No sell requests available for your offered crops</p>
-                    </div>
-                `;
-                return;
-            }
-
-            const html = `
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 20px;">
-                    ${requests.map(req => `
-                        <div class="card" style="border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.3s, box-shadow 0.3s;">
-                            <!-- Image Section -->
-                            <div style="height: 200px; background: #f0f0f0; position: relative; overflow: hidden;">
-                                ${req.photos && req.photos.length > 0 
-                                    ? `<img src="${req.photos[0]}" alt="${req.crop_name}" style="width: 100%; height: 100%; object-fit: cover;">`
-                                    : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; font-size: 48px; font-weight: bold;">${req.crop_name.charAt(0).toUpperCase()}</div>`
-                                }
-                                ${req.photos && req.photos.length > 1 ? `<div style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">+${req.photos.length - 1}</div>` : ''}
-                            </div>
-
-                            <!-- Card Body -->
-                            <div style="padding: 16px;">
-                                <!-- Crop Name & Status -->
-                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
-                                    <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: var(--primary-color);">${req.crop_name}</h3>
-                                    <span style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">PENDING</span>
-                                </div>
-
-                                <!-- Price Highlight -->
-                                <div style="background: #fff3cd; border-left: 4px solid var(--secondary-color); padding: 10px; border-radius: 4px; margin-bottom: 12px;">
-                                    <div style="font-size: 12px; color: #666;">Asked Price</div>
-                                    <div style="font-size: 20px; font-weight: 700; color: var(--primary-color);">₹${req.expected_price.toLocaleString('en-IN')}<span style="font-size: 12px; color: #666;">/Qtl</span></div>
-                                </div>
-
-                                <!-- Details Grid -->
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; font-size: 13px;">
-                                    <div>
-                                        <div style="color: #999; margin-bottom: 4px;">Quantity</div>
-                                        <div style="font-weight: 600; color: #333;">${req.quantity_quintal} Qtl</div>
-                                    </div>
-                                    <div>
-                                        <div style="color: #999; margin-bottom: 4px;">Harvest Date</div>
-                                        <div style="font-weight: 600; color: #333;">${new Date(req.harvest_date).toLocaleDateString('en-IN')}</div>
-                                    </div>
-                                    <div style="grid-column: 1/-1;">
-                                        <div style="color: #999; margin-bottom: 4px;">📍 Location</div>
-                                        <div style="font-weight: 600; color: #333;">${req.location}</div>
-                                    </div>
-                                </div>
-
-                                <!-- Farmer Info -->
-                                <div style="background: #f8f9fa; padding: 10px; border-radius: 6px; margin-bottom: 12px; border-left: 3px solid var(--primary-color);">
-                                    <div style="font-weight: 600; color: #333; margin-bottom: 4px;">👨‍🌾 ${req.farmer_name}</div>
-                                    <div style="font-size: 12px; color: #666;">Farmer</div>
-                                </div>
-
-                                <!-- Action Buttons -->
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                                    <button onclick="copyPhoneNumber('${req.farmer_phone}')" style="display: flex; align-items: center; justify-content: center; background: var(--primary-color); color: white; padding: 10px; border-radius: 6px; border: none; font-weight: 600; font-size: 14px; cursor: pointer; transition: background 0.3s;">
-                                        📞 Call
-                                    </button>
-                                    <button onclick="openChatModal('${req.id}', '${req.farmer_id}', '${req.farmer_name}', '${req.crop_name}', '${req.farmer_phone}')" style="background: var(--secondary-color); color: white; padding: 10px; border-radius: 6px; border: none; font-weight: 600; font-size: 14px; cursor: pointer; transition: background 0.3s;">
-                                        💬 Chat
-                                    </button>
-                                </div>
-
-                                <!-- Posted Date -->
-                                <div style="text-align: center; margin-top: 10px; font-size: 11px; color: #999;">
-                                    Posted: ${new Date(req.created_at).toLocaleDateString('en-IN')}
-                                </div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-            
-            container.innerHTML = html;
-        }
-
-        // Copy Phone Number to Clipboard
-        function copyPhoneNumber(phoneNumber) {
-            navigator.clipboard.writeText(phoneNumber).then(() => {
-                alert(`✅ Phone number copied to clipboard!\n📞 ${phoneNumber}`);
-            }).catch(() => {
-                alert(`❌ Failed to copy phone number. Please try again.`);
-            });
-        }
+        loadAuctions();
 
         // Load Chats
         async function loadChats() {

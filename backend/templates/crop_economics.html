@@ -1303,8 +1303,9 @@ function closeCropModal(event) {
 function viewBuyers() {
     if (!currentCropKey) return;
     
-    // Navigate to market prices page for this crop
-    window.location.href = `/market/nearby/${currentCropKey}`;
+    // Marketplace removed - redirect to bidding system
+    alert('Marketplace has been removed. Please use the Bidding System to sell your crops.');
+    window.location.href = '/bidding/dashboard';
 }
 </script>
 {% endblock %}
