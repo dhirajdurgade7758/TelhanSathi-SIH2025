@@ -143,6 +143,15 @@
         .profile-dropdown:hover .profile-dropdown-menu {
             display: block;
         }
+        .profile-dropdown::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    right: 0;
+    height: 10px;      /* buffer zone */
+    width: 100%;
+}
+
 
         .profile-dropdown-item {
             padding: 12px 18px;
@@ -249,7 +258,7 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             transform: translateY(-2px);
         }
-
+        
         .card-header {
             background: var(--bg-light);
             border-bottom: 1px solid var(--border-color);
@@ -723,19 +732,27 @@
                             </div>
                             <div>
                                 <label style="display: block; font-size: 13px; font-weight: 600; color: #666; margin-bottom: 6px;">Email</label>
-                                <div style="font-size: 16px; font-weight: 600; color: var(--text-dark);">{{ buyer.buyer_email }}</div>
+                                <div style="font-size: 16px; font-weight: 600; color: var(--text-dark);">{{ buyer.email }}</div>
                             </div>
                             <div>
                                 <label style="display: block; font-size: 13px; font-weight: 600; color: #666; margin-bottom: 6px;">Phone</label>
-                                <div style="font-size: 16px; font-weight: 600; color: var(--text-dark);">{{ buyer.buyer_phone or 'Not provided' }}</div>
+                                <div style="font-size: 16px; font-weight: 600; color: var(--text-dark);">{{ buyer.phone or 'Not provided' }}</div>
                             </div>
                             <div>
                                 <label style="display: block; font-size: 13px; font-weight: 600; color: #666; margin-bottom: 6px;">Company/Business</label>
                                 <div style="font-size: 16px; font-weight: 600; color: var(--text-dark);">{{ buyer.company_name or 'Not provided' }}</div>
                             </div>
                             <div>
-                                <label style="display: block; font-size: 13px; font-weight: 600; color: #666; margin-bottom: 6px;">Location</label>
-                                <div style="font-size: 16px; font-weight: 600; color: var(--text-dark);">{{ buyer.city or 'Not provided' }}, {{ buyer.state or 'India' }}</div>
+                                <label style="display: block; font-size: 13px; font-weight: 600; color: #666; margin-bottom: 6px;">Address</label>
+                                <div style="font-size: 16px; font-weight: 600; color: var(--text-dark);">{{ buyer.address or 'Not provided' }}</div>
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 13px; font-weight: 600; color: #666; margin-bottom: 6px;">District</label>
+                                <div style="font-size: 16px; font-weight: 600; color: var(--text-dark);">{{ buyer.district or 'Not provided' }}</div>
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 13px; font-weight: 600; color: #666; margin-bottom: 6px;">State</label>
+                                <div style="font-size: 16px; font-weight: 600; color: var(--text-dark);">{{ buyer.state or 'Maharashtra' }}</div>
                             </div>
                         </div>
                     </div>
@@ -747,20 +764,20 @@
                         <h3 style="margin-top: 0; margin-bottom: 20px; color: var(--primary-color);">📊 Your Statistics</h3>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                             <div style="background: #f0fdf4; padding: 16px; border-radius: 10px; text-align: center;">
-                                <div style="font-size: 28px; font-weight: 700; color: var(--primary-color);">0</div>
-                                <div style="font-size: 12px; color: #666; margin-top: 6px;">Active Auctions</div>
+                                <div id="activeBidsCount" style="font-size: 28px; font-weight: 700; color: var(--primary-color);">-</div>
+                                <div style="font-size: 12px; color: #666; margin-top: 6px;">Active Bids</div>
                             </div>
                             <div style="background: #fef3c7; padding: 16px; border-radius: 10px; text-align: center;">
-                                <div style="font-size: 28px; font-weight: 700; color: var(--secondary-color);">0</div>
+                                <div id="wonAuctionsCount" style="font-size: 28px; font-weight: 700; color: var(--secondary-color);">-</div>
                                 <div style="font-size: 12px; color: #666; margin-top: 6px;">Won Auctions</div>
                             </div>
                             <div style="background: #dbeafe; padding: 16px; border-radius: 10px; text-align: center;">
-                                <div style="font-size: 28px; font-weight: 700; color: #0284c7;">0</div>
-                                <div style="font-size: 12px; color: #666; margin-top: 6px;">Total Spent</div>
+                                <div id="totalBidsCount" style="font-size: 28px; font-weight: 700; color: #0284c7;">-</div>
+                                <div style="font-size: 12px; color: #666; margin-top: 6px;">Total Bids</div>
                             </div>
                             <div style="background: #f3e8ff; padding: 16px; border-radius: 10px; text-align: center;">
-                                <div style="font-size: 28px; font-weight: 700; color: #a855f7;">0</div>
-                                <div style="font-size: 12px; color: #666; margin-top: 6px;">Conversations</div>
+                                <div id="winningBidsCount" style="font-size: 28px; font-weight: 700; color: #a855f7;">-</div>
+                                <div style="font-size: 12px; color: #666; margin-top: 6px;">Winning Bids</div>
                             </div>
                         </div>
                     </div>
@@ -828,7 +845,30 @@
             } else if (tabName === 'auctions') {
                 loadAuctions();
             } else if (tabName === 'profile') {
-                // Profile doesn't need loading as it's static data
+                loadBuyerStats();
+            }
+        }
+
+        // Load buyer statistics
+        async function loadBuyerStats() {
+            try {
+                const response = await fetch('/bidding/buyer/dashboard/stats');
+                if (!response.ok) throw new Error('Failed to load statistics');
+
+                const stats = await response.json();
+
+                // Update statistics display
+                document.getElementById('activeBidsCount').textContent = stats.active_bids || 0;
+                document.getElementById('wonAuctionsCount').textContent = stats.won_auctions || 0;
+                document.getElementById('totalBidsCount').textContent = stats.total_bids || 0;
+                document.getElementById('winningBidsCount').textContent = stats.winning_bids || 0;
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+                // Show error state
+                document.getElementById('activeBidsCount').textContent = '?';
+                document.getElementById('wonAuctionsCount').textContent = '?';
+                document.getElementById('totalBidsCount').textContent = '?';
+                document.getElementById('winningBidsCount').textContent = '?';
             }
         }
 

@@ -1901,3 +1901,254 @@ def send_farmer_message(chat_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
+
+
+# ==================== LEADERBOARD ENDPOINTS ====================
+
+@bidding_bp.route('/farmer/leaderboard/activity', methods=['GET'])
+def farmer_leaderboard_activity():
+    """Get activity-based leaderboard (auctions and revenue)"""
+    if 'farmer_id_verified' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    farmer_id = session['farmer_id_verified']
+    
+    try:
+        from sqlalchemy import func
+        
+        # Get all farmers with their auction stats
+        farmers_stats = db.session.query(
+            Farmer.id,
+            Farmer.name,
+            func.count(Auction.id).label('total_auctions'),
+            func.sum(Auction.base_price_per_quintal * Auction.quantity_quintals).label('total_revenue')
+        ).outerjoin(
+            Auction, Farmer.id == Auction.farmer_id
+        ).filter(
+            Auction.status.in_(['completed', 'active'])
+        ).group_by(
+            Farmer.id, Farmer.name
+        ).order_by(
+            func.count(Auction.id).desc(),
+            func.sum(Auction.base_price_per_quintal * Auction.quantity_quintals).desc()
+        ).all()
+        
+        # Build leaderboard list
+        leaderboard = []
+        your_rank = 0
+        your_auctions = 0
+        your_revenue = 0
+        your_data = None
+        
+        for idx, stat in enumerate(farmers_stats):
+            farmer_entry = {
+                'farmer_id': stat.id,
+                'farmer_name': stat.name,
+                'total_auctions': stat.total_auctions or 0,
+                'total_revenue': float(stat.total_revenue) if stat.total_revenue else 0,
+                'is_you': stat.id == farmer_id
+            }
+            leaderboard.append(farmer_entry)
+            
+            if stat.id == farmer_id:
+                your_rank = idx + 1
+                your_auctions = stat.total_auctions or 0
+                your_revenue = float(stat.total_revenue) if stat.total_revenue else 0
+                your_data = farmer_entry
+        
+        # If farmer not in list, add at bottom
+        if not your_data:
+            your_rank = len(leaderboard) + 1
+            your_auctions = 0
+            your_revenue = 0
+            farmer = Farmer.query.get(farmer_id)
+            leaderboard.append({
+                'farmer_id': farmer_id,
+                'farmer_name': farmer.name if farmer else 'Unknown',
+                'total_auctions': 0,
+                'total_revenue': 0,
+                'is_you': True
+            })
+        
+        # Calculate top 3 farmers
+        top_3_auctions = leaderboard[2]['total_auctions'] if len(leaderboard) > 2 else leaderboard[0]['total_auctions']
+        top_3_revenue = leaderboard[2]['total_revenue'] if len(leaderboard) > 2 else leaderboard[0]['total_revenue']
+        
+        auctions_to_top3 = max(0, top_3_auctions - your_auctions)
+        revenue_to_top3 = max(0, top_3_revenue - your_revenue)
+        
+        # Calculate progress percentage (based on distance from top 3)
+        if auctions_to_top3 > 0:
+            max_gap = leaderboard[0]['total_auctions'] - top_3_auctions if leaderboard else 10
+            progress = max(0, min(100, ((auctions_to_top3 - max_gap) / max(max_gap, 1)) * 100)) if max_gap > 0 else 100
+        else:
+            progress = 100
+        
+        # Get top crops for the farmer
+        top_crops = db.session.query(
+            Auction.crop_name,
+            func.count(Auction.id).label('count')
+        ).filter(
+            Auction.farmer_id == farmer_id,
+            Auction.status.in_(['completed', 'active'])
+        ).group_by(
+            Auction.crop_name
+        ).order_by(
+            func.count(Auction.id).desc()
+        ).limit(3).all()
+        
+        top_crops_data = [
+            {'crop_name': crop[0], 'count': crop[1]}
+            for crop in top_crops
+        ]
+        
+        # Calculate rank change (simplified - would need historical data for real implementation)
+        rank_change = 0  # Default to no change
+        
+        return jsonify({
+            'your_rank': your_rank,
+            'total_farmers': len(leaderboard),
+            'your_auctions': your_auctions,
+            'your_revenue': your_revenue,
+            'rank_change': rank_change,
+            'auctions_to_top3': auctions_to_top3,
+            'revenue_to_top3': revenue_to_top3,
+            'progress_to_top3': progress,
+            'top_crops': top_crops_data,
+            'leaderboard': leaderboard[:50]  # Return top 50
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@bidding_bp.route('/farmer/leaderboard/rewards', methods=['GET'])
+def farmer_leaderboard_rewards():
+    """Get rewards-based leaderboard (coins)"""
+    if 'farmer_id_verified' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    farmer_id = session['farmer_id_verified']
+    
+    try:
+        from sqlalchemy import func
+        
+        # For now, calculate coins based on completed auctions
+        # In future, this will come from a Coins/Rewards table
+        farmers_coins = db.session.query(
+            Farmer.id,
+            Farmer.name,
+            func.count(Auction.id).label('completed_auctions'),
+            (func.count(Auction.id) * 100).label('total_coins'),  # 100 coins per auction
+            (func.count(Auction.id) * 100).label('coins_this_month')  # Simplified
+        ).outerjoin(
+            Auction, Farmer.id == Auction.farmer_id
+        ).filter(
+            Auction.status == 'completed'
+        ).group_by(
+            Farmer.id, Farmer.name
+        ).order_by(
+            (func.count(Auction.id) * 100).desc()
+        ).all()
+        
+        # Build leaderboard list
+        leaderboard = []
+        your_rank = 0
+        your_coins = 0
+        your_coins_month = 0
+        your_data = None
+        
+        for idx, stat in enumerate(farmers_coins):
+            farmer_entry = {
+                'farmer_id': stat.id,
+                'farmer_name': stat.name,
+                'total_coins': stat.total_coins or 0,
+                'coins_this_month': stat.coins_this_month or 0,
+                'is_you': stat.id == farmer_id
+            }
+            leaderboard.append(farmer_entry)
+            
+            if stat.id == farmer_id:
+                your_rank = idx + 1
+                your_coins = stat.total_coins or 0
+                your_coins_month = stat.coins_this_month or 0
+                your_data = farmer_entry
+        
+        # If farmer not in list, add at bottom
+        if not your_data:
+            your_rank = len(leaderboard) + 1
+            your_coins = 0
+            your_coins_month = 0
+            farmer = Farmer.query.get(farmer_id)
+            leaderboard.append({
+                'farmer_id': farmer_id,
+                'farmer_name': farmer.name if farmer else 'Unknown',
+                'total_coins': 0,
+                'coins_this_month': 0,
+                'is_you': True
+            })
+        
+        # Calculate top 1 target
+        top_1_coins = leaderboard[0]['total_coins'] if leaderboard else your_coins
+        coins_to_top1 = max(0, top_1_coins - your_coins)
+        
+        # Estimate weeks to top 1 based on current rate
+        monthly_rate = max(your_coins_month, 100)  # At least 100 coins per month
+        weeks_to_top1 = max(1, round(coins_to_top1 / (monthly_rate / 4)))
+        
+        # Calculate progress percentage
+        if coins_to_top1 > 0:
+            max_gap = leaderboard[0]['total_coins'] - (leaderboard[1]['total_coins'] if len(leaderboard) > 1 else 0) if leaderboard else 1000
+            progress = max(0, min(100, ((coins_to_top1 - max_gap) / max(max_gap, 1)) * 100)) if max_gap > 0 else 100
+        else:
+            progress = 100
+        
+        # Earnings breakdown
+        earnings_breakdown = [
+            {'source': 'From Auctions', 'coins': max(0, your_coins - 300)},
+            {'source': 'Scheme Bonus', 'coins': 150},
+            {'source': 'Quality Premium', 'coins': 150}
+        ]
+        
+        # Simplify based on actual coins
+        if your_coins < 300:
+            earnings_breakdown = [
+                {'source': 'From Auctions', 'coins': your_coins},
+                {'source': 'Scheme Bonus', 'coins': 0},
+                {'source': 'Quality Premium', 'coins': 0}
+            ]
+        
+        rank_change = 0  # Default to no change
+        
+        return jsonify({
+            'your_rank': your_rank,
+            'total_farmers': len(leaderboard),
+            'your_coins': your_coins,
+            'your_coins_this_month': your_coins_month,
+            'rank_change': rank_change,
+            'coins_to_top1': coins_to_top1,
+            'weeks_to_top1': weeks_to_top1,
+            'progress_to_top1': progress,
+            'earnings_breakdown': earnings_breakdown,
+            'leaderboard': leaderboard[:50]  # Return top 50
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+# ==================== LEADERBOARD PAGE ROUTE ====================
+
+@bidding_bp.route('/farmer/leaderboard')
+def farmer_leaderboard_page():
+    """View farmer leaderboard with activity and rewards tabs"""
+    if 'farmer_id_verified' not in session:
+        return redirect(url_for('auth.login'))
+    
+    farmer_id = session['farmer_id_verified']
+    farmer = Farmer.query.get(farmer_id)
+    
+    if not farmer:
+        return redirect(url_for('auth.login'))
+    
+    return render_template('farmer_leaderboard.html', farmer=farmer)
