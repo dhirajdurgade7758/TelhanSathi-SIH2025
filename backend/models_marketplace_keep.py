@@ -25,6 +25,7 @@ class Buyer(db.Model):
     buyer_name = db.Column(db.String(255), nullable=False)
     phone = db.Column(db.String(20))
     company_name = db.Column(db.String(255))
+    address = db.Column(db.String(500))
     
     # Location information
     location = db.Column(db.String(255))

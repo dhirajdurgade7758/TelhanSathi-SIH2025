@@ -786,7 +786,7 @@
 
     <!-- Chat Modal -->
     <div id="chatModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
-        <div style="background: white; border-radius: 12px; width: 100%; max-width: 500px; height: 600px; display: flex; flex-direction: column; box-shadow: 0 5px 40px rgba(0,0,0,0.2);">
+        <div style="background: white; border-radius: 12px; width: 100%; max-width: 600px; height: 700px; display: flex; flex-direction: column; box-shadow: 0 5px 40px rgba(0,0,0,0.2);">
             <!-- Chat Header -->
             <div style="background: var(--primary-color); color: white; padding: 16px; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center;">
                 <div>
@@ -800,7 +800,7 @@
             <div id="chatMessages" style="flex: 1; overflow-y: auto; padding: 16px; background: #f8f9fa; display: flex; flex-direction: column; gap: 8px;">
                 <!-- Messages will appear here -->
                 <div style="text-align: center; color: #999; margin-top: 20px;">
-                    <p style="font-size: 12px;">💬 Chat feature is starting...</p>
+                    <p style="font-size: 12px;">💬 Loading messages...</p>
                 </div>
             </div>
 
@@ -1171,11 +1171,11 @@
                 const container = document.getElementById('chats-container');
                 container.innerHTML = '<p style="text-align: center; color: #666;">Loading chats...</p>';
 
-                const response = await fetch('/buyer/api/chats');
+                const response = await fetch('/bidding/buyer/chats/list');
                 if (!response.ok) throw new Error('Failed to load chats');
 
-                const chats = await response.json();
-                displayChats(chats);
+                const data = await response.json();
+                displayChats(data.chats);
             } catch (error) {
                 console.error('Error loading chats:', error);
                 document.getElementById('chats-container').innerHTML = `
@@ -1191,11 +1191,11 @@
         function displayChats(chats) {
             const container = document.getElementById('chats-container');
 
-            if (chats.length === 0) {
+            if (!chats || chats.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon">💭</div>
-                        <p>No active chats yet. Start a chat from Sell Requests tab!</p>
+                        <p>No active chats yet. Win an auction to start chatting with farmers!</p>
                     </div>
                 `;
                 return;
@@ -1204,11 +1204,11 @@
             const html = `
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 16px;">
                     ${chats.map(chat => `
-                        <div class="card" style="border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;" onclick="openExistingChat('${chat.id}', '${chat.crop_name}')">
+                        <div class="card" style="border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;" onclick="openExistingChat('${chat.chat_id}', '${chat.farmer_name}', '${chat.crop_name}')">
                             <!-- Chat Header -->
                             <div style="padding: 16px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white;">
-                                <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 700;">🌾 ${chat.crop_name}</h3>
-                                <div style="font-size: 12px; opacity: 0.9;">Chat ID: ${chat.id.substring(0, 8)}...</div>
+                                <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 700;">👨‍🌾 ${chat.farmer_name}</h3>
+                                <div style="font-size: 13px; opacity: 0.9;">🌾 ${chat.crop_name}</div>
                             </div>
 
                             <!-- Chat Body -->
@@ -1217,24 +1217,21 @@
                                 <div style="margin-bottom: 12px;">
                                     <div style="font-size: 12px; color: #999; margin-bottom: 4px;">Last Message</div>
                                     <div style="font-size: 13px; color: #333; padding: 8px; background: #f8f9fa; border-radius: 4px; max-height: 60px; overflow: hidden;">
-                                        ${chat.last_message.text ? `<strong>${chat.last_message.sender === 'buyer' ? 'You' : 'Farmer'}:</strong> ${chat.last_message.text}` : 'No messages yet'}
+                                        <strong>${chat.last_message_sender === 'buyer' ? 'You' : 'Farmer'}:</strong> ${chat.last_message || 'No messages yet'}
                                     </div>
                                 </div>
 
-                                <!-- Metadata -->
-                                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #666;">
-                                    <div>
-                                        <span>${chat.message_count} messages</span>
+                                <!-- Unread Badge -->
+                                ${chat.unread_count > 0 ? `
+                                    <div style="display: inline-block; background: #ff6b6b; color: white; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-bottom: 12px;">
+                                        ${chat.unread_count} unread
                                     </div>
-                                    <div>
-                                        ${chat.last_message.time ? `<span>${new Date(chat.last_message.time).toLocaleDateString('en-IN')}</span>` : ''}
-                                    </div>
-                                </div>
+                                ` : ''}
                             </div>
 
                             <!-- Footer -->
                             <div style="padding: 12px; background: #f8f9fa; border-top: 1px solid var(--border-color);">
-                                <button style="width: 100%; padding: 8px; background: var(--primary-color); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 13px;" onclick="event.stopPropagation(); openExistingChat('${chat.id}', '${chat.crop_name}')">
+                                <button style="width: 100%; padding: 8px; background: var(--primary-color); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 13px;" onclick="event.stopPropagation(); openExistingChat('${chat.chat_id}', '${chat.farmer_name}', '${chat.crop_name}')">
                                     💬 Open Chat
                                 </button>
                             </div>
@@ -1247,36 +1244,40 @@
         }
 
         // Open Existing Chat
-        async function openExistingChat(chatId, cropName) {
+        async function openExistingChat(chatId, farmerName, cropName) {
             try {
                 // Set current chat
                 window.currentChat = {
                     id: chatId,
+                    farmerName: farmerName,
                     cropName: cropName,
                     messages: []
                 };
 
                 // Update modal header
-                document.getElementById('chatTitle').textContent = `Chat about ${cropName}`;
-                document.getElementById('chatSubtitle').textContent = `Chat started: ${new Date().toLocaleDateString('en-IN')}`;
+                document.getElementById('chatTitle').textContent = `Chat with ${farmerName}`;
+                document.getElementById('chatSubtitle').textContent = `About: ${cropName}`;
+
+                // Show modal
+                document.getElementById('chatModal').style.display = 'flex';
 
                 // Load messages
-                const response = await fetch(`/buyer/api/chats/${chatId}/messages`);
+                const response = await fetch(`/bidding/buyer/chat/${chatId}/messages`);
                 if (!response.ok) throw new Error('Failed to load messages');
 
-                const messages = await response.json();
-                window.currentChat.messages = messages;
+                const data = await response.json();
+                window.currentChat.messages = data.messages;
 
                 // Display messages
                 const messagesDiv = document.getElementById('chatMessages');
-                if (messages.length === 0) {
+                if (!data.messages || data.messages.length === 0) {
                     messagesDiv.innerHTML = `<div style="text-align: center; color: #999; padding: 20px 0;">No messages yet. Start the conversation!</div>`;
                 } else {
-                    messagesDiv.innerHTML = messages.map(msg => `
+                    messagesDiv.innerHTML = data.messages.map(msg => `
                         <div style="display: flex; justify-content: ${msg.sender_type === 'buyer' ? 'flex-end' : 'flex-start'}; margin-bottom: 8px;">
                             <div style="background: ${msg.sender_type === 'buyer' ? 'var(--primary-color)' : '#e9ecef'}; color: ${msg.sender_type === 'buyer' ? 'white' : '#333'}; padding: 10px 12px; border-radius: 12px; max-width: 70%; word-wrap: break-word; font-size: 14px;">
                                 ${msg.message}
-                                <div style="font-size: 11px; margin-top: 4px; opacity: 0.7;">${new Date(msg.created_at).toLocaleTimeString('en-IN', {hour: '2-digit', minute: '2-digit'})}</div>
+                                <div style="font-size: 11px; margin-top: 4px; opacity: 0.7;">${new Date(msg.timestamp).toLocaleTimeString('en-IN', {hour: '2-digit', minute: '2-digit'})}</div>
                             </div>
                         </div>
                     `).join('');
@@ -1286,73 +1287,51 @@
                 // Clear input
                 document.getElementById('chatInput').value = '';
 
-                // Show modal
-                document.getElementById('chatModal').style.display = 'flex';
-
                 // Focus on input
                 setTimeout(() => {
                     document.getElementById('chatInput').focus();
                 }, 100);
             } catch (error) {
+                console.error('Error opening chat:', error);
                 alert('Failed to open chat: ' + error.message);
             }
         }
 
-        // Open Chat Modal (from Sell Requests)
-        async function openChatModal(requestId, farmerId, farmerName, cropName, farmerPhone) {
+        // Initiate chat when winning auction
+        async function initiateChat(auctionId, farmerName) {
             try {
-                // Create or get chat
-                const createResponse = await fetch('/buyer/api/chats', {
+                // First fetch auction details to get crop_name
+                const auctionResponse = await fetch(`/bidding/buyer/auction/${auctionId}/api`);
+                if (!auctionResponse.ok) {
+                    throw new Error('Failed to fetch auction details');
+                }
+                const auction = await auctionResponse.json();
+                
+                // Create or get existing chat (without initial message)
+                const response = await fetch('/bidding/buyer/chat/initiate', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        farmer_id: farmerId,
-                        sell_request_id: requestId,
-                        crop_name: cropName
+                        auction_id: auctionId,
+                        message: '' // Empty initial message
                     })
                 });
 
-                if (!createResponse.ok) throw new Error('Failed to create chat');
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to initiate chat');
+                }
 
-                const chatData = await createResponse.json();
-                const chatId = chatData.id;
-
-                // Open the chat
-                window.currentChat = {
-                    id: chatId,
-                    farmerId: farmerId,
-                    farmerName: farmerName,
-                    cropName: cropName,
-                    farmerPhone: farmerPhone,
-                    messages: []
-                };
-
-                // Update modal header
-                document.getElementById('chatTitle').textContent = `Chat with ${farmerName}`;
-                document.getElementById('chatSubtitle').textContent = `About: ${cropName} • 📞 ${farmerPhone}`;
-
-                // Initialize with empty messages
-                document.getElementById('chatMessages').innerHTML = `
-                    <div style="text-align: center; color: #999; padding: 20px 0;">
-                        <p style="font-size: 12px;">💬 New chat started</p>
-                        <p style="font-size: 12px; margin-top: 8px;">📍 ${cropName} • ${farmerPhone}</p>
-                    </div>
-                `;
-
-                // Clear input
-                document.getElementById('chatInput').value = '';
-
-                // Show modal
-                document.getElementById('chatModal').style.display = 'flex';
-
-                // Focus on input
-                setTimeout(() => {
-                    document.getElementById('chatInput').focus();
-                }, 100);
+                const chatData = await response.json();
+                
+                // Open the chat modal directly with fetched auction data
+                openExistingChat(chatData.chat_id, farmerName, auction.crop_name);
+                
             } catch (error) {
-                alert('Failed to open chat: ' + error.message);
+                console.error('Error initiating chat:', error);
+                alert('Failed to start chat: ' + error.message);
             }
         }
 
@@ -1373,7 +1352,7 @@
 
             try {
                 // Send message to backend
-                const response = await fetch(`/buyer/api/chats/${window.currentChat.id}/messages`, {
+                const response = await fetch(`/bidding/buyer/chat/${window.currentChat.id}/send`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -2149,7 +2128,7 @@
                                     <div style="color: #666; font-size: 11px; margin-bottom: 4px;">Farmer Phone</div>
                                     <div style="font-weight: 700; font-size: 14px; color: #27ae60;">${bid.farmer_phone || 'N/A'}</div>
                                 </div>
-                                <button onclick="messageFarmer('${bid.farmer_name}')" style="padding: 10px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px;">
+                                <button onclick="initiateChat('${bid.auction_id}', '${bid.farmer_name}')" style="padding: 10px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px;">
                                     💬 Message
                                 </button>
                             ` : ''}
@@ -2225,55 +2204,6 @@
             }
             
             renderMyBidsAndOffers(filteredBids, allCounterOffers);
-        }
-
-        // Message Farmer - Show message button
-        function messageFarmer(farmerName) {
-            // For now, show a placeholder message modal
-            const modal = document.createElement('div');
-            modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px;';
-            
-            modal.innerHTML = `
-                <div style="background: white; border-radius: 12px; padding: 30px; max-width: 400px; width: 100%; box-shadow: 0 5px 40px rgba(0,0,0,0.3);">
-                    <h3 style="margin: 0 0 15px 0; color: #3498db;">💬 Message Farmer</h3>
-                    <p style="margin: 0 0 15px 0; color: #666; font-size: 14px;">Farmer: <strong>${farmerName}</strong></p>
-                    
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #333;">Your Message</label>
-                        <textarea id="farmerMessage" placeholder="Type your message here..." style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: Arial, sans-serif; resize: vertical; min-height: 100px; box-sizing: border-box;"></textarea>
-                    </div>
-                    
-                    <div style="display: flex; gap: 10px;">
-                        <button onclick="sendMessageToFarmer('${farmerName}')" style="flex: 1; padding: 12px; background: #3498db; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">
-                            Send Message
-                        </button>
-                        <button onclick="this.closest('div').parentElement.remove()" style="flex: 1; padding: 12px; background: #f0f0f0; color: #333; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">
-                            Close
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-            modal.onclick = function(e) {
-                if (e.target === modal) modal.remove();
-            };
-        }
-
-        // Send Message to Farmer
-        function sendMessageToFarmer(farmerName) {
-            const messageText = document.getElementById('farmerMessage').value;
-            
-            if (!messageText.trim()) {
-                alert('Please enter a message');
-                return;
-            }
-            
-            // Show success message
-            showSuccess(`Message sent to ${farmerName}! ✓`);
-            
-            // Close the modal
-            document.querySelector('[style*="position: fixed"]').parentElement.remove();
         }
 
         // Accept Counter Offer

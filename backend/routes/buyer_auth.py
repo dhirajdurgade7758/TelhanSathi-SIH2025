@@ -68,12 +68,16 @@ def buyer_register_post():
     buyer_name = request.form.get('buyer_name', '').strip()
     phone = request.form.get('phone', '').strip()
     company_name = request.form.get('company_name', '').strip()
+    address = request.form.get('address', '').strip()
     district = request.form.get('district', '').strip()
     state = request.form.get('state', 'Maharashtra').strip()
     
     # Validation
     if not email or not password or not buyer_name:
         return render_template('buyer_register.html', error='Email, password, and name are required')
+    
+    if not address:
+        return render_template('buyer_register.html', error='Address is required')
     
     if password != confirm_password:
         return render_template('buyer_register.html', error='Passwords do not match')
@@ -94,6 +98,7 @@ def buyer_register_post():
             buyer_name=buyer_name,
             phone=phone,
             company_name=company_name,
+            address=address,
             district=district,
             state=state,
             is_verified=True,

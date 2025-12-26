@@ -313,11 +313,11 @@
     // Load farmer chats
     async function loadFarmerChats() {
         try {
-            const response = await fetch('/api/farmer/chats');
+            const response = await fetch('/bidding/farmer/chats/list');
             if (!response.ok) throw new Error('Failed to load chats');
 
-            const chats = await response.json();
-            displayFarmerChats(chats);
+            const data = await response.json();
+            displayFarmerChats(data.chats);
         } catch (error) {
             console.error('Error loading chats:', error);
             document.getElementById('chats-container').innerHTML = `
@@ -344,32 +344,32 @@
         }
 
         const html = chats.map(chat => `
-            <div class="chat-card" onclick="openFarmerChat('${chat.id}', '${chat.crop_name}')">
+            <div class="chat-card" onclick="openFarmerChat('${chat.chat_id}', '${chat.crop_name}')">
                 <div class="chat-card-header">
                     <h3>🌾 ${chat.crop_name}</h3>
-                    <div>Chat ID: ${chat.id.substring(0, 8)}...</div>
+                    <div>Buyer: ${chat.buyer_name}</div>
                 </div>
 
                 <div class="chat-card-body">
                     <div class="last-message">
                         <div class="last-message-label">Last Message</div>
                         <div class="last-message-text">
-                            ${chat.last_message.text ? `<strong>${chat.last_message.sender === 'farmer' ? 'You' : 'Buyer'}:</strong> ${chat.last_message.text}` : 'No messages yet'}
+                            ${chat.last_message ? `<strong>${chat.last_message_sender === 'farmer' ? 'You' : chat.buyer_name}:</strong> ${chat.last_message}` : 'No messages yet'}
                         </div>
                     </div>
 
                     <div class="chat-metadata">
                         <div>
-                            <span>${chat.message_count} messages</span>
+                            <span>${chat.unread_count} unread</span>
                         </div>
                         <div>
-                            ${chat.last_message.time ? `<span>${new Date(chat.last_message.time).toLocaleDateString('en-IN')}</span>` : ''}
+                            ${chat.last_message_time ? `<span>${new Date(chat.last_message_time).toLocaleDateString('en-IN')}</span>` : ''}
                         </div>
                     </div>
                 </div>
 
                 <div class="chat-card-footer">
-                    <button class="open-chat-btn" onclick="event.stopPropagation(); openFarmerChat('${chat.id}', '${chat.crop_name}')">
+                    <button class="open-chat-btn" onclick="event.stopPropagation(); openFarmerChat('${chat.chat_id}', '${chat.crop_name}')">
                         💬 Open Chat
                     </button>
                 </div>
@@ -393,22 +393,22 @@
             document.getElementById('chatSubtitle').textContent = `Started: ${new Date().toLocaleDateString('en-IN')}`;
 
             // Load messages
-            const response = await fetch(`/api/farmer/chats/${chatId}/messages`);
+            const response = await fetch(`/bidding/farmer/chat/${chatId}/messages`);
             if (!response.ok) throw new Error('Failed to load messages');
 
-            const messages = await response.json();
-            window.currentChat.messages = messages;
+            const data = await response.json();
+            window.currentChat.messages = data.messages;
 
             // Display messages
             const messagesDiv = document.getElementById('chatMessages');
-            if (messages.length === 0) {
+            if (data.messages.length === 0) {
                 messagesDiv.innerHTML = `<div style="text-align: center; color: #999; padding: 20px 0;">No messages yet. Start the conversation!</div>`;
             } else {
-                messagesDiv.innerHTML = messages.map(msg => `
+                messagesDiv.innerHTML = data.messages.map(msg => `
                     <div class="message ${msg.sender_type === 'farmer' ? 'sent' : 'received'}">
                         <div class="message-bubble">
                             ${msg.message}
-                            <div class="message-time">${new Date(msg.created_at).toLocaleTimeString('en-IN', {hour: '2-digit', minute: '2-digit'})}</div>
+                            <div class="message-time">${new Date(msg.timestamp).toLocaleTimeString('en-IN', {hour: '2-digit', minute: '2-digit'})}</div>
                         </div>
                     </div>
                 `).join('');
@@ -447,7 +447,7 @@
 
         try {
             // Send message to backend
-            const response = await fetch(`/api/farmer/chats/${window.currentChat.id}/messages`, {
+            const response = await fetch(`/bidding/farmer/chat/${window.currentChat.id}/send`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

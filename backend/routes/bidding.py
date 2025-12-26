@@ -272,7 +272,7 @@ def my_auctions():
                 auction_dict['winning_company_name'] = highest_bid.buyer.company_name or 'N/A'
                 auction_dict['winning_buyer_email'] = highest_bid.buyer.email
                 auction_dict['winning_buyer_phone'] = highest_bid.buyer.phone or 'N/A'
-                auction_dict['winning_buyer_address'] = highest_bid.buyer.location or 'N/A'
+                auction_dict['winning_buyer_address'] = highest_bid.buyer.address or 'N/A'
                 auction_dict['winning_buyer_district'] = highest_bid.buyer.district or 'N/A'
                 auction_dict['winning_buyer_state'] = highest_bid.buyer.state or 'N/A'
                 auction_dict['winning_bid_price'] = highest_bid.bid_price_per_quintal
@@ -871,7 +871,7 @@ def farmer_stats():
 
 @bidding_bp.route('/buyer/dashboard')
 def buyer_dashboard():
-    """Buyer's main dashboard"""
+    """Buyer's main dashboard with auctions, chats, and profile"""
     if 'buyer_id_verified' not in session:
         return redirect(url_for('buyer_auth.buyer_login'))
     
@@ -881,17 +881,18 @@ def buyer_dashboard():
     if not buyer:
         return redirect(url_for('buyer_auth.buyer_login'))
     
-    return render_template('buyer_auction_dashboard.html', buyer=buyer)
+    return render_template('buyer_dashboard.html', buyer=buyer)
 
 
 @bidding_bp.route('/buyer/browse-auctions')
 def browse_auctions():
-    """Browse all active auctions"""
+    """Browse all active auctions - redirect to dashboard"""
     if 'buyer_id_verified' not in session:
         return redirect(url_for('buyer_auth.buyer_login'))
     
     buyer_id = session['buyer_id_verified']
-    return render_template('buyer_browse_auctions.html')
+    buyer = Buyer.query.get(buyer_id)
+    return render_template('buyer_dashboard.html', buyer=buyer)
 
 
 @bidding_bp.route('/buyer/auctions/api', methods=['GET'])
@@ -974,11 +975,13 @@ def get_auctions():
 
 @bidding_bp.route('/buyer/auction/<auction_id>')
 def auction_details(auction_id):
-    """View detailed auction information"""
+    """View detailed auction information - loads via dashboard"""
     if 'buyer_id_verified' not in session:
         return redirect(url_for('buyer_auth.buyer_login'))
     
-    return render_template('buyer_auction_details.html', auction_id=auction_id)
+    buyer_id = session['buyer_id_verified']
+    buyer = Buyer.query.get(buyer_id)
+    return render_template('buyer_dashboard.html', buyer=buyer, auction_id=auction_id)
 
 
 @bidding_bp.route('/buyer/auction/<auction_id>/api', methods=['GET'])
@@ -1295,11 +1298,13 @@ def reject_counter_offer(counter_offer_id):
 
 @bidding_bp.route('/buyer/my-bids')
 def my_bids():
-    """View buyer's bids"""
+    """View buyer's bids - redirect to dashboard"""
     if 'buyer_id_verified' not in session:
         return redirect(url_for('buyer_auth.buyer_login'))
     
-    return render_template('buyer_my_bids.html')
+    buyer_id = session['buyer_id_verified']
+    buyer = Buyer.query.get(buyer_id)
+    return render_template('buyer_dashboard.html', buyer=buyer)
 
 
 @bidding_bp.route('/buyer/bids/api', methods=['GET'])
@@ -1376,11 +1381,13 @@ def get_my_bids():
 
 @bidding_bp.route('/buyer/won-auctions')
 def won_auctions():
-    """View buyer's won auctions"""
+    """View buyer's won auctions - redirect to dashboard"""
     if 'buyer_id_verified' not in session:
         return redirect(url_for('buyer_auth.buyer_login'))
     
-    return render_template('buyer_won_auctions.html')
+    buyer_id = session['buyer_id_verified']
+    buyer = Buyer.query.get(buyer_id)
+    return render_template('buyer_dashboard.html', buyer=buyer)
 
 
 @bidding_bp.route('/buyer/won-auctions/api', methods=['GET'])
@@ -1552,4 +1559,345 @@ def buyer_stats():
         }), 200
         
     except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+# ==================== AUCTION CHAT SYSTEM ====================
+
+@bidding_bp.route('/buyer/chat/initiate', methods=['POST'])
+def initiate_chat():
+    """Buyer initiates chat with farmer when winning auction"""
+    if 'buyer_id_verified' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    buyer_id = session['buyer_id_verified']
+    
+    try:
+        data = request.get_json()
+        auction_id = data.get('auction_id')
+        initial_message = data.get('message', '')
+        
+        if not auction_id:
+            return jsonify({'error': 'Auction ID required'}), 400
+        
+        auction = Auction.query.get(auction_id)
+        if not auction:
+            return jsonify({'error': 'Auction not found'}), 404
+        
+        farmer_id = auction.farmer_id
+        
+        # Check if chat already exists for this buyer-farmer pair on this auction
+        from models_marketplace_keep import Chat, ChatMessage
+        existing_chat = Chat.query.filter_by(
+            buyer_id=buyer_id,
+            farmer_id=farmer_id,
+            auction_id=auction_id
+        ).first()
+        
+        if existing_chat:
+            chat = existing_chat
+        else:
+            # Create new chat
+            chat = Chat(
+                buyer_id=buyer_id,
+                farmer_id=farmer_id,
+                auction_id=auction_id,
+                crop_name=auction.crop_name
+            )
+            db.session.add(chat)
+            db.session.flush()
+        
+        # Add initial message if provided
+        if initial_message.strip():
+            buyer = Buyer.query.get(buyer_id)
+            message = ChatMessage(
+                chat_id=chat.id,
+                sender_type='buyer',
+                sender_id=buyer_id,
+                sender_name=buyer.buyer_name if buyer else 'Buyer',
+                message=initial_message,
+                is_read=False
+            )
+            db.session.add(message)
+            chat.last_message_at = datetime.utcnow()
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'chat_id': chat.id,
+            'message': 'Chat initiated successfully'
+        }), 201
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+@bidding_bp.route('/buyer/chats/list', methods=['GET'])
+def get_buyer_chats():
+    """Get all chats for buyer"""
+    if 'buyer_id_verified' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    buyer_id = session['buyer_id_verified']
+    
+    try:
+        from models_marketplace_keep import Chat
+        chats = Chat.query.filter_by(buyer_id=buyer_id, is_active=True).order_by(
+            Chat.last_message_at.desc()
+        ).all()
+        
+        chats_data = []
+        for chat in chats:
+            farmer = Farmer.query.get(chat.farmer_id)
+            unread_count = sum(1 for msg in chat.messages if not msg.is_read and msg.sender_type == 'farmer')
+            last_message = chat.messages[-1] if chat.messages else None
+            
+            chats_data.append({
+                'chat_id': chat.id,
+                'auction_id': chat.auction_id,
+                'farmer_id': chat.farmer_id,
+                'farmer_name': farmer.name if farmer else 'Unknown Farmer',
+                'crop_name': chat.crop_name,
+                'unread_count': unread_count,
+                'last_message': last_message.message if last_message else 'No messages yet',
+                'last_message_time': last_message.created_at.isoformat() if last_message else None,
+                'last_message_sender': last_message.sender_type if last_message else None,
+                'updated_at': chat.updated_at.isoformat()
+            })
+        
+        return jsonify({
+            'chats': chats_data,
+            'total': len(chats_data)
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@bidding_bp.route('/buyer/chat/<chat_id>/messages', methods=['GET'])
+def get_chat_messages(chat_id):
+    """Get messages in a chat"""
+    if 'buyer_id_verified' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    buyer_id = session['buyer_id_verified']
+    
+    try:
+        from models_marketplace_keep import Chat
+        chat = Chat.query.get(chat_id)
+        
+        if not chat:
+            return jsonify({'error': 'Chat not found'}), 404
+        
+        if chat.buyer_id != buyer_id:
+            return jsonify({'error': 'Unauthorized'}), 403
+        
+        # Mark farmer messages as read
+        for message in chat.messages:
+            if message.sender_type == 'farmer' and not message.is_read:
+                message.is_read = True
+        db.session.commit()
+        
+        messages_data = [{
+            'message_id': msg.id,
+            'sender_type': msg.sender_type,
+            'sender_name': msg.sender_name,
+            'message': msg.message,
+            'timestamp': msg.created_at.isoformat(),
+            'is_read': msg.is_read
+        } for msg in chat.messages]
+        
+        return jsonify({
+            'chat_id': chat_id,
+            'messages': messages_data,
+            'total': len(messages_data)
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@bidding_bp.route('/buyer/chat/<chat_id>/send', methods=['POST'])
+def send_buyer_message(chat_id):
+    """Send a message in chat (buyer)"""
+    if 'buyer_id_verified' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    buyer_id = session['buyer_id_verified']
+    
+    try:
+        from models_marketplace_keep import Chat, ChatMessage
+        chat = Chat.query.get(chat_id)
+        
+        if not chat:
+            return jsonify({'error': 'Chat not found'}), 404
+        
+        if chat.buyer_id != buyer_id:
+            return jsonify({'error': 'Unauthorized'}), 403
+        
+        data = request.get_json()
+        message_text = data.get('message', '').strip()
+        
+        if not message_text:
+            return jsonify({'error': 'Message cannot be empty'}), 400
+        
+        buyer = Buyer.query.get(buyer_id)
+        message = ChatMessage(
+            chat_id=chat_id,
+            sender_type='buyer',
+            sender_id=buyer_id,
+            sender_name=buyer.buyer_name if buyer else 'Buyer',
+            message=message_text,
+            is_read=False
+        )
+        
+        chat.last_message_at = datetime.utcnow()
+        db.session.add(message)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message_id': message.id,
+            'timestamp': message.created_at.isoformat()
+        }), 201
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+@bidding_bp.route('/farmer/chats/list', methods=['GET'])
+def get_farmer_chats():
+    """Get all chats for farmer"""
+    if 'farmer_id_verified' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    farmer_id = session['farmer_id_verified']
+    
+    try:
+        from models_marketplace_keep import Chat
+        chats = Chat.query.filter_by(farmer_id=farmer_id, is_active=True).order_by(
+            Chat.last_message_at.desc()
+        ).all()
+        
+        chats_data = []
+        for chat in chats:
+            buyer = Buyer.query.get(chat.buyer_id)
+            unread_count = sum(1 for msg in chat.messages if not msg.is_read and msg.sender_type == 'buyer')
+            last_message = chat.messages[-1] if chat.messages else None
+            
+            chats_data.append({
+                'chat_id': chat.id,
+                'auction_id': chat.auction_id,
+                'buyer_id': chat.buyer_id,
+                'buyer_name': buyer.buyer_name if buyer else 'Unknown Buyer',
+                'buyer_company': buyer.company_name if buyer else 'N/A',
+                'crop_name': chat.crop_name,
+                'unread_count': unread_count,
+                'last_message': last_message.message if last_message else 'No messages yet',
+                'last_message_time': last_message.created_at.isoformat() if last_message else None,
+                'last_message_sender': last_message.sender_type if last_message else None,
+                'updated_at': chat.updated_at.isoformat()
+            })
+        
+        return jsonify({
+            'chats': chats_data,
+            'total': len(chats_data)
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@bidding_bp.route('/farmer/chat/<chat_id>/messages', methods=['GET'])
+def get_farmer_chat_messages(chat_id):
+    """Get messages in a chat (farmer view)"""
+    if 'farmer_id_verified' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    farmer_id = session['farmer_id_verified']
+    
+    try:
+        from models_marketplace_keep import Chat
+        chat = Chat.query.get(chat_id)
+        
+        if not chat:
+            return jsonify({'error': 'Chat not found'}), 404
+        
+        if chat.farmer_id != farmer_id:
+            return jsonify({'error': 'Unauthorized'}), 403
+        
+        # Mark buyer messages as read
+        for message in chat.messages:
+            if message.sender_type == 'buyer' and not message.is_read:
+                message.is_read = True
+        db.session.commit()
+        
+        messages_data = [{
+            'message_id': msg.id,
+            'sender_type': msg.sender_type,
+            'sender_name': msg.sender_name,
+            'message': msg.message,
+            'timestamp': msg.created_at.isoformat(),
+            'is_read': msg.is_read
+        } for msg in chat.messages]
+        
+        return jsonify({
+            'chat_id': chat_id,
+            'messages': messages_data,
+            'total': len(messages_data)
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@bidding_bp.route('/farmer/chat/<chat_id>/send', methods=['POST'])
+def send_farmer_message(chat_id):
+    """Send a message in chat (farmer)"""
+    if 'farmer_id_verified' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    farmer_id = session['farmer_id_verified']
+    
+    try:
+        from models_marketplace_keep import Chat, ChatMessage
+        chat = Chat.query.get(chat_id)
+        
+        if not chat:
+            return jsonify({'error': 'Chat not found'}), 404
+        
+        if chat.farmer_id != farmer_id:
+            return jsonify({'error': 'Unauthorized'}), 403
+        
+        data = request.get_json()
+        message_text = data.get('message', '').strip()
+        
+        if not message_text:
+            return jsonify({'error': 'Message cannot be empty'}), 400
+        
+        farmer = Farmer.query.get(farmer_id)
+        message = ChatMessage(
+            chat_id=chat_id,
+            sender_type='farmer',
+            sender_id=farmer_id,
+            sender_name=farmer.name if farmer else 'Farmer',
+            message=message_text,
+            is_read=False
+        )
+        
+        chat.last_message_at = datetime.utcnow()
+        db.session.add(message)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message_id': message.id,
+            'timestamp': message.created_at.isoformat()
+        }), 201
+        
+    except Exception as e:
+        db.session.rollback()
         return jsonify({'error': str(e)}), 500
