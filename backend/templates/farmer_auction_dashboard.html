@@ -1,26 +1,26 @@
 {% extends "base.html" %}
 
-{% block title %}Farmer Auction Dashboard - तेलहान साथी{% endblock %}
+{% block title %}किसान नीलामी डैशबोर्ड - तेलहान साथी{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="page-header">
         <div class="header-top">
-            <h1>🎯 Nilami (Bidding) Dashboard</h1>
+            <h1>🎯 नीलामी (बिडिंग) डैशबोर्ड</h1>
             <button class="btn btn-primary btn-create-auction" onclick="goToCreateAuction()">
-                <span>➕</span> Create New Auction
+                <span>➕</span> क्रिएट न्यू ऑक्शन
             </button>
         </div>
-        <p>Manage your oilseed auctions and view bids</p>
+        <p>अपनी तिलहन नीलामी सम्मान करें और बिड्स देखें</p>
     </div>
 
     <!-- Tab Navigation -->
     <div class="tabs-navigation">
         <button class="tab-btn active" onclick="switchTab('overview')" id="tabBtn-overview">
-            📊 Overview
+            📊 ओवरव्यू
         </button>
         <button class="tab-btn" onclick="switchTab('auctions')" id="tabBtn-auctions">
-            🎯 My Auctions
+            🎯 मेरी नीलामी
         </button>
     </div>
 
@@ -31,28 +31,28 @@
             <div class="stat-card">
                 <div class="stat-icon">📊</div>
                 <div class="stat-content">
-                    <div class="stat-label">Active Auctions</div>
+                    <div class="stat-label">एक्टिव नीलामी</div>
                     <div class="stat-value" id="activeCount">0</div>
                 </div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">✅</div>
                 <div class="stat-content">
-                    <div class="stat-label">Completed</div>
+                    <div class="stat-label">कम्प्लीटेड</div>
                     <div class="stat-value" id="completedCount">0</div>
                 </div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">💰</div>
                 <div class="stat-content">
-                    <div class="stat-label">Best Price</div>
+                    <div class="stat-label">बेस्ट प्राइस</div>
                     <div class="stat-value" id="bestPrice">₹0</div>
                 </div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">📈</div>
                 <div class="stat-content">
-                    <div class="stat-label">Total Bids</div>
+                    <div class="stat-label">टोटल बिड्स</div>
                     <div class="stat-value" id="totalBids">0</div>
                 </div>
             </div>
@@ -63,30 +63,30 @@
     <div id="auctions-tab" class="tab-content">
         <div class="auctions-section-header">
             <div class="auction-header-section">
-                <h2 style="margin: 0;">My Auctions</h2>
+                <h2 style="margin: 0;">मेरी नीलामी</h2>
                 
                 <!-- Status Filter Buttons -->
                 <div class="auction-filter-buttons">
                     <button onclick="filterAuctionsByStatus('all')" id="filterBtn-all" class="status-filter-btn active" style="background: #388e3c; color: white;">
-                        All
+                        ऑल
                     </button>
                     <button onclick="filterAuctionsByStatus('active')" id="filterBtn-active" class="status-filter-btn" style="border: 2px solid #ff9800; color: #ff9800;">
-                        ⏳ Active
+                        ⏳ एक्टिव
                     </button>
                     <button onclick="filterAuctionsByStatus('completed')" id="filterBtn-completed" class="status-filter-btn" style="border: 2px solid #4caf50; color: #4caf50;">
-                        ✅ Completed
+                        ✅ कम्प्लीटेड
                     </button>
                     <button onclick="filterAuctionsByStatus('cancelled')" id="filterBtn-cancelled" class="status-filter-btn" style="border: 2px solid #f44336; color: #f44336;">
-                        ❌ Cancelled
+                        ❌ कैंसल्ड
                     </button>
                 </div>
             </div>
             <button class="btn btn-secondary btn-refresh-auctions" onclick="refreshData()">
-                <span>🔄</span> Refresh
+                <span>🔄</span> रिफ्रेश
             </button>
         </div>
         <div id="auctionsList" class="auctions-grid">
-            <div class="loading">Loading auctions...</div>
+            <div class="loading">नीलामी लोड हो रही है...</div>
         </div>
     </div>
 
@@ -94,7 +94,7 @@
     <div id="manageModal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Manage Auction</h3>
+                <h3>नीलामी मैनेज</h3>
                 <button class="close-btn" onclick="closeManageModal()">✕</button>
             </div>
             <div class="modal-body">
@@ -102,36 +102,36 @@
                     <button class="manage-btn accept-btn" onclick="acceptBid()">
                         <span>✅</span>
                         <div>
-                            <div class="btn-title">Accept Bid</div>
-                            <div class="btn-desc">Accept the highest bid</div>
+                            <div class="btn-title">एक्सेप्ट बिड</div>
+                            <div class="btn-desc">हाईएस्ट बिड एक्सेप्ट करें</div>
                         </div>
                     </button>
                     <button class="manage-btn counter-btn" onclick="sendCounterOffer()">
                         <span>💬</span>
                         <div>
-                            <div class="btn-title">Counter Offer</div>
-                            <div class="btn-desc">Send counter price offer</div>
+                            <div class="btn-title">काउंटर ऑफर</div>
+                            <div class="btn-desc">काउंटर प्राइस ऑफर भेजें</div>
                         </div>
                     </button>
                     <button class="manage-btn extend-btn" onclick="extendAuction()">
                         <span>⏱️</span>
                         <div>
-                            <div class="btn-title">Extend Duration</div>
-                            <div class="btn-desc">Add more time to auction</div>
+                            <div class="btn-title">एक्सटेंड ड्यूरेशन</div>
+                            <div class="btn-desc">ऑक्शन का टाइम बढ़ाएं</div>
                         </div>
                     </button>
                     <button class="manage-btn update-btn" onclick="updateMinimumPrice()">
                         <span>💰</span>
                         <div>
-                            <div class="btn-title">Update Price</div>
-                            <div class="btn-desc">Change minimum price</div>
+                            <div class="btn-title">अपडेट प्राइस</div>
+                            <div class="btn-desc">मिनिमम प्राइस बदलें</div>
                         </div>
                     </button>
                     <button class="manage-btn cancel-btn" onclick="cancelAuction()">
                         <span>❌</span>
                         <div>
-                            <div class="btn-title">Cancel Auction</div>
-                            <div class="btn-desc">Cancel this auction</div>
+                            <div class="btn-title">कैंसल ऑक्शन</div>
+                            <div class="btn-desc">इस ऑक्शन को कैंसल करें</div>
                         </div>
                     </button>
                 </div>

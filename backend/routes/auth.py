@@ -3,6 +3,8 @@ from datetime import datetime
 from functools import wraps
 import sys
 import os
+from werkzeug.utils import secure_filename
+import secrets
 
 # Avoid circular imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -11,6 +13,40 @@ from models import Farmer, OTPRecord
 from extensions import db
 from utils import generate_otp, send_otp_sms, calculate_otp_expiry, is_farmer_eligible_for_subsidy
 from models_marketplace_keep import Chat, ChatMessage
+
+# Profile picture upload configuration
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'static', 'uploads', 'profile_pics')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def save_profile_pic(file, farmer_id):
+    """Save profile picture and return filename"""
+    if not file or file.filename == '':
+        return None
+    
+    if not allowed_file(file.filename):
+        return None
+    
+    # Check file size
+    file.seek(0, os.SEEK_END)
+    file_size = file.tell()
+    file.seek(0)
+    
+    if file_size > MAX_FILE_SIZE:
+        return None
+    
+    # Generate unique filename
+    ext = secure_filename(file.filename).rsplit('.', 1)[1].lower()
+    filename = f"farmer_{farmer_id}_{secrets.token_hex(8)}.{ext}"
+    filepath = os.path.join(UPLOAD_FOLDER, filename)
+    file.save(filepath)
+    
+    return filename
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -124,26 +160,25 @@ def login_with_mobile():
             farmer = Farmer(
                 farmer_id=generate_farmer_id(),
                 phone_number=mobile_number,
-                name=f'Farmer_{mobile_number}',  # Temporary name, will be updated in extended onboarding
-                district='',  # Will be updated in extended onboarding
+                name='',  # Will be filled during onboarding
+                district='',  # Will be updated in onboarding
                 onboarding_completed=False,
-                is_verified=True  # Mark as verified since they'll complete onboarding
+                is_verified=True,  # Mark as verified since they'll complete onboarding
+                coins_earned=0  # Initialize coins to 0
             )
             db.session.add(farmer)
             db.session.commit()
             
-            # Mark for extended onboarding flow
+            # Mark as new farmer
             session['new_farmer'] = True
-            session['needs_extended_onboarding'] = True
             
         except Exception as e:
             db.session.rollback()
             print(f"Error creating farmer: {str(e)}")  # Log the error for debugging
             return render_template('login.html', error='Error creating farmer profile. Please try again.')
     else:
-        # Clear extended onboarding flag for existing farmers
+        # Mark as existing farmer
         session['new_farmer'] = False
-        session['needs_extended_onboarding'] = False
     
     # Generate and send OTP
     otp_code = generate_otp()
@@ -223,7 +258,7 @@ def verify_otp_post():
     session['farmer_kisan_id'] = farmer.farmer_id
     
     # If the farmer has completed onboarding previously, go to dashboard.
-    # Otherwise start onboarding to collect minimal context.
+    # Otherwise route to unified onboarding to collect comprehensive profile information.
     try:
         if getattr(farmer, 'onboarding_completed', False):
             return redirect(url_for('dashboard'))
@@ -231,11 +266,7 @@ def verify_otp_post():
         # If any issue accessing the flag, fall back to onboarding
         pass
 
-    # Check if this is a new farmer logging in via mobile - send to extended onboarding
-    if session.get('needs_extended_onboarding'):
-        return redirect(url_for('onboarding.extended_onboarding'))
-    
-    # Else redirect to standard onboarding
+    # Redirect to consolidated onboarding form
     return redirect(url_for('onboarding.onboarding'))
 
 
@@ -320,19 +351,30 @@ def api_current_farmer():
         'id': farmer.id,
         'name': farmer.name,
         'farmer_id': farmer.farmer_id,
-        'phone': farmer.phone_number,
+        'phone_number': farmer.phone_number,
+        'gender': farmer.gender,
+        'date_of_birth': farmer.date_of_birth.isoformat() if farmer.date_of_birth else None,
+        'caste_category': farmer.caste_category,
+        'is_physically_handicapped': farmer.is_physically_handicapped,
+        'permanent_address': farmer.permanent_address,
         'village': farmer.village,
         'taluka': farmer.taluka,
         'district': farmer.district,
         'state': farmer.state,
+        'pincode': farmer.pincode,
         'total_land_area_hectares': farmer.total_land_area_hectares,
-        'land_type': farmer.soil_type,
-        'current_crops': farmer.current_crops,
+        'land_area_gunthas': farmer.land_area_gunthas,
+        'land_holder_type': farmer.land_holder_type,
+        'land_unit': farmer.land_unit,
+        'soil_type': farmer.soil_type,
         'water_type': farmer.water_type,
-        'is_verified': farmer.is_verified,
-        'photo_url': None,
-        'date_of_birth': farmer.date_of_birth.isoformat() if farmer.date_of_birth else None,
-        'gender': farmer.gender
+        'current_crops': farmer.current_crops,
+        'harvest_date': farmer.harvest_date,
+        'is_oilseed_farmer': farmer.is_oilseed_farmer,
+        'annual_income': farmer.annual_income,
+        'is_pm_kisan_beneficiary': farmer.is_pm_kisan_beneficiary,
+        'coins_earned': farmer.coins_earned,
+        'is_verified': farmer.is_verified
     })
 
 
@@ -461,4 +503,131 @@ def send_farmer_chat_message(chat_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
+
+
+# ===== EDIT PROFILE ROUTES =====
+
+@auth_bp.route('/edit-profile', methods=['GET'])
+@login_required
+def edit_profile():
+    """Serve edit profile page"""
+    farmer_id = session.get('farmer_id_verified')
+    farmer = Farmer.query.filter_by(id=farmer_id).first()
+    
+    if not farmer:
+        return redirect(url_for('auth.login'))
+    
+    pre = farmer.to_dict()
+    return render_template('edit_profile.html', pre=pre)
+
+
+@auth_bp.route('/edit-profile', methods=['POST'])
+@login_required
+def edit_profile_post():
+    """Process edit profile form"""
+    farmer_id = session.get('farmer_id_verified')
+    farmer = Farmer.query.filter_by(id=farmer_id).first()
+    
+    if not farmer:
+        return redirect(url_for('auth.login'))
+    
+    try:
+        # Update basic fields
+        if request.form.get('name'):
+            farmer.name = request.form.get('name').strip()
+        
+        if request.form.get('date_of_birth'):
+            try:
+                farmer.date_of_birth = datetime.strptime(request.form.get('date_of_birth'), "%Y-%m-%d")
+            except:
+                pass
+        
+        if request.form.get('gender'):
+            farmer.gender = request.form.get('gender').strip()
+        
+        if request.form.get('caste_category'):
+            farmer.caste_category = request.form.get('caste_category').strip()
+        
+        if request.form.get('permanent_address'):
+            farmer.permanent_address = request.form.get('permanent_address').strip()
+        
+        if request.form.get('district'):
+            farmer.district = request.form.get('district').strip()
+        
+        if request.form.get('taluka'):
+            farmer.taluka = request.form.get('taluka').strip()
+        
+        if request.form.get('village'):
+            farmer.village = request.form.get('village').strip()
+        
+        if request.form.get('state'):
+            farmer.state = request.form.get('state').strip()
+        
+        if request.form.get('pincode'):
+            farmer.pincode = request.form.get('pincode').strip()
+        
+        # Update farming fields
+        if request.form.get('land_holder_type'):
+            farmer.land_holder_type = request.form.get('land_holder_type').strip()
+        
+        if request.form.get('soil_type'):
+            farmer.soil_type = request.form.get('soil_type').strip()
+        
+        if request.form.get('water_type'):
+            farmer.water_type = request.form.get('water_type').strip()
+        
+        if request.form.get('current_crops'):
+            farmer.current_crops = request.form.get('current_crops').strip()
+        
+        if request.form.get('land_area_gunthas'):
+            try:
+                farmer.land_area_gunthas = float(request.form.get('land_area_gunthas'))
+            except:
+                pass
+        
+        if request.form.get('total_land_area_hectares'):
+            try:
+                farmer.total_land_area_hectares = float(request.form.get('total_land_area_hectares'))
+            except:
+                pass
+        
+        if request.form.get('harvest_date'):
+            try:
+                farmer.harvest_date = datetime.strptime(request.form.get('harvest_date'), "%Y-%m-%d")
+            except:
+                pass
+        
+        # Update boolean fields
+        is_oilseed = request.form.get('is_oilseed_farmer', '').lower() == 'yes'
+        farmer.is_oilseed_farmer = is_oilseed
+        
+        is_pm_kisan = request.form.get('is_pm_kisan_beneficiary', '').lower() == 'yes'
+        farmer.is_pm_kisan_beneficiary = is_pm_kisan
+        
+        is_handicapped = request.form.get('is_physically_handicapped', '').lower() == 'yes'
+        farmer.is_physically_handicapped = is_handicapped
+        
+        # Update financial field
+        if request.form.get('annual_income'):
+            try:
+                farmer.annual_income = float(request.form.get('annual_income'))
+            except:
+                pass
+        
+        # Handle profile picture upload
+        if 'profile_pic' in request.files:
+            pic_file = request.files['profile_pic']
+            if pic_file and pic_file.filename:
+                new_pic = save_profile_pic(pic_file, farmer.id)
+                if new_pic:
+                    farmer.profile_pic = new_pic
+        
+        farmer.updated_at = datetime.utcnow()
+        db.session.commit()
+        
+        return redirect(url_for('auth.profile'))
+    
+    except Exception as e:
+        db.session.rollback()
+        return render_template('edit_profile.html', pre=farmer.to_dict(), error=str(e))
 

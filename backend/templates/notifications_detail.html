@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notification Details - TelhanSathi</title>
+    <title>सूचना विवरण - TelhanSathi</title>
     <style>
         * {
             margin: 0;
@@ -311,21 +311,21 @@
         <!-- Header -->
         <div class="header">
             <button class="back-btn" onclick="window.history.back()">←</button>
-            <h1>Notification</h1>
+            <h1>📬 सूचना</h1>
         </div>
 
         <!-- Content -->
         <div class="content" id="notification-detail">
             <div class="empty-state">
                 <div class="empty-state-icon">⏳</div>
-                <p>Loading notification...</p>
+                <p>सूचना लोड हो रही है...</p>
             </div>
         </div>
 
         <!-- Footer -->
         <div class="footer">
-            <button class="btn-back" onclick="window.history.back()">← Back</button>
-            <button class="btn-delete" onclick="deleteNotification()">Delete</button>
+            <button class="btn-back" onclick="window.history.back()">← वापस</button>
+            <button class="btn-delete" onclick="deleteNotification()">हटाएं</button>
         </div>
     </div>
 
@@ -363,7 +363,7 @@
         // Format date
         function formatDate(dateString) {
             const date = new Date(dateString);
-            return date.toLocaleDateString('en-IN', {
+            return date.toLocaleDateString('hi-IN', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
@@ -387,7 +387,7 @@
                 document.getElementById('notification-detail').innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon">❌</div>
-                        <p>${err.message}</p>
+                        <p>त्रुटि: ${err.message}</p>
                     </div>
                 `;
             }
@@ -399,19 +399,19 @@
             const icon = getNotificationIcon(notif.type);
             const formattedDate = formatDate(notif.createdAt);
             const statusClass = notif.isRead ? '' : 'unread';
-            const statusText = notif.isRead ? 'Read' : 'Unread';
+            const statusText = notif.isRead ? 'पढ़ा गया' : 'अपढ़ा';
 
             let html = `
-                <div class="notification-badge ${notif.relatedType}">${notif.relatedType || notif.type}</div>
-                <div class="notification-icon-large ${typeColor}">${icon}</div>
-                <h2 class="notification-title">${escapeHtml(notif.title)}</h2>
+                <div class="notification-badge ${notif.relatedType}\">${notif.relatedType || notif.type}</div>
+                <div class="notification-icon-large ${typeColor}\">${icon}</div>
+                <h2 class="notification-title\">${escapeHtml(notif.title)}</h2>
                 
-                <div class="notification-meta">
-                    <div class="notification-time">
+                <div class="notification-meta\">
+                    <div class="notification-time\">
                         <span>${formattedDate}</span>
-                        <span>ID: ${notif.id.substring(0, 8)}</span>
+                        <span>आईडी: ${notif.id.substring(0, 8)}</span>
                     </div>
-                    <span class="notification-status ${statusClass}">${statusText}</span>
+                    <span class="notification-status ${statusClass}\">${statusText}</span>
                 </div>
 
                 <div class="notification-description">
@@ -421,11 +421,11 @@
 
             if (notif.relatedId || notif.relatedType) {
                 html += `
-                    <div class="info-section">
-                        <div class="info-section-title">Details</div>
-                        <div class="info-section-content">
-                            ${notif.relatedType ? `<div class="info-row"><span class="info-label">Type:</span><span class="info-value">${notif.relatedType}</span></div>` : ''}
-                            ${notif.relatedId ? `<div class="info-row"><span class="info-label">Reference ID:</span><span class="info-value">${notif.relatedId.substring(0, 12)}</span></div>` : ''}
+                    <div class="info-section\">
+                        <div class="info-section-title\">विवरण</div>
+                        <div class="info-section-content\">
+                            ${notif.relatedType ? `<div class="info-row\"><span class="info-label\">प्रकार:</span><span class="info-value\">${notif.relatedType}</span></div>` : ''}
+                            ${notif.relatedId ? `<div class="info-row\"><span class="info-label\">संदर्भ आईडी:</span><span class="info-value\">${notif.relatedId.substring(0, 12)}</span></div>` : ''}
                         </div>
                     </div>
                 `;
@@ -433,21 +433,21 @@
 
             if (notif.actionLink) {
                 html += `
-                    <a href="${notif.actionLink}" class="action-button">
-                        View Details →
+                    <a href=\"${notif.actionLink}\" class=\"action-button\">
+                        विवरण देखें →
                     </a>
                 `;
             }
 
             html += `
-                <div class="info-section">
-                    <div class="info-section-title">Timeline</div>
-                    <div class="info-section-content">
-                        <div class="info-row">
-                            <span class="info-label">Received:</span>
-                            <span class="info-value">${formattedDate}</span>
+                <div class="info-section\">
+                    <div class="info-section-title\">समयरेखा</div>
+                    <div class="info-section-content\">
+                        <div class="info-row\">
+                            <span class="info-label\">प्राप्त:</span>
+                            <span class="info-value\">${formattedDate}</span>
                         </div>
-                        ${notif.expiresAt ? `<div class="info-row"><span class="info-label">Expires:</span><span class="info-value">${formatDate(notif.expiresAt)}</span></div>` : ''}
+                        ${notif.expiresAt ? `<div class="info-row\"><span class="info-label\">समाप्त होता है:</span><span class="info-value\">${formatDate(notif.expiresAt)}</span></div>` : ''}
                     </div>
                 </div>
             `;
@@ -457,7 +457,7 @@
 
         // Delete notification
         function deleteNotification() {
-            if (confirm('Delete this notification?')) {
+            if (confirm('क्या आप इस सूचना को हटाना चाहते हैं?')) {
                 fetch(`/notifications/api/delete/${notificationId}`, { method: 'DELETE' })
                     .then(res => {
                         if (res.ok) {

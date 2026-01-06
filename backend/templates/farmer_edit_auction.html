@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Edit Auction - तेलहान साथी{% endblock %}
+{% block title %}नीलामी संशोधक - तेलहान साथी{% endblock %}
 
 {% block content %}
 <style>
@@ -249,20 +249,20 @@
 <div class="container">
     <div class="form-container">
         <div class="form-header">
-            <button class="back-btn" onclick="goBack()">← Back</button>
-            <h1>✏️ Edit Auction</h1>
-            <p>Update your oilseed harvest auction details</p>
+            <button class="back-btn" onclick="goBack()">← बैक</button>
+            <h1>✏️ ऑक्शन एडिट करें</h1>
+            <p>अपनी ऑयलसीड फसल ऑक्शन की डिटेल्स अपडेट करें</p>
         </div>
 
         <form id="editAuctionForm" class="auction-form">
             <!-- Crop Information Section -->
             <fieldset class="form-section">
-                <legend>Crop Information</legend>
+                <legend>क्रॉप जानकारी</legend>
                 
                 <div class="form-group">
-                    <label for="cropName">Crop Type *</label>
+                    <label for="cropName">क्रॉप टाइप *</label>
                     <select id="cropName" name="crop_name" required>
-                        <option value="">Select Crop</option>
+                        <option value="">क्रॉप सिलेक्ट करें</option>
                         <option value="Mustard" {% if auction.crop_name == 'Mustard' %}selected{% endif %}>Mustard (सरसों)</option>
                         <option value="Groundnut" {% if auction.crop_name == 'Groundnut' %}selected{% endif %}>Groundnut (मूंगफली)</option>
                         <option value="Sunflower" {% if auction.crop_name == 'Sunflower' %}selected{% endif %}>Sunflower (सूरजमुखी)</option>
@@ -274,40 +274,40 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="quantity">Quantity (Quintals) *</label>
+                        <label for="quantity">क्वांटिटी (क्विंटल) *</label>
                         <input type="number" id="quantity" name="quantity_quintals" min="1" step="0.1" value="{{ auction.quantity_quintals }}" required>
-                        <small>1 quintal = 100 kg</small>
+                        <small>1 क्विंटल = 100 किलो</small>
                     </div>
 
                     <div class="form-group">
-                        <label for="quality">Quality Grade</label>
+                        <label for="quality">क्वालिटी ग्रेड</label>
                         <select id="quality" name="quality_grade">
-                            <option value="Standard" {% if auction.quality_grade == 'Standard' %}selected{% endif %}>Standard</option>
-                            <option value="A" {% if auction.quality_grade == 'A' %}selected{% endif %}>Grade A - Premium</option>
-                            <option value="B" {% if auction.quality_grade == 'B' %}selected{% endif %}>Grade B - Good</option>
-                            <option value="C" {% if auction.quality_grade == 'C' %}selected{% endif %}>Grade C - Fair</option>
+                            <option value="Standard" {% if auction.quality_grade == 'Standard' %}selected{% endif %}>स्टैंडर्ड</option>
+                            <option value="A" {% if auction.quality_grade == 'A' %}selected{% endif %}>ग्रेड ए - प्रीमियम</option>
+                            <option value="B" {% if auction.quality_grade == 'B' %}selected{% endif %}>ग्रेड बी - गुड</option>
+                            <option value="C" {% if auction.quality_grade == 'C' %}selected{% endif %}>ग्रेड सी - नॉर्मल</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="description">Description (Optional)</label>
-                    <textarea id="description" name="description" rows="4" placeholder="Describe your harvest...">{{ auction.description or '' }}</textarea>
+                    <label for="description">विवरण (ऑप्शनल)</label>
+                    <textarea id="description" name="description" rows="4" placeholder="अपनी फसल के बारे में जानकारी लिखें...">{{ auction.description or '' }}</textarea>
                 </div>
             </fieldset>
 
             <!-- Pricing Section -->
             <fieldset class="form-section">
-                <legend>Pricing</legend>
+                <legend>प्राइसिंग</legend>
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="basePrice">Base Price (₹/quintal) *</label>
+                        <label for="basePrice">बेस प्राइस (₹/क्विंटल) *</label>
                         <input type="number" id="basePrice" name="base_price_per_quintal" min="0" step="0.01" value="{{ auction.base_price_per_quintal }}" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="minIncrement">Minimum Bid Increment (₹/quintal)</label>
+                        <label for="minIncrement">मिनिमम बिड इंक्रीमेंट (₹/क्विंटल)</label>
                         <input type="number" id="minIncrement" name="minimum_bid_increment" min="0" step="0.01" value="{{ auction.minimum_bid_increment }}">
                     </div>
                 </div>
@@ -315,47 +315,47 @@
 
             <!-- Location Section -->
             <fieldset class="form-section">
-                <legend>Location & Details</legend>
+                <legend>लोकेशन & डिटेल्स</legend>
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="location">Location *</label>
-                        <input type="text" id="location" name="location" value="{{ auction.location }}" placeholder="City/Village name" required>
+                        <label for="location">लोकेशन *</label>
+                        <input type="text" id="location" name="location" value="{{ auction.location }}" placeholder="शहर/गांव का नाम" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="district">District *</label>
-                        <input type="text" id="district" name="district" value="{{ auction.district }}" placeholder="District name" required>
+                        <label for="district">डिस्ट्रिक्ट *</label>
+                        <input type="text" id="district" name="district" value="{{ auction.district }}" placeholder="डिस्ट्रिक्ट का नाम" required>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="state">State</label>
-                        <input type="text" id="state" name="state" value="{{ auction.state or 'Maharashtra' }}" placeholder="State">
+                        <label for="state">स्टेट</label>
+                        <input type="text" id="state" name="state" value="{{ auction.state or 'Maharashtra' }}" placeholder="स्टेट">
                     </div>
 
                     <div class="form-group">
-                        <label for="storageLocation">Storage Location</label>
-                        <input type="text" id="storageLocation" name="storage_location" value="{{ auction.storage_location or '' }}" placeholder="Where is it stored?">
+                        <label for="storageLocation">स्टोरेज लोकेशन</label>
+                        <input type="text" id="storageLocation" name="storage_location" value="{{ auction.storage_location or '' }}" placeholder="फसल कहाँ रखी है">
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="harvestDate">Harvest Date</label>
+                    <label for="harvestDate">हार्वेस्ट डेट</label>
                     <input type="date" id="harvestDate" name="harvest_date" value="{{ auction.harvest_date if auction.harvest_date else '' }}">
                 </div>
             </fieldset>
 
             <!-- Photos Section -->
             <fieldset class="form-section">
-                <legend>📸 Harvest Photos</legend>
-                <p style="color: #666; margin-bottom: 15px; font-size: 13px;">You can update the photos for your auction</p>
+                <legend>📸 हार्वेस्ट फोटो</legend>
+                <p style="color: #666; margin-bottom: 15px; font-size: 13px;">आप अपनी ऑक्शन की फोटो अपडेट कर सकते हैं</p>
 
                 <div class="photos-grid">
                     <div class="photo-upload-item">
-                        <label>📷 Photo 1</label>
-                        <p style="font-size: 12px; color: #999; margin: 0 0 8px 0;">Main Harvest</p>
+                        <label>📷 फोटो 1</label>
+                        <p style="font-size: 12px; color: #999; margin: 0 0 8px 0;">मुख्य फसल</p>
                         {% if auction.photo1_path %}
                             <div class="photo-preview">
                                 <img src="{{ auction.photo1_path }}" alt="Photo 1">
@@ -366,8 +366,8 @@
                     </div>
 
                     <div class="photo-upload-item">
-                        <label>📷 Photo 2</label>
-                        <p style="font-size: 12px; color: #999; margin: 0 0 8px 0;">Detail View</p>
+                        <label>📷 फोटो 2</label>
+                        <p style="font-size: 12px; color: #999; margin: 0 0 8px 0;">डिटेल व्यू</p>
                         {% if auction.photo2_path %}
                             <div class="photo-preview">
                                 <img src="{{ auction.photo2_path }}" alt="Photo 2">
@@ -378,8 +378,8 @@
                     </div>
 
                     <div class="photo-upload-item">
-                        <label>📷 Photo 3</label>
-                        <p style="font-size: 12px; color: #999; margin: 0 0 8px 0;">Quality/Grade</p>
+                        <label>📷 फोटो 3</label>
+                        <p style="font-size: 12px; color: #999; margin: 0 0 8px 0;">क्वालिटी/ग्रेड</p>
                         {% if auction.photo3_path %}
                             <div class="photo-preview">
                                 <img src="{{ auction.photo3_path }}" alt="Photo 3">
@@ -390,8 +390,8 @@
                     </div>
 
                     <div class="photo-upload-item">
-                        <label>📷 Photo 4</label>
-                        <p style="font-size: 12px; color: #999; margin: 0 0 8px 0;">Storage/Packaging</p>
+                        <label>📷 फोटो 4</label>
+                        <p style="font-size: 12px; color: #999; margin: 0 0 8px 0;">स्टोरेज/पैकेजिंग</p>
                         {% if auction.photo4_path %}
                             <div class="photo-preview">
                                 <img src="{{ auction.photo4_path }}" alt="Photo 4">
@@ -405,8 +405,8 @@
 
             <!-- Action Buttons -->
             <div class="form-actions">
-                <button type="button" class="btn btn-primary" onclick="submitForm()">💾 Save Changes</button>
-                <button type="button" class="btn btn-secondary" onclick="goBack()">← Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitForm()">💾 सेव चेंजेस</button>
+                <button type="button" class="btn btn-secondary" onclick="goBack()">← कैंसल</button>
             </div>
             <br><br><br>
         </form>
@@ -463,19 +463,19 @@
             const data = await response.json();
             
             if (data.success) {
-                messageDiv.innerHTML = `<div style="background: #d4edda; color: #155724; padding: 12px; border-radius: 6px;">✅ ${data.message}</div>`;
+                messageDiv.innerHTML = `<div style="background: #d4edda; color: #155724; padding: 12px; border-radius: 6px;">✅ ${data.message || 'ऑक्शन सफलतापूर्वक अपडेट हो गया!'}</div>`;
                 setTimeout(() => {
                     // Redirect to auction details page
                     window.location.href = `/bidding/farmer/auction/{{ auction.id }}/details`;
                 }, 1500);
             } else {
-                messageDiv.innerHTML = `<div style="background: #f8d7da; color: #721c24; padding: 12px; border-radius: 6px;">❌ ${data.error}</div>`;
+                messageDiv.innerHTML = `<div style="background: #f8d7da; color: #721c24; padding: 12px; border-radius: 6px;">❌ ${data.error || 'ऑक्शन अपडेट करने में समस्या'}</div>`;
                 submitBtn.disabled = false;
                 submitBtn.textContent = '💾 Save Changes';
             }
         } catch (error) {
             console.error('Error:', error);
-            messageDiv.innerHTML = `<div style="background: #f8d7da; color: #721c24; padding: 12px; border-radius: 6px;">❌ Error updating auction: ${error.message}</div>`;
+            messageDiv.innerHTML = `<div style="background: #f8d7da; color: #721c24; padding: 12px; border-radius: 6px;">❌ ऑक्शन अपडेट करने में एरर: ${error.message}</div>`;
             submitBtn.disabled = false;
             submitBtn.textContent = '💾 Save Changes';
         }

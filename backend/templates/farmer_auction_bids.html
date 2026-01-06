@@ -1,18 +1,18 @@
 {% extends "base.html" %}
 
-{% block title %}Auction Bids - तेलहान साथी{% endblock %}
+{% block title %}नीलामी संदेश - तेलहान साथी{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="page-header">
-        <button class="back-btn" onclick="goBack()">← Back</button>
-        <h1>📊 Bids for Your Auction</h1>
+        <button class="back-btn" onclick="goBack()">← बैक</button>
+        <h1>📊 आपकी नीलामी बिड्स</h1>
     </div>
 
     <!-- Bids List -->
     <div class="bids-section">
         <div id="bidsList" class="bids-list">
-            <div class="loading">Loading bids...</div>
+            <div class="loading">बिड्स लोड हो रही हैं...</div>
         </div>
     </div>
 </div>
@@ -213,7 +213,7 @@ async function loadBids() {
                 bidsList.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-icon">📭</div>
-                        <div class="empty-text">No bids initiated yet</div>
+                        <div class="empty-text">कोई बिड्स शुरू नहीं हुई हैं</div>
                     </div>
                 `;
             } else {
@@ -227,15 +227,15 @@ async function loadBids() {
                         
                         <div class="bid-details">
                             <div class="detail-item">
-                                <div class="detail-label">Bid Price</div>
+                                <div class="detail-label">बिड प्राइस</div>
                                 <div class="detail-value">₹${bid.bid_price.toLocaleString('en-IN')}/q</div>
                             </div>
                             <div class="detail-item">
-                                <div class="detail-label">Total Amount</div>
+                                <div class="detail-label">टोटल अमाउंट</div>
                                 <div class="detail-value">₹${bid.bid_total.toLocaleString('en-IN')}</div>
                             </div>
                             <div class="detail-item">
-                                <div class="detail-label">Bid Date</div>
+                                <div class="detail-label">बिड डेट</div>
                                 <div class="detail-value">${new Date(bid.created_at).toLocaleDateString()}</div>
                             </div>
                         </div>
@@ -253,8 +253,8 @@ async function loadBids() {
         bidsList.innerHTML = `
             <div style="padding: 40px; text-align: center; color: #f44336;">
                 <div style="font-size: 2em; margin-bottom: 10px;">⚠️</div>
-                <div style="font-size: 1.1em; font-weight: 600;">Failed to load bids</div>
-                <div style="font-size: 0.9em; color: #999; margin-top: 10px;">Please refresh the page and try again</div>
+                <div style="font-size: 1.1em; font-weight: 600;">बिड्स लोड करने में समस्या</div>
+                <div style="font-size: 0.9em; color: #999; margin-top: 10px;">पेज रिफ्रेश करें और फिर से कोशिश करें</div>
             </div>
         `;
     }

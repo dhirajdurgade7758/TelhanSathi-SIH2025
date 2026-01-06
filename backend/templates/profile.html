@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Profile - Telhan Sathi</title>
+    <title>मेरी प्रोफाइल - Telhan Sathi</title>
     <style>
         * {
             margin: 0;
@@ -304,20 +304,26 @@
                 <path d="M19 12H5M12 19l-7-7 7-7"/>
             </svg>
         </div>
-        <h1 class="header-title">My Profile</h1>
+        <h1 class="header-title">👤 मेरी प्रोफाइल</h1>
+        <a href="{{ url_for('auth.edit_profile') }}" class="header-edit" style="width: 32px; height: 32px; background: rgba(255,255,255,0.2); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; text-decoration: none; transition: background 0.3s;" title="संपादित करें">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+        </a>
     </header>
 
     <!-- Profile Hero -->
     <div class="profile-hero">
         <div class="profile-pic" id="profile-pic">👤</div>
         <div class="farmer-name" id="farmer-name">Loading...</div>
-        <div id="profile-id-text" style="font-size: 13px; opacity: 0.9;">Farmer ID: —</div>
+        <div id="profile-id-text" style="font-size: 13px; opacity: 0.9;">किसान आईडी: —</div>
         
-        <div class="verified-badge" id="verified-badge" style="display:none;">
+            <div class="verified-badge" id="verified-badge" style="display:none;">
             <svg viewBox="0 0 24 24" fill="currentColor">
                 <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
             </svg>
-            Verified
+            सत्यापित
         </div>
     </div>
 
@@ -329,7 +335,7 @@
                 <svg class="section-icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                 </svg>
-                Location
+                📍 स्थान
             </div>
             <div class="location-box">
                 <div class="location-value" id="location-text">—</div>
@@ -342,20 +348,32 @@
                 <svg class="section-icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                 </svg>
-                Basic Information
+                👤 मूल जानकारी
             </div>
             <div class="info-grid">
                 <div class="info-item">
-                    <div class="info-label">Phone</div>
+                    <div class="info-label">फोन</div>
                     <div class="info-value" id="phone-value">—</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Email</div>
-                    <div class="info-value" id="email-value">—</div>
+                    <div class="info-label">लिंग</div>
+                    <div class="info-value" id="gender-value">—</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">जन्म तिथि</div>
+                    <div class="info-value" id="dob-value">—</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">आयु</div>
+                    <div class="info-value" id="age-value">—</div>
                 </div>
                 <div class="info-item full-width">
-                    <div class="info-label">Age</div>
-                    <div class="info-value" id="age-value">—</div>
+                    <div class="info-label">जाति श्रेणी</div>
+                    <div class="info-value" id="caste-value">—</div>
+                </div>
+                <div class="info-item full-width">
+                    <div class="info-label">शारीरिक रूप से विकलांग</div>
+                    <div class="info-value" id="handicapped-value">—</div>
                 </div>
             </div>
         </div>
@@ -366,24 +384,44 @@
                 <svg class="section-icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M13 5.5C13 4.12 14.12 3 15.5 3S18 4.12 18 5.5V9h4V3c0-1.66-1.34-3-3-3h-1V1h-2v2h-4V1H9v2H8c-1.66 0-3 1.34-3 3v6h4V5.5zm8 8.5H3c-1.66 0-3 1.34-3 3v8c0 1.66 1.34 3 3 3h18c1.66 0 3-1.34 3-3v-8c0-1.66-1.34-3-3-3zm-1 10h-4v-4h4v4z"/>
                 </svg>
-                Land & Farming
+                🌾 भूमि और खेती
             </div>
             <div class="info-grid">
                 <div class="info-item">
-                    <div class="info-label">Total Land Area</div>
-                    <div class="info-value" id="land-area-value">—</div>
+                    <div class="info-label">कुल भूमि क्षेत्र (हेक्टेयर)</div>
+                    <div class="info-value" id="land-hectares-value">—</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Land Type</div>
-                    <div class="info-value" id="land-type-value">—</div>
+                    <div class="info-label">भूमि क्षेत्र (गुंठे)</div>
+                    <div class="info-value" id="land-gunthas-value">—</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">भूमि इकाई</div>
+                    <div class="info-value" id="land-unit-value">—</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">भूमि धारक का प्रकार</div>
+                    <div class="info-value" id="land-holder-type-value">—</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">मिट्टी का प्रकार</div>
+                    <div class="info-value" id="soil-type-value">—</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">पानी का प्रकार</div>
+                    <div class="info-value" id="water-type-value">—</div>
                 </div>
                 <div class="info-item full-width">
-                    <div class="info-label">Current Crops</div>
+                    <div class="info-label">वर्तमान फसलें</div>
                     <div class="info-value" id="crops-value">—</div>
                 </div>
-                <div class="info-item full-width">
-                    <div class="info-label">Irrigation Method</div>
-                    <div class="info-value" id="irrigation-value">—</div>
+                <div class="info-item">
+                    <div class="info-label">कटाई की तारीख</div>
+                    <div class="info-value" id="harvest-date-value">—</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">तिलहन किसान</div>
+                    <div class="info-value" id="oilseed-value">—</div>
                 </div>
             </div>
         </div>
@@ -394,41 +432,34 @@
                 <svg class="section-icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M0 0h24v24H0z" fill="none"/><path d="M11.8 10.9c-2.27-.59-3-1.38-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.91-1.08-3.45-3.75-3.9V3h-3v2.16c-1.96.23-2.5 1.15-2.5 2.64 0 2.31 1.91 2.61 4.51 3.21 2.3.52 2.8 1.31 2.8 2.05 0 .63-.3 1.5-2.7 1.5-2.26 0-2.91-.88-2.95-2.07h-2.2c.05 2.23 1.24 3.41 3.75 3.82V21h3v-2.15c1.96-.29 2.5-1.08 2.5-2.61 0-2.31-1.42-2.87-4.36-3.44z"/>
                 </svg>
-                Financial Information
+                💰 वित्तीय जानकारी
             </div>
             <div class="info-grid">
                 <div class="info-item">
-                    <div class="info-label">Bank Name</div>
-                    <div class="info-value" id="bank-value">—</div>
+                    <div class="info-label">वार्षिक आय</div>
+                    <div class="info-value" id="annual-income-value">—</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Account Number</div>
-                    <div class="info-value" id="account-value">—</div>
+                    <div class="info-label">अर्जित सिक्के</div>
+                    <div class="info-value" id="coins-earned-value">—</div>
                 </div>
-                <div class="info-item full-width">
-                    <div class="info-label">IFSC Code</div>
-                    <div class="info-value" id="ifsc-value">—</div>
+                <div class="info-item">
+                    <div class="info-label">PM-किसान लाभार्थी</div>
+                    <div class="info-value" id="pm-kisan-value">—</div>
                 </div>
             </div>
         </div>
 
-        <!-- Government IDs -->
+        <!-- Permanent Address -->
         <div class="section">
             <div class="section-title">
                 <svg class="section-icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12z"/>
                 </svg>
-                Government IDs
+                🏠 स्थायी पता
             </div>
-            <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label">Aadhar Number</div>
-                    <div class="info-value" id="aadhar-value">—</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Kisan ID</div>
-                    <div class="info-value" id="kisan-id-value">—</div>
-                </div>
+            <div class="location-box">
+                <div class="location-value" id="permanent-address-text">—</div>
             </div>
         </div>
     </div>
@@ -436,7 +467,7 @@
     <!-- Footer -->
     <div class="footer">
         <button class="btn-back-home" onclick="window.location.href='/dashboard'">
-            Back to Home
+            होम पर वापस जाएं
         </button>
     </div>
 </div>
@@ -477,8 +508,8 @@ function showNotSignedIn() {
     content.innerHTML = `
         <div class="loading" style="padding: 60px 20px; text-align: center;">
             <div style="font-size: 48px; margin-bottom: 20px;">🔐</div>
-            <div style="font-size: 18px; font-weight: 600; margin-bottom: 10px; color: #333;">Not Signed In</div>
-            <div style="color: #666; margin-bottom: 30px;">Please log in to view your profile.</div>
+            <div style="font-size: 18px; font-weight: 600; margin-bottom: 10px; color: #333;">साइन इन नहीं किया गया</div>
+            <div style="color: #666; margin-bottom: 30px;">अपनी प्रोफाइल देखने के लिए कृपया साइन इन करें।</div>
             <button onclick="window.location.href='/login'" style="
                 background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
                 color: white;
@@ -488,13 +519,13 @@ function showNotSignedIn() {
                 font-size: 16px;
                 font-weight: 600;
                 cursor: pointer;
-            ">Sign In</button>
+            ">साइन इन करें</button>
         </div>
     `;
 }
 
 function showError() {
-    document.querySelector('#profile-content').innerHTML = '<div class="loading" style="padding: 60px 20px; text-align: center;"><div style="font-size: 18px; font-weight: 600; margin-bottom: 10px; color: #333;">⚠️ Error</div><div style="color: #666;">Unable to load profile data. Please try refreshing the page.</div></div>';
+    document.querySelector('#profile-content').innerHTML = '<div class="loading" style="padding: 60px 20px; text-align: center;"><div style="font-size: 18px; font-weight: 600; margin-bottom: 10px; color: #333;">⚠️ त्रुटि</div><div style="color: #666;">प्रोफाइल डेटा लोड करने में असमर्थ। कृपया पृष्ठ को रीफ्रेश करने का प्रयास करें।</div></div>';
 }
 
 function populateProfile(farmer) {
@@ -510,16 +541,13 @@ function populateProfile(farmer) {
         document.querySelector('#verified-badge').style.display = 'inline-flex';
     }
 
-    // Profile picture
+    // Profile picture - show image if available, otherwise show initials
     const picEl = document.querySelector('#profile-pic');
-    if (farmer.photo_url) {
-        const img = document.createElement('img');
-        img.src = farmer.photo_url;
-        img.alt = displayName;
-        picEl.innerHTML = '';
-        picEl.appendChild(img);
+    const initials = (displayName.split(' ').map(s => s[0]).slice(0, 2).join('') || 'F').toUpperCase();
+    
+    if (farmer.profile_pic) {
+        picEl.innerHTML = `<img src="/static/uploads/profile_pics/${farmer.profile_pic}" alt="Profile">`;
     } else {
-        const initials = (displayName.split(' ').map(s => s[0]).slice(0, 2).join('') || 'F').toUpperCase();
         picEl.textContent = initials;
     }
 
@@ -532,8 +560,17 @@ function populateProfile(farmer) {
     document.querySelector('#location-text').textContent = locationParts.join(', ') || '—';
 
     // Basic info
-    document.querySelector('#phone-value').textContent = farmer.phone || '—';
-    document.querySelector('#email-value').textContent = farmer.email || '—';
+    document.querySelector('#phone-value').textContent = farmer.phone_number || '—';
+    document.querySelector('#gender-value').textContent = farmer.gender || '—';
+    
+    // Date of birth
+    let dobText = '—';
+    if (farmer.date_of_birth) {
+        const dob = new Date(farmer.date_of_birth);
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        dobText = dob.toLocaleDateString('hi-IN', options);
+    }
+    document.querySelector('#dob-value').textContent = dobText;
     
     // Calculate age from date_of_birth
     let ageText = '—';
@@ -545,24 +582,32 @@ function populateProfile(farmer) {
         if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
             age--;
         }
-        ageText = `${age} years`;
+        ageText = `${age} साल`;
     }
     document.querySelector('#age-value').textContent = ageText;
 
+    // Caste and disability
+    document.querySelector('#caste-value').textContent = farmer.caste_category || '—';
+    document.querySelector('#handicapped-value').textContent = farmer.is_physically_handicapped ? 'हाँ' : 'नहीं';
+
     // Land & Farming
-    document.querySelector('#land-area-value').textContent = farmer.total_land_area_hectares ? `${farmer.total_land_area_hectares} hectares` : '—';
-    document.querySelector('#land-type-value').textContent = farmer.land_type || '—';
+    document.querySelector('#land-hectares-value').textContent = farmer.total_land_area_hectares ? `${farmer.total_land_area_hectares}` : '—';
+    document.querySelector('#land-gunthas-value').textContent = farmer.land_area_gunthas ? `${farmer.land_area_gunthas}` : '—';
+    document.querySelector('#land-unit-value').textContent = farmer.land_unit || '—';
+    document.querySelector('#land-holder-type-value').textContent = farmer.land_holder_type || '—';
+    document.querySelector('#soil-type-value').textContent = farmer.soil_type || '—';
+    document.querySelector('#water-type-value').textContent = farmer.water_type || '—';
     document.querySelector('#crops-value').textContent = farmer.current_crops || '—';
-    document.querySelector('#irrigation-value').textContent = farmer.irrigation_method || '—';
+    document.querySelector('#harvest-date-value').textContent = farmer.harvest_date || '—';
+    document.querySelector('#oilseed-value').textContent = farmer.is_oilseed_farmer ? 'हाँ' : 'नहीं';
 
     // Financial
-    document.querySelector('#bank-value').textContent = farmer.bank_name || '—';
-    document.querySelector('#account-value').textContent = farmer.bank_account_number ? `****${farmer.bank_account_number.toString().slice(-4)}` : '—';
-    document.querySelector('#ifsc-value').textContent = farmer.ifsc_code || '—';
+    document.querySelector('#annual-income-value').textContent = farmer.annual_income ? `₹${farmer.annual_income.toLocaleString('en-IN')}` : '—';
+    document.querySelector('#coins-earned-value').textContent = farmer.coins_earned ? `${farmer.coins_earned}` : '0';
+    document.querySelector('#pm-kisan-value').textContent = farmer.is_pm_kisan_beneficiary ? 'हाँ' : 'नहीं';
 
-    // Gov IDs
-    document.querySelector('#aadhar-value').textContent = farmer.aadhar_number ? `****${farmer.aadhar_number.toString().slice(-4)}` : '—';
-    document.querySelector('#kisan-id-value').textContent = farmer.farmer_id || '—';
+    // Permanent Address
+    document.querySelector('#permanent-address-text').textContent = farmer.permanent_address || '—';
 }
 </script></body>
 </html>

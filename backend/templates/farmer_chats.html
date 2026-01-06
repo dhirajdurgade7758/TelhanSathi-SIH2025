@@ -260,11 +260,11 @@
 
 {% block content %}
 <div style="padding: 16px;">
-    <h1 style="font-size: 24px; font-weight: 700; color: var(--primary-color); margin: 0 0 16px 0;">💬 My Chats</h1>
+    <h1 style="font-size: 24px; font-weight: 700; color: var(--primary-color); margin: 0 0 16px 0;">💬 मेरी बातचीत</h1>
     <div id="chats-container" class="chats-container">
         <div class="empty-state">
             <div class="empty-state-icon">⏳</div>
-            <p>Loading chats...</p>
+            <p>बातचीत लोड हो रही है...</p>
         </div>
     </div>
 </div>
@@ -275,7 +275,7 @@
         <!-- Chat Header -->
         <div class="chat-modal-header">
             <div>
-                <h3 id="chatTitle">Chat</h3>
+                <h3 id="chatTitle">बातचीत</h3>
                 <div id="chatSubtitle"></div>
             </div>
             <button class="chat-close-btn" onclick="closeChatModal()">×</button>
@@ -284,14 +284,14 @@
         <!-- Messages Area -->
         <div id="chatMessages" class="chat-messages">
             <div style="text-align: center; color: #999; padding: 20px 0;">
-                <p style="font-size: 12px;">Loading messages...</p>
+                <p style="font-size: 12px;">संदेश लोड हो रहे हैं...</p>
             </div>
         </div>
 
         <!-- Message Input Area -->
         <div class="chat-input-area">
-            <input type="text" id="chatInput" class="chat-input" placeholder="Type a message...">
-            <button class="chat-send-btn" onclick="sendChatMessage()">Send</button>
+            <input type="text" id="chatInput" class="chat-input" placeholder="संदेश लिखें...">
+            <button class="chat-send-btn" onclick="sendChatMessage()">भेजें</button>
         </div>
     </div>
 </div>
@@ -323,7 +323,7 @@
             document.getElementById('chats-container').innerHTML = `
                 <div class="empty-state" style="grid-column: 1/-1;">
                     <div class="empty-state-icon">⚠️</div>
-                    <p>Failed to load chats</p>
+                    <p>बातचीत लोड करने में विफल</p>
                 </div>
             `;
         }
@@ -337,7 +337,7 @@
             container.innerHTML = `
                 <div class="empty-state" style="grid-column: 1/-1;">
                     <div class="empty-state-icon">💭</div>
-                    <p>No active chats yet. Respond to buyer messages to start chatting!</p>
+                    <p>अभी कोई सक्रिय बातचीत नहीं है। खरीदार के संदेशों का जवाब देकर बातचीत शुरू करें!</p>
                 </div>
             `;
             return;
@@ -347,30 +347,30 @@
             <div class="chat-card" onclick="openFarmerChat('${chat.chat_id}', '${chat.crop_name}')">
                 <div class="chat-card-header">
                     <h3>🌾 ${chat.crop_name}</h3>
-                    <div>Buyer: ${chat.buyer_name}</div>
+                    <div>खरीदार: ${chat.buyer_name}</div>
                 </div>
 
                 <div class="chat-card-body">
                     <div class="last-message">
-                        <div class="last-message-label">Last Message</div>
+                        <div class="last-message-label">अंतिम संदेश</div>
                         <div class="last-message-text">
-                            ${chat.last_message ? `<strong>${chat.last_message_sender === 'farmer' ? 'You' : chat.buyer_name}:</strong> ${chat.last_message}` : 'No messages yet'}
+                            ${chat.last_message ? `<strong>${chat.last_message_sender === 'farmer' ? 'आप' : chat.buyer_name}:</strong> ${chat.last_message}` : 'अभी कोई संदेश नहीं'}
                         </div>
                     </div>
 
                     <div class="chat-metadata">
                         <div>
-                            <span>${chat.unread_count} unread</span>
+                            <span>${chat.unread_count} अपढ़े</span>
                         </div>
                         <div>
-                            ${chat.last_message_time ? `<span>${new Date(chat.last_message_time).toLocaleDateString('en-IN')}</span>` : ''}
+                            ${chat.last_message_time ? `<span>${new Date(chat.last_message_time).toLocaleDateString('hi-IN')}</span>` : ''}
                         </div>
                     </div>
                 </div>
 
                 <div class="chat-card-footer">
                     <button class="open-chat-btn" onclick="event.stopPropagation(); openFarmerChat('${chat.chat_id}', '${chat.crop_name}')">
-                        💬 Open Chat
+                        💬 बातचीत खोलें
                     </button>
                 </div>
             </div>
@@ -390,7 +390,7 @@
 
             // Update modal header
             document.getElementById('chatTitle').textContent = `Chat about ${cropName}`;
-            document.getElementById('chatSubtitle').textContent = `Started: ${new Date().toLocaleDateString('en-IN')}`;
+            document.getElementById('chatSubtitle').textContent = `शुरू किया गया: ${new Date().toLocaleDateString('hi-IN')}`
 
             // Load messages
             const response = await fetch(`/bidding/farmer/chat/${chatId}/messages`);
@@ -402,13 +402,13 @@
             // Display messages
             const messagesDiv = document.getElementById('chatMessages');
             if (data.messages.length === 0) {
-                messagesDiv.innerHTML = `<div style="text-align: center; color: #999; padding: 20px 0;">No messages yet. Start the conversation!</div>`;
+                messagesDiv.innerHTML = `<div style="text-align: center; color: #999; padding: 20px 0;">कोई संदेश नहीं। बातचीत शुरू करें!</div>`;
             } else {
                 messagesDiv.innerHTML = data.messages.map(msg => `
                     <div class="message ${msg.sender_type === 'farmer' ? 'sent' : 'received'}">
                         <div class="message-bubble">
                             ${msg.message}
-                            <div class="message-time">${new Date(msg.timestamp).toLocaleTimeString('en-IN', {hour: '2-digit', minute: '2-digit'})}</div>
+                            <div class="message-time">${new Date(msg.timestamp).toLocaleTimeString('hi-IN', {hour: '2-digit', minute: '2-digit'})}</div>
                         </div>
                     </div>
                 `).join('');
@@ -426,7 +426,7 @@
                 document.getElementById('chatInput').focus();
             }, 100);
         } catch (error) {
-            alert('Failed to open chat: ' + error.message);
+            alert('बातचीत खोलने में विफल: ' + error.message);
         }
     }
 
@@ -465,7 +465,7 @@
             messageDiv.innerHTML = `
                 <div class="message-bubble">
                     ${message}
-                    <div class="message-time">${new Date().toLocaleTimeString('en-IN', {hour: '2-digit', minute: '2-digit'})}</div>
+                    <div class=\"message-time\">${new Date().toLocaleTimeString('hi-IN', {hour: '2-digit', minute: '2-digit'})}</div>
                 </div>
             `;
             messagesDiv.appendChild(messageDiv);
@@ -480,7 +480,7 @@
             input.focus();
         } catch (error) {
             console.error('Error sending message:', error);
-            alert('Failed to send message. Please try again.');
+            alert('संदेश भेजने में विफल। कृपया पुनः प्रयास करें।');
         }
     }
 </script>

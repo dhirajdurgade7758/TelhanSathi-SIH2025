@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Manage Subsidies</title>
+    <title>व्यवस्थापक - सब्सिडी प्रबंधन</title>
     <style>
         body {
             font-family: sans-serif;
@@ -185,89 +185,89 @@
 <body>
 
     <div class="container">
-        <h1>Admin Panel - Manage Schemes & Subsidies</h1>
+        <h1>व्यवस्थापक पैनल - योजनाएं और सब्सिडी प्रबंधन करें</h1>
 
         <!-- Alerts -->
         <div id="alert-container"></div>
 
         <!-- Add New Subsidy Section -->
         <div class="section">
-            <h2>Add New Scheme/Subsidy</h2>
+            <h2>नई योजना/सब्सिडी जोड़ें</h2>
             <form id="add-subsidy-form">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="scheme_code">Scheme Code *</label>
-                        <input type="text" id="scheme_code" name="scheme_code" required placeholder="e.g., pmkisan">
+                        <label for="scheme_code">योजना कोड *</label>
+                        <input type="text" id="scheme_code" name="scheme_code" required placeholder="उदा., pmkisan">
                     </div>
                     <div class="form-group">
-                        <label for="name">Scheme Name *</label>
-                        <input type="text" id="name" name="name" required placeholder="e.g., PM-KISAN Samman Nidhi">
+                        <label for="name">योजना का नाम *</label>
+                        <input type="text" id="name" name="name" required placeholder="उदा., PM-KISAN समान निधि">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="scheme_type">Type *</label>
+                        <label for="scheme_type">प्रकार *</label>
                         <select id="scheme_type" name="scheme_type" required>
-                            <option value="">Select Type</option>
-                            <option value="subsidy">Subsidy</option>
-                            <option value="scheme">Scheme</option>
+                            <option value="">प्रकार चुनें</option>
+                            <option value="subsidy">सब्सिडी</option>
+                            <option value="scheme">योजना</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="focus_area">Focus Area *</label>
-                        <input type="text" id="focus_area" name="focus_area" required placeholder="e.g., Income Support">
+                        <label for="focus_area">ध्यान केंद्रित क्षेत्र *</label>
+                        <input type="text" id="focus_area" name="focus_area" required placeholder="उदा., आय समर्थन">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="focus_color">Focus Color</label>
+                        <label for="focus_color">फोकस रंग</label>
                         <input type="text" id="focus_color" name="focus_color" placeholder="#2196f3" value="#2196f3">
                     </div>
                     <div class="form-group">
-                        <label for="benefit_amount">Benefit Amount *</label>
-                        <input type="text" id="benefit_amount" name="benefit_amount" required placeholder="e.g., ₹6,000/year">
+                        <label for="benefit_amount">लाभ राशि *</label>
+                        <input type="text" id="benefit_amount" name="benefit_amount" required placeholder="उदा., ₹6,000/वर्ष">
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="eligibility_criteria">Eligibility Criteria *</label>
-                    <textarea id="eligibility_criteria" name="eligibility_criteria" required placeholder="Enter eligibility requirements"></textarea>
+                    <label for="eligibility_criteria">पात्रता मानदंड *</label>
+                    <textarea id="eligibility_criteria" name="eligibility_criteria" required placeholder="पात्रता आवश्यकताएं दर्ज करें"></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label for="description">Description *</label>
-                    <textarea id="description" name="description" required placeholder="Enter full description"></textarea>
+                    <label for="description">विवरण *</label>
+                    <textarea id="description" name="description" required placeholder="पूर्ण विवरण दर्ज करें"></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label for="external_link">External Link (Optional)</label>
+                    <label for="external_link">बाहरी लिंक (वैकल्पिक)</label>
                     <input type="url" id="external_link" name="external_link" placeholder="https://example.com">
                 </div>
 
                 <div class="checkbox-group">
                     <label>
                         <input type="checkbox" id="is_recommended" name="is_recommended">
-                        Mark as Recommended
+                        अनुशंसित के रूप में चिह्नित करें
                     </label>
                     <label>
                         <input type="checkbox" id="is_active" name="is_active" checked>
-                        Active
+                        सक्रिय
                     </label>
                 </div>
 
                 <div class="form-group" style="margin-top: 20px;">
-                    <label>Application Steps (one per line)</label>
-                    <textarea id="apply_steps" name="apply_steps" placeholder="Step 1&#10;Step 2&#10;Step 3"></textarea>
+                    <label>आवेदन चरण (प्रति पंक्ति एक)</label>
+                    <textarea id="apply_steps" name="apply_steps" placeholder="चरण 1&#10;चरण 2&#10;चरण 3"></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label>Required Documents (one per line)</label>
-                    <textarea id="required_documents" name="required_documents" placeholder="Document 1&#10;Document 2&#10;Document 3"></textarea>
+                    <label>आवश्यक दस्तावेज़ (प्रति पंक्ति एक)</label>
+                    <textarea id="required_documents" name="required_documents" placeholder="दस्तावेज़ 1&#10;दस्तावेज़ 2&#10;दस्तावेज़ 3"></textarea>
                 </div>
 
-                <button type="submit" class="btn btn-primary">Add Scheme/Subsidy</button>
+                <button type="submit" class="btn btn-primary">योजना/सब्सिडी जोड़ें</button>
             </form>
         </div>
 
@@ -277,43 +277,43 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Type</th>
-                        <th>Focus</th>
-                        <th>Recommended</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <th>नाम</th>
+                        <th>प्रकार</th>
+                        <th>फोकस</th>
+                        <th>अनुशंसित</th>
+                        <th>स्थिति</th>
+                        <th>कार्य</th>
                     </tr>
                 </thead>
                 <tbody id="subsidies-table">
                     <tr>
-                        <td colspan="6" style="text-align: center;">Loading...</td>
+                        <td colspan="6" style="text-align: center;">लोड हो रहा है...</td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- Edit Modal -->
+                    <!-- Edit Modal -->
     <div id="edit-modal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeEditModal()">&times;</span>
-            <h2>Edit Scheme/Subsidy</h2>
+            <h2>योजना/सब्सिडी संपादित करें</h2>
             <form id="edit-subsidy-form">
                 <input type="hidden" id="edit_id" name="edit_id">
                 
                 <div class="form-group">
-                    <label for="edit_name">Scheme Name</label>
+                    <label for="edit_name">योजना का नाम</label>
                     <input type="text" id="edit_name" name="edit_name" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="edit_benefit_amount">Benefit Amount</label>
+                    <label for="edit_benefit_amount">लाभ राशि</label>
                     <input type="text" id="edit_benefit_amount" name="edit_benefit_amount" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="edit_eligibility_criteria">Eligibility Criteria</label>
+                    <label for="edit_eligibility_criteria">पात्रता मानदंड</label>
                     <textarea id="edit_eligibility_criteria" name="edit_eligibility_criteria" required></textarea>
                 </div>
 
@@ -329,7 +329,7 @@
                 </div>
 
                 <div style="margin-top: 20px; display: flex; gap: 10px;">
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="submit" class="btn btn-primary">परिवर्तन सहेजें</button>
                     <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
                 </div>
             </form>
@@ -413,7 +413,7 @@
                     <td>
                         <div class="action-buttons">
                             <button class="btn btn-secondary" onclick="editScheme('${scheme.id}')">Edit</button>
-                            <button class="btn btn-danger" onclick="deleteScheme('${scheme.id}')">Delete</button>
+                            <button class="btn btn-danger" onclick="deleteScheme('${scheme.id}')">हटाएं</button>
                         </div>
                     </td>
                 </tr>
@@ -426,7 +426,7 @@
         }
 
         async function deleteScheme(schemeId) {
-            if (!confirm('Are you sure you want to delete this scheme?')) return;
+            if (!confirm('क्या आप इस योजना को हटाना चाहते हैं?')) return;
 
             try {
                 const response = await fetch(`/admin/api/schemes/delete/${schemeId}`, {
@@ -434,7 +434,7 @@
                 });
 
                 if (response.ok) {
-                    showAlert('Scheme deleted successfully!', 'success');
+                    showAlert('योजना सफलतापूर्वक हटा दी गई!', 'success');
                     loadSubsidies();
                 } else {
                     showAlert('Error deleting scheme', 'error');

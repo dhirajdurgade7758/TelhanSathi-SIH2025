@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Farmer Leaderboard - Telhan Sathi{% endblock %}
+{% block title %}किसान लीडरबोर्ड - तेलहान साथी{% endblock %}
 
 {% block style %}
 <style>
@@ -553,17 +553,17 @@
 <div class="leaderboard-container">
     <!-- Header -->
     <div class="leaderboard-header">
-        <h1>🏆 FARMER LEADERBOARD</h1>
-        <p>See where you rank among farmers on Telhan Sathi</p>
+        <h1>🏆 किसान लीडरबोर्ड</h1>
+        <p>देखें आप तेलहान साथी पर किसानों में किस रैंक पर हैं</p>
     </div>
 
     <!-- Tabs -->
     <div class="leaderboard-tabs">
         <button class="leaderboard-tab-btn active" onclick="switchTab('activity')">
-            📊 Activity
+            📊 एक्टिविटी
         </button>
         <button class="leaderboard-tab-btn" onclick="switchTab('rewards')">
-            🎁 Rewards
+            🎁 रिवॉर्ड्स
         </button>
     </div>
 
@@ -577,50 +577,50 @@
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; margin-bottom: 16px;">
                 <button class="info-btn" onclick="toggleSection(event)">
                     <span style="font-size: 18px;">📍</span>
-                    <span>Your Stats</span>
+                    <span>आपके आंकड़े</span>
                 </button>
                 <button class="info-btn" onclick="toggleSection(event)">
                     <span style="font-size: 18px;">🌾</span>
-                    <span>Top Crops</span>
+                    <span>टॉप फसलें</span>
                 </button>
                 <button class="info-btn" onclick="toggleSection(event)">
                     <span style="font-size: 18px;">🎯</span>
-                    <span>To Top 3</span>
+                    <span>टॉप 3 तक</span>
                 </button>
             </div>
 
             <!-- YOUR STATS PANEL - COLLAPSIBLE (DIRECTLY BELOW BUTTONS) -->
             <div class="info-panel" id="yourStatsPanel" style="display: none;">
                 <div class="panel-header">
-                    <h3>📍 Your Statistics</h3>
+                    <h3>📍 आपके आंकड़े</h3>
                     <button class="close-btn" onclick="closePanel(event)">✕</button>
                 </div>
                 <div class="panel-content">
                     <div class="quick-stats">
                         <div class="stat-card activity">
-                            <div class="stat-label">Position</div>
+                            <div class="stat-label">स्थिति</div>
                             <div class="stat-value" id="activityRankValue">4</div>
-                            <div class="stat-subtext">of 150 farmers</div>
+                            <div class="stat-subtext">150 किसानों में से</div>
                         </div>
                         <div class="stat-card activity">
-                            <div class="stat-label">Total Auctions</div>
+                            <div class="stat-label">कुल नीलामी</div>
                             <div class="stat-value" id="activityAuctionsValue">25</div>
-                            <div class="stat-subtext">auctions created</div>
+                            <div class="stat-subtext">नीलामी बनाई</div>
                         </div>
                         <div class="stat-card activity">
-                            <div class="stat-label">Total Revenue</div>
+                            <div class="stat-label">कुल कमाई</div>
                             <div class="stat-value" style="font-size: 18px;" id="activityRevenue">₹4,25,000</div>
-                            <div class="stat-subtext">earned</div>
+                            <div class="stat-subtext">कमाई गई</div>
                         </div>
                         <div class="stat-card activity">
-                            <div class="stat-label">Rank Change</div>
-                            <div class="stat-value" id="activityRankChange">📈 Up 2</div>
-                            <div class="stat-subtext">this month</div>
+                            <div class="stat-label">रैंक बदलाव</div>
+                            <div class="stat-value" id="activityRankChange">📈 ऊपर 2</div>
+                            <div class="stat-subtext">इस महीने</div>
                         </div>
                     </div>
                     <div class="motivation">
                         <div class="motivation-text" id="activityMotivation">
-                            🚀 You're doing great! Keep creating more auctions to climb the ranks!
+                            🚀 आप बहुत अच्छा कर रहे हैं! रैंक बढ़ाने के लिए और नीलामी बनाएं!
                         </div>
                     </div>
                 </div>
@@ -629,22 +629,22 @@
             <!-- TOP CROPS PANEL - COLLAPSIBLE (DIRECTLY BELOW BUTTONS) -->
             <div class="info-panel" id="topCropsPanel" style="display: none;">
                 <div class="panel-header">
-                    <h3>🌾 Your Top Crops</h3>
+                    <h3>🌾 आपकी टॉप फसलें</h3>
                     <button class="close-btn" onclick="closePanel(event)">✕</button>
                 </div>
                 <div class="panel-content">
                     <div class="crops-list" id="activityTopCrops">
                         <div class="crop-item">
-                            <div class="crop-name">Rice</div>
-                            <div class="crop-count">12 auctions</div>
+                            <div class="crop-name">चावल</div>
+                            <div class="crop-count">12 नीलामी</div>
                         </div>
                         <div class="crop-item">
-                            <div class="crop-name">Wheat</div>
-                            <div class="crop-count">8 auctions</div>
+                            <div class="crop-name">गेहूं</div>
+                            <div class="crop-count">8 नीलामी</div>
                         </div>
                         <div class="crop-item">
-                            <div class="crop-name">Mustard</div>
-                            <div class="crop-count">5 auctions</div>
+                            <div class="crop-name">सरसों</div>
+                            <div class="crop-count">5 नीलामी</div>
                         </div>
                     </div>
                 </div>
@@ -653,23 +653,23 @@
             <!-- GOAL PROGRESS PANEL - COLLAPSIBLE (DIRECTLY BELOW BUTTONS) -->
             <div class="info-panel" id="goalPanel" style="display: none;">
                 <div class="panel-header">
-                    <h3>🎯 To Reach Top 3</h3>
+                    <h3>🎯 टॉप 3 तक पहुंचने के लिए</h3>
                     <button class="close-btn" onclick="closePanel(event)">✕</button>
                 </div>
                 <div class="panel-content">
                     <div class="progress-section">
-                        <h4>📈 Progress</h4>
+                        <h4>📈 प्रगति</h4>
                         <div class="progress-bar">
                             <div class="progress-fill" id="activityProgressBar" style="width: 40%;"></div>
                         </div>
                         <div class="progress-text">
-                            <span>40% Complete</span>
-                            <span id="activityNeedAuctions">17 more auctions</span>
+                            <span>40% पूरा</span>
+                            <span id="activityNeedAuctions">17 और नीलामी</span>
                         </div>
                     </div>
                     <div style="background: var(--bg-light); padding: 12px; border-radius: 8px; border-left: 4px solid var(--secondary-color); margin-top: 12px;">
-                        <div style="font-size: 12px; color: var(--text-light); font-weight: 600; margin-bottom: 4px;">OR Need Revenue:</div>
-                        <div style="font-size: 16px; color: var(--secondary-color); font-weight: 700;" id="activityNeedRevenue">₹3,50,000 more</div>
+                        <div style="font-size: 12px; color: var(--text-light); font-weight: 600; margin-bottom: 4px;">या कमाई चाहिए:</div>
+                        <div style="font-size: 16px; color: var(--secondary-color); font-weight: 700;" id="activityNeedRevenue">₹3,50,000 और</div>
                     </div>
                 </div>
             </div>
@@ -677,15 +677,15 @@
             <!-- TOP PERFORMERS TABLE - PRIMARY CONTENT (NOW BELOW PANELS) -->
             <div style="margin-bottom: 16px; overflow-x: auto; -webkit-overflow-scrolling: touch;">
                 <h2 style="margin-bottom: 8px; color: var(--text-dark); display: flex; align-items: center; gap: 8px; font-size: 18px;">
-                    👥 Top Performers
+                    👥 टॉप परफॉर्मर
                 </h2>
                 <table class="leaderboard-table" id="activityTable">
                     <thead>
                         <tr>
-                            <th style="width: 50px;">Rank</th>
-                            <th style="width: 50%;">Farmer</th>
-                            <th style="width: 25%; text-align: right;">Auctions</th>
-                            <th style="width: 25%; text-align: right;">Revenue</th>
+                            <th style="width: 50px;">रैंक</th>
+                            <th style="width: 50%;">किसान</th>
+                            <th style="width: 25%; text-align: right;">नीलामी</th>
+                            <th style="width: 25%; text-align: right;">कमाई</th>
                         </tr>
                     </thead>
                     <tbody id="activityLeaderboard">
@@ -705,50 +705,50 @@
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; margin-bottom: 16px;">
                 <button class="info-btn" onclick="toggleSection(event)">
                     <span style="font-size: 18px;">💰</span>
-                    <span>Your Coins</span>
+                    <span>आपके कॉइन्स</span>
                 </button>
                 <button class="info-btn" onclick="toggleSection(event)">
                     <span style="font-size: 18px;">📊</span>
-                    <span>How Earning</span>
+                    <span>कमाई कैसे</span>
                 </button>
                 <button class="info-btn" onclick="toggleSection(event)">
                     <span style="font-size: 18px;">🎯</span>
-                    <span>To Top 1</span>
+                    <span>टॉप 1 तक</span>
                 </button>
             </div>
 
             <!-- YOUR COINS PANEL - COLLAPSIBLE (DIRECTLY BELOW BUTTONS) -->
             <div class="info-panel" id="yourCoinsPanel" style="display: none;">
                 <div class="panel-header">
-                    <h3>💰 Your Earnings</h3>
+                    <h3>💰 आपकी कमाई</h3>
                     <button class="close-btn" onclick="closePanel(event)">✕</button>
                 </div>
                 <div class="panel-content">
                     <div class="quick-stats">
                         <div class="stat-card activity">
-                            <div class="stat-label">Position</div>
+                            <div class="stat-label">स्थिति</div>
                             <div class="stat-value" id="rewardsRankValue">3</div>
-                            <div class="stat-subtext">of 150 farmers</div>
+                            <div class="stat-subtext">150 किसानों में से</div>
                         </div>
                         <div class="stat-card activity">
-                            <div class="stat-label">Total Coins</div>
+                            <div class="stat-label">कुल कॉइन्स</div>
                             <div class="stat-value" id="rewardsCoinsValue">1,250</div>
-                            <div class="stat-subtext">coins earned</div>
+                            <div class="stat-subtext">कॉइन्स कमाए</div>
                         </div>
                         <div class="stat-card activity">
-                            <div class="stat-label">This Month</div>
+                            <div class="stat-label">इस महीने</div>
                             <div class="stat-value" id="rewardsCoinsMonth">450</div>
-                            <div class="stat-subtext">coins</div>
+                            <div class="stat-subtext">कॉइन्स</div>
                         </div>
                         <div class="stat-card activity">
-                            <div class="stat-label">Rank Change</div>
-                            <div class="stat-value" id="rewardsRankChange">📈 Up 5</div>
-                            <div class="stat-subtext">this month</div>
+                            <div class="stat-label">रैंक बदलाव</div>
+                            <div class="stat-value" id="rewardsRankChange">📈 ऊपर 5</div>
+                            <div class="stat-subtext">इस महीने</div>
                         </div>
                     </div>
                     <div class="motivation">
                         <div class="motivation-text" id="rewardsMotivation">
-                            ⭐ Excellent! You're in Top 3 with great momentum. Keep using schemes for bonus coins!
+                            ⭐ बहुत अच्छा! आप टॉप 3 में हैं, स्कीम्स का उपयोग करें और बोनस कॉइन्स पाएं!
                         </div>
                     </div>
                 </div>
@@ -757,22 +757,22 @@
             <!-- EARNINGS BREAKDOWN PANEL - COLLAPSIBLE (DIRECTLY BELOW BUTTONS) -->
             <div class="info-panel" id="earningsPanel" style="display: none;">
                 <div class="panel-header">
-                    <h3>📊 How You're Earning</h3>
+                    <h3>📊 आप कैसे कमा रहे हैं</h3>
                     <button class="close-btn" onclick="closePanel(event)">✕</button>
                 </div>
                 <div class="panel-content">
                     <div class="crops-list" id="rewardsEarnings">
                         <div class="crop-item">
-                            <div class="crop-name">Auctions</div>
-                            <div class="crop-count">800 coins</div>
+                            <div class="crop-name">नीलामी</div>
+                            <div class="crop-count">800 कॉइन्स</div>
                         </div>
                         <div class="crop-item">
-                            <div class="crop-name">Scheme Bonus</div>
-                            <div class="crop-count">300 coins</div>
+                            <div class="crop-name">स्कीम बोनस</div>
+                            <div class="crop-count">300 कॉइन्स</div>
                         </div>
                         <div class="crop-item">
-                            <div class="crop-name">Quality Premium</div>
-                            <div class="crop-count">150 coins</div>
+                            <div class="crop-name">क्वालिटी प्रीमियम</div>
+                            <div class="crop-count">150 कॉइन्स</div>
                         </div>
                     </div>
                 </div>
@@ -781,23 +781,23 @@
             <!-- GOAL PROGRESS PANEL - COLLAPSIBLE (DIRECTLY BELOW BUTTONS) -->
             <div class="info-panel" id="rewardGoalPanel" style="display: none;">
                 <div class="panel-header">
-                    <h3>🎯 To Reach Top 1</h3>
+                    <h3>🎯 टॉप 1 तक पहुंचने के लिए</h3>
                     <button class="close-btn" onclick="closePanel(event)">✕</button>
                 </div>
                 <div class="panel-content">
                     <div class="progress-section">
-                        <h4>📈 Progress</h4>
+                        <h4>📈 प्रगति</h4>
                         <div class="progress-bar">
                             <div class="progress-fill" id="rewardsProgressBar" style="width: 60%; background: linear-gradient(90deg, var(--secondary-color), #e67e22);"></div>
                         </div>
                         <div class="progress-text">
-                            <span>60% Complete</span>
-                            <span id="rewardsNeedCoins">500 more coins</span>
+                            <span>60% पूरा</span>
+                            <span id="rewardsNeedCoins">500 और कॉइन्स</span>
                         </div>
                     </div>
                     <div style="background: var(--bg-light); padding: 12px; border-radius: 8px; border-left: 4px solid var(--secondary-color); margin-top: 12px;">
-                        <div style="font-size: 12px; color: var(--text-light); font-weight: 600; margin-bottom: 4px;">At Current Rate:</div>
-                        <div style="font-size: 16px; color: var(--secondary-color); font-weight: 700;" id="rewardsTimeToTop">~2 weeks</div>
+                        <div style="font-size: 12px; color: var(--text-light); font-weight: 600; margin-bottom: 4px;">मौजूदा रेट पर:</div>
+                        <div style="font-size: 16px; color: var(--secondary-color); font-weight: 700;" id="rewardsTimeToTop">~2 हफ्ते</div>
                     </div>
                 </div>
             </div>
@@ -805,15 +805,15 @@
             <!-- TOP EARNERS TABLE - PRIMARY CONTENT (NOW BELOW PANELS) -->
             <div style="margin-bottom: 16px; overflow-x: auto; -webkit-overflow-scrolling: touch;">
                 <h2 style="margin-bottom: 8px; color: var(--text-dark); display: flex; align-items: center; gap: 8px; font-size: 18px;">
-                    👥 Top Earners
+                    👥 टॉप कमाई करने वाले
                 </h2>
                 <table class="leaderboard-table" id="rewardsTable">
                     <thead>
                         <tr>
-                            <th style="width: 50px;">Rank</th>
-                            <th style="width: 50%;">Farmer</th>
-                            <th style="width: 25%; text-align: right;">Total</th>
-                            <th style="width: 25%; text-align: right;">Month</th>
+                            <th style="width: 50px;">रैंक</th>
+                            <th style="width: 50%;">किसान</th>
+                            <th style="width: 25%; text-align: right;">कुल</th>
+                            <th style="width: 25%; text-align: right;">महीना</th>
                         </tr>
                     </thead>
                     <tbody id="rewardsLeaderboard">
@@ -854,7 +854,17 @@
         function getPanelNameFromButton(btn) {
             const text = btn.textContent.trim();
             const tab = document.querySelector('.leaderboard-tab-content.active');
-            
+            // Hindi matching for activity tab
+            if (tab.id === 'activity') {
+                if (text.includes('आपके आंकड़े')) return 'yourStatsPanel';
+                if (text.includes('टॉप फसलें')) return 'topCropsPanel';
+                if (text.includes('टॉप 3 तक')) return 'goalPanel';
+            } else if (tab.id === 'rewards') {
+                if (text.includes('आपके कॉइन्स')) return 'yourCoinsPanel';
+                if (text.includes('कमाई कैसे')) return 'earningsPanel';
+                if (text.includes('टॉप 1 तक')) return 'rewardGoalPanel';
+            }
+            // Fallback to English for robustness
             if (tab.id === 'activity') {
                 if (text.includes('Your Stats')) return 'yourStatsPanel';
                 if (text.includes('Top Crops')) return 'topCropsPanel';

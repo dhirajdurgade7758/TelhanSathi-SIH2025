@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Auction Details - तेलहान साथी{% endblock %}
+{% block title %}नीलामी विस्तर - तेलहान साथी{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="page-header">
-        <button class="back-btn" onclick="goBack()">← Back</button>
-        <h1>🎯 Auction Details</h1>
+        <button class="back-btn" onclick="goBack()">← वापस</button>
+        <h1>🎯 नीलामी विस्तर</h1>
     </div>
 
     <!-- Auction Details Card -->
@@ -19,59 +19,59 @@
                         {{ auction.status.upper() }}
                     </div>
                 </div>
-                <button id="editBtn" style="background: #2196F3; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: 600; display: none; white-space: nowrap;" onclick="editAuction('{{ auction.id }}')">✏️ Edit</button>
+                <button id="editBtn" style="background: #2196F3; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: 600; display: none; white-space: nowrap;" onclick="editAuction('{{ auction.id }}')">✏️ एडिट</button>
             </div>
 
             <!-- Won Auction View (Completed) -->
             {% if auction.status == 'completed' and buyer_details %}
             <div class="won-auction-content">
                 <div class="winning-section">
-                    <h3 style="color: #4caf50; margin-top: 0;">🏆 Auction Won!</h3>
-                    <p style="color: #666; margin-bottom: 25px;">Your auction has been successfully completed.</p>
+                    <h3 style="color: #4caf50; margin-top: 0;">🏆 ऑक्शन जीत गए!</h3>
+                    <p style="color: #666; margin-bottom: 25px;">आपकी ऑक्शन सफलतापूर्वक पूरी हो गई है।</p>
 
                     <!-- Winning Price -->
                     <div class="winning-price-box">
-                        <div class="price-label">Final Winning Price</div>
-                        <div class="price-value">₹{{ "{:,.2f}".format(buyer_details.winning_price) }}/quintal</div>
-                        <div class="price-total">Total: ₹{{ "{:,.2f}".format(buyer_details.winning_price * auction.quantity_quintals) }}</div>
+                        <div class="price-label">फाइनल विनिंग प्राइस</div>
+                        <div class="price-value">₹{{ "{:,.2f}".format(buyer_details.winning_price) }}/क्विंटल</div>
+                        <div class="price-total">कुल: ₹{{ "{:,.2f}".format(buyer_details.winning_price * auction.quantity_quintals) }}</div>
                     </div>
 
                     <!-- Buyer Information -->
-                    <h3 style="margin-top: 30px; margin-bottom: 20px; color: #333;">👤 Winning Buyer Details</h3>
+                    <h3 style="margin-top: 30px; margin-bottom: 20px; color: #333;">👤 विनिंग बायर डिटेल्स</h3>
                     
                     <div class="buyer-details-grid">
                         <div class="buyer-detail-item">
-                            <label>Company Name</label>
+                            <label>कंपनी नाम</label>
                             <value style="color: #388e3c;">{{ buyer_details.company_name }}</value>
                         </div>
                         
                         <div class="buyer-detail-item">
-                            <label>Contact Person</label>
+                            <label>कॉन्टैक्ट पर्सन</label>
                             <value>{{ buyer_details.buyer_name }}</value>
                         </div>
                         
                         <div class="buyer-detail-item">
-                            <label>Email</label>
+                            <label>ईमेल</label>
                             <value style="word-break: break-all;">{{ buyer_details.email }}</value>
                         </div>
                         
                         <div class="buyer-detail-item">
-                            <label>Phone</label>
+                            <label>फोन</label>
                             <value style="color: #388e3c; font-weight: 700;">{{ buyer_details.phone }}</value>
                         </div>
                         
                         <div class="buyer-detail-item">
-                            <label>Address</label>
+                            <label>पता</label>
                             <value>{{ buyer_details.address }}</value>
                         </div>
                         
                         <div class="buyer-detail-item">
-                            <label>District</label>
+                            <label>डिस्ट्रिक्ट</label>
                             <value>{{ buyer_details.district }}</value>
                         </div>
 
                         <div class="buyer-detail-item">
-                            <label>State</label>
+                            <label>स्टेट</label>
                             <value>{{ buyer_details.state }}</value>
                         </div>
                     </div>
@@ -84,51 +84,51 @@
                 <!-- Left Column -->
                 <div class="details-column">
                     <div class="detail-item">
-                        <label>📦 Quantity</label>
-                        <value>{{ auction.quantity_quintals }} quintals</value>
+                        <label>📦 क्वांटिटी</label>
+                        <value>{{ auction.quantity_quintals }} क्विंटल</value>
                     </div>
 
                     <div class="detail-item">
-                        <label>💰 Base Price</label>
-                        <value>₹{{ "{:,.2f}".format(auction.base_price_per_quintal) }}/quintal</value>
+                        <label>💰 बेस प्राइस</label>
+                        <value>₹{{ "{:,.2f}".format(auction.base_price_per_quintal) }}/क्विंटल</value>
                     </div>
 
                     <div class="detail-item">
-                        <label>🏢 Quality Grade</label>
+                        <label>🏢 क्वालिटी ग्रेड</label>
                         <value>{{ auction.quality_grade or 'N/A' }}</value>
                     </div>
 
                     <div class="detail-item">
-                        <label>📍 Location</label>
-                        <value>{{ auction.location or 'Not specified' }}</value>
+                        <label>📍 लोकेशन</label>
+                        <value>{{ auction.location or 'स्पेसिफाइड नहीं' }}</value>
                     </div>
                 </div>
 
                 <!-- Right Column -->
                 <div class="details-column">
                     <div class="detail-item">
-                        <label>📊 Current Highest Bid</label>
+                        <label>📊 करंट हाईएस्ट बिड</label>
                         <value style="color: #388e3c; font-weight: 700;">
                             {% if auction.current_highest_bid %}
-                                ₹{{ "{:,.2f}".format(auction.current_highest_bid) }}/quintal
+                                ₹{{ "{:,.2f}".format(auction.current_highest_bid) }}/क्विंटल
                             {% else %}
-                                No bids yet
+                                अभी तक कोई बिड नहीं
                             {% endif %}
                         </value>
                     </div>
 
                     <div class="detail-item">
-                        <label>👥 Total Bids Received</label>
-                        <value>{{ auction.bids|length }} bids</value>
+                        <label>👥 टोटल बिड्स रिसीव्ड</label>
+                        <value>{{ auction.bids|length }} बिड्स</value>
                     </div>
 
                     <div class="detail-item">
-                        <label>⏰ Start Time</label>
+                        <label>⏰ स्टार्ट टाइम</label>
                         <value>{{ auction.created_at.strftime('%d %b %Y, %H:%M') if auction.created_at else 'N/A' }}</value>
                     </div>
 
                     <div class="detail-item">
-                        <label>⏱️ End Time</label>
+                        <label>⏱️ एंड टाइम</label>
                         <value>{{ auction.end_time.strftime('%d %b %Y, %H:%M') if auction.end_time else 'N/A' }}</value>
                     </div>
                 </div>
@@ -138,33 +138,33 @@
             <!-- Photos Section -->
             {% if auction.photo1_path or auction.photo2_path or auction.photo3_path or auction.photo4_path %}
             <div class="photos-section">
-                <h3>📸 Oilseed Harvest Photos</h3>
+                <h3>📸 ऑयलसीड हार्वेस्ट फोटो</h3>
                 <div class="photos-grid">
                     {% if auction.photo1_path %}
                     <div class="photo-item">
                         <img src="{{ auction.photo1_path }}" alt="Photo 1" class="auction-photo">
-                        <p class="photo-label">Main Harvest</p>
+                        <p class="photo-label">मुख्य फसल</p>
                     </div>
                     {% endif %}
                     
                     {% if auction.photo2_path %}
                     <div class="photo-item">
                         <img src="{{ auction.photo2_path }}" alt="Photo 2" class="auction-photo">
-                        <p class="photo-label">Detail View</p>
+                        <p class="photo-label">डिटेल व्यू</p>
                     </div>
                     {% endif %}
                     
                     {% if auction.photo3_path %}
                     <div class="photo-item">
                         <img src="{{ auction.photo3_path }}" alt="Photo 3" class="auction-photo">
-                        <p class="photo-label">Quality/Grade</p>
+                        <p class="photo-label">क्वालिटी/ग्रेड</p>
                     </div>
                     {% endif %}
                     
                     {% if auction.photo4_path %}
                     <div class="photo-item">
                         <img src="{{ auction.photo4_path }}" alt="Photo 4" class="auction-photo">
-                        <p class="photo-label">Storage/Packaging</p>
+                        <p class="photo-label">स्टोरेज/पैकेजिंग</p>
                     </div>
                     {% endif %}
                 </div>
@@ -174,7 +174,7 @@
             <!-- Description Section -->
             {% if auction.description %}
             <div class="description-section">
-                <h3>📝 Description</h3>
+                <h3>📝 विवरण</h3>
                 <p>{{ auction.description }}</p>
             </div>
             {% endif %}
@@ -183,20 +183,20 @@
             <div class="action-buttons">
                 {% if auction.status == 'completed' %}
                     <button class="btn btn-primary" onclick="window.location.href='/bidding/farmer/auction/{{ auction.id }}/bids'">
-                        📊 View All Bids
+                        📊 बिड्स देखें
                     </button>
                 {% else %}
                     <button class="btn btn-primary" onclick="window.location.href='/bidding/farmer/auction/{{ auction.id }}/bids'">
-                        📊 View All Bids
+                        📊 सभी बिड्स देखें
                     </button>
                     {% if auction.status == 'active' %}
                         <button class="btn btn-secondary" onclick="manageAuction('{{ auction.id }}', {{ auction.bids|length }})">
-                            ⚙️ Manage Auction
+                            ⚙️ ऑक्शन मैनेज करें
                         </button>
                     {% endif %}
                 {% endif %}
                 <button class="btn btn-outline" onclick="goBack()">
-                    ← Go Back
+                    ← वापस जाएं
                 </button>
             </div>
         </div>
@@ -204,13 +204,13 @@
 
     <!-- Counter Offers Section -->
     <div class="counter-offers-section" style="background: #f5f5f5; padding: 25px; margin-top: 30px; border-radius: 8px;">
-        <h3 style="margin-top: 0; color: #1e3a24;">💬 Counter Offers Sent</h3>
+        <h3 style="margin-top: 0; color: #1e3a24;">💬 काउंटर ऑफर भेजे गए</h3>
         
         <div style="margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
-            <button onclick="filterCounterOffers('all')" class="filter-btn" style="background: #4caf50; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">All</button>
-            <button onclick="filterCounterOffers('pending')" class="filter-btn" style="background: #fff; color: #ff9800; padding: 8px 16px; border: 2px solid #ff9800; border-radius: 4px; cursor: pointer; font-weight: 600;">Pending</button>
-            <button onclick="filterCounterOffers('accepted')" class="filter-btn" style="background: #fff; color: #4caf50; padding: 8px 16px; border: 2px solid #4caf50; border-radius: 4px; cursor: pointer; font-weight: 600;">Accepted</button>
-            <button onclick="filterCounterOffers('rejected')" class="filter-btn" style="background: #fff; color: #f44336; padding: 8px 16px; border: 2px solid #f44336; border-radius: 4px; cursor: pointer; font-weight: 600;">Rejected</button>
+            <button onclick="filterCounterOffers('all')" class="filter-btn" style="background: #4caf50; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">सभी</button>
+            <button onclick="filterCounterOffers('pending')" class="filter-btn" style="background: #fff; color: #ff9800; padding: 8px 16px; border: 2px solid #ff9800; border-radius: 4px; cursor: pointer; font-weight: 600;">पेंडिंग</button>
+            <button onclick="filterCounterOffers('accepted')" class="filter-btn" style="background: #fff; color: #4caf50; padding: 8px 16px; border: 2px solid #4caf50; border-radius: 4px; cursor: pointer; font-weight: 600;">एक्सेप्टेड</button>
+            <button onclick="filterCounterOffers('rejected')" class="filter-btn" style="background: #fff; color: #f44336; padding: 8px 16px; border: 2px solid #f44336; border-radius: 4px; cursor: pointer; font-weight: 600;">रिजेक्टेड</button>
         </div>
         
         <div id="counterOffersContainer" style="display: grid; gap: 12px;">
@@ -218,7 +218,7 @@
         </div>
         
         <div id="noCounterOffers" style="text-align: center; color: #999; padding: 30px 20px;">
-            <p style="font-size: 16px; margin: 0;">No counter offers sent yet</p>
+            <p style="font-size: 16px; margin: 0;">अभी तक कोई काउंटर ऑफर नहीं भेजा गया है</p>
         </div>
     </div>
     <br><br><br>
@@ -227,7 +227,7 @@
     <div id="manageModal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Manage Auction</h3>
+                <h3>ऑक्शन मैनेज करें</h3>
                 <button class="close-btn" onclick="closeManageModal()">✕</button>
             </div>
             <div class="modal-body">
@@ -235,36 +235,36 @@
                     <button class="manage-btn accept-btn" onclick="acceptBid()">
                         <span>✅</span>
                         <div>
-                            <div class="btn-title">Accept Bid</div>
-                            <div class="btn-desc">Accept the highest bid</div>
+                            <div class="btn-title">एक्सेप्ट बिड</div>
+                            <div class="btn-desc">हाईएस्ट बिड एक्सेप्ट करें</div>
                         </div>
                     </button>
                     <button id="counterOfferBtn" class="manage-btn counter-btn" onclick="sendCounterOffer()" style="display: none;">
                         <span>💬</span>
                         <div>
-                            <div class="btn-title">Counter Offer</div>
-                            <div class="btn-desc">Send counter price offer</div>
+                            <div class="btn-title">काउंटर ऑफर</div>
+                            <div class="btn-desc">काउंटर प्राइस ऑफर भेजें</div>
                         </div>
                     </button>
                     <button class="manage-btn extend-btn" onclick="extendAuction()">
                         <span>⏱️</span>
                         <div>
-                            <div class="btn-title">Extend Duration</div>
-                            <div class="btn-desc">Add more time to auction</div>
+                            <div class="btn-title">ड्यूरेशन बढ़ाएं</div>
+                            <div class="btn-desc">ऑक्शन का टाइम बढ़ाएं</div>
                         </div>
                     </button>
                     <button class="manage-btn update-btn" onclick="updateMinimumPrice()">
                         <span>💰</span>
                         <div>
-                            <div class="btn-title">Update Price</div>
-                            <div class="btn-desc">Change minimum price</div>
+                            <div class="btn-title">अपडेट प्राइस</div>
+                            <div class="btn-desc">मिनिमम प्राइस बदलें</div>
                         </div>
                     </button>
                     <button class="manage-btn cancel-btn" onclick="cancelAuction()">
                         <span>❌</span>
                         <div>
-                            <div class="btn-title">Cancel Auction</div>
-                            <div class="btn-desc">Cancel this auction</div>
+                            <div class="btn-title">कैंसल ऑक्शन</div>
+                            <div class="btn-desc">इस ऑक्शन को कैंसल करें</div>
                         </div>
                     </button>
                 </div>
@@ -277,12 +277,12 @@
 <div id="counterOfferModal" class="modal hidden">
     <div class="modal-content" style="max-width: 600px;">
         <div class="modal-header">
-            <h3>💬 Send Counter Offer</h3>
+            <h3>💬 काउंटर ऑफर भेजें</h3>
             <button class="close-btn" onclick="closeCounterOfferModal()">✕</button>
         </div>
         <div class="modal-body">
             <div style="margin-bottom: 15px;">
-                <label style="font-weight: 600; display: block; margin-bottom: 8px;">Select Buyer Bid:</label>
+                <label style="font-weight: 600; display: block; margin-bottom: 8px;">बायर बिड सिलेक्ट करें:</label>
                 <div id="bidsList" style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; border-radius: 6px; background: #fafafa;">
                     <!-- Bids will be populated here -->
                 </div>
@@ -295,13 +295,13 @@
                 </div>
                 
                 <div style="margin-bottom: 15px;">
-                    <label for="counterPrice" style="font-weight: 600; display: block; margin-bottom: 8px;">Counter Offer Price (₹/quintal):</label>
-                    <input type="number" id="counterPrice" placeholder="Enter counter price" min="0" step="0.01" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    <label for="counterPrice" style="font-weight: 600; display: block; margin-bottom: 8px;">काउंटर ऑफर प्राइस (₹/क्विंटल):</label>
+                    <input type="number" id="counterPrice" placeholder="काउंटर प्राइस डालें" min="0" step="0.01" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
                 </div>
                 
                 <div style="display: flex; gap: 10px;">
-                    <button onclick="submitCounterOffer()" style="flex: 1; background: #4caf50; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">Send Counter Offer</button>
-                    <button onclick="closeCounterOfferModal()" style="flex: 1; background: #f0f0f0; color: #333; padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">Cancel</button>
+                    <button onclick="submitCounterOffer()" style="flex: 1; background: #4caf50; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">काउंटर ऑफर भेजें</button>
+                    <button onclick="closeCounterOfferModal()" style="flex: 1; background: #f0f0f0; color: #333; padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">कैंसल</button>
                 </div>
             </div>
         </div>

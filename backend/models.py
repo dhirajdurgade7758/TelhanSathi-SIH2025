@@ -97,6 +97,9 @@ class Farmer(db.Model):
     # ===== GAMIFICATION =====
     coins_earned = db.Column(db.Integer, default=0)  # Total coins earned
     
+    # Profile Picture (stores filename)
+    profile_pic = db.Column(db.String(255), default=None)
+    
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -119,7 +122,10 @@ class Farmer(db.Model):
             'name': self.name,
             'date_of_birth': self.date_of_birth.isoformat() if self.date_of_birth else None,
             'gender': self.gender,
-            'phone': self.phone_number,
+            'phone_number': self.phone_number,
+            'caste_category': self.caste_category,
+            'is_physically_handicapped': self.is_physically_handicapped,
+            'permanent_address': self.permanent_address,
             'district': self.district,
             'taluka': self.taluka,
             'village': self.village,
@@ -127,14 +133,18 @@ class Farmer(db.Model):
             'pincode': self.pincode,
             'total_land_area_hectares': self.total_land_area_hectares,
             'land_area_gunthas': self.land_area_gunthas,
-            'land_type': self.land_holder_type,
-            'soil_type': self.soil_type,
-            'current_crops': self.current_crops,
-            'water_type': self.water_type,
-            'is_verified': self.is_verified,
-            'photo_url': None,
+            'land_holder_type': self.land_holder_type,
             'land_unit': self.land_unit,
+            'soil_type': self.soil_type,
+            'water_type': self.water_type,
+            'current_crops': self.current_crops,
             'harvest_date': self.harvest_date.isoformat() if self.harvest_date else None,
+            'is_oilseed_farmer': self.is_oilseed_farmer,
+            'annual_income': self.annual_income,
+            'is_pm_kisan_beneficiary': self.is_pm_kisan_beneficiary,
+            'coins_earned': self.coins_earned,
+            'profile_pic': self.profile_pic,
+            'is_verified': self.is_verified,
         }
 
 

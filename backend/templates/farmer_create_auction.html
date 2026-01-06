@@ -1,24 +1,24 @@
 {% extends "base.html" %}
 
-{% block title %}Create Auction - तेलहान साथी{% endblock %}
+{% block title %}नीलामी बनाएं - तेलहान साथी{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="form-container">
         <div class="form-header">
-            <h1>🎯 Create New Auction</h1>
-            <p>List your oilseed harvest for bidding</p>
+            <h1>🎯 नई नीलामी क्रिएट करें</h1>
+            <p>अपनी तिलहन फसल सेल के लिए लिस्ट करें</p>
         </div>
 
         <form id="createAuctionForm" class="auction-form">
             <!-- Crop Information Section -->
             <fieldset class="form-section">
-                <legend>Crop Information</legend>
+                <legend>क्रॉप की जानकारी</legend>
                 
                 <div class="form-group">
-                    <label for="cropName">Crop Type *</label>
+                    <label for="cropName">क्रॉप टाइप *</label>
                     <select id="cropName" name="cropName" required>
-                        <option value="">Select Crop</option>
+                        <option value="">क्रॉप सिलेक्ट करें</option>
                         <option value="Mustard">Mustard (सरसों)</option>
                         <option value="Groundnut">Groundnut (मूंगफली)</option>
                         <option value="Sunflower">Sunflower (सूरजमुखी)</option>
@@ -30,43 +30,43 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="quantity">Quantity (Quintals) *</label>
+                        <label for="quantity">क्वांटिटी (क्विंटल) *</label>
                         <input type="number" id="quantity" name="quantity_quintals" min="1" step="0.1" required>
-                        <small>1 quintal = 100 kg</small>
+                        <small>1 क्विंटल = 100 किलो</small>
                     </div>
 
                     <div class="form-group">
-                        <label for="quality">Quality Grade</label>
+                        <label for="quality">क्वालिटी ग्रेड</label>
                         <select id="quality" name="quality_grade">
-                            <option value="Standard">Standard</option>
-                            <option value="A">Grade A - Premium</option>
-                            <option value="B">Grade B - Good</option>
-                            <option value="C">Grade C - Fair</option>
+                            <option value="Standard">स्टैंडर्ड</option>
+                            <option value="A">ग्रेड ए - प्रीमियम</option>
+                            <option value="B">ग्रेड बी - गुड</option>
+                            <option value="C">ग्रेड सी - नॉर्मल</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="description">Description (Optional)</label>
-                    <textarea id="description" name="description" rows="3" placeholder="Add details about your harvest..."></textarea>
+                    <label for="description">विवरण (ऑप्शनल)</label>
+                    <textarea id="description" name="description" rows="3" placeholder="अपनी फसल के बारे में जानकारी लिखें..."></textarea>
                 </div>
             </fieldset>
 
             <!-- Pricing Section -->
             <fieldset class="form-section">
-                <legend>Pricing & Bidding</legend>
+                <legend>प्राइसिंग & बिडिंग</legend>
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="basePrice">Base Price (₹/Quintal) *</label>
+                        <label for="basePrice">बेस प्राइस (₹/क्विंटल) *</label>
                         <input type="number" id="basePrice" name="base_price" min="100" step="10" required>
-                        <small>Starting price for bidding</small>
+                        <small>बिडिंग के लिए स्टार्टिंग प्राइस</small>
                     </div>
 
                     <div class="form-group">
-                        <label for="minIncrement">Minimum Bid Increment (₹)</label>
+                        <label for="minIncrement">मिनिमम बिड इंक्रीमेंट (₹)</label>
                         <input type="number" id="minIncrement" name="minimum_bid_increment" min="10" step="10" value="50">
-                        <small>Minimum increase per bid</small>
+                        <small>हर बिड में कम से कम इतना बढ़ाएं</small>
                     </div>
                 </div>
 
@@ -75,119 +75,119 @@
 
             <!-- Timeline Section -->
             <fieldset class="form-section">
-                <legend>Auction Duration</legend>
+                <legend>ऑक्शन ड्यूरेशन</legend>
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="duration">Auction Duration (Hours) *</label>
+                        <label for="duration">ऑक्शन ड्यूरेशन (घंटे) *</label>
                         <select id="duration" name="duration_hours" required>
-                            <option value="">Select Duration</option>
-                            <option value="1">1 Hour</option>
-                            <option value="2">2 Hours</option>
-                            <option value="4">4 Hours</option>
-                            <option value="6">6 Hours</option>
-                            <option value="12">12 Hours</option>
-                            <option value="24">24 Hours (1 Day)</option>
-                            <option value="48">48 Hours (2 Days)</option>
-                            <option value="72">72 Hours (3 Days)</option>
-                            <option value="168">7 Days</option>
+                            <option value="">ड्यूरेशन सिलेक्ट करें</option>
+                            <option value="1">1 घंटा</option>
+                            <option value="2">2 घंटे</option>
+                            <option value="4">4 घंटे</option>
+                            <option value="6">6 घंटे</option>
+                            <option value="12">12 घंटे</option>
+                            <option value="24">24 घंटे (1 दिन)</option>
+                            <option value="48">48 घंटे (2 दिन)</option>
+                            <option value="72">72 घंटे (3 दिन)</option>
+                            <option value="168">7 दिन</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label>Auction Start Time</label>
-                        <input type="text" value="Now" disabled>
-                        <small>Auction starts immediately after creation</small>
+                        <label>ऑक्शन स्टार्ट टाइम</label>
+                        <input type="text" value="अभी" disabled>
+                        <small>ऑक्शन क्रिएट होते ही शुरू होगा</small>
                     </div>
                 </div>
             </fieldset>
 
             <!-- Location Section -->
             <fieldset class="form-section">
-                <legend>Location & Logistics</legend>
+                <legend>लोकेशन & लॉजिस्टिक्स</legend>
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="location">Farm Location *</label>
-                        <input type="text" id="location" name="location" placeholder="Address" required>
+                        <label for="location">फार्म लोकेशन *</label>
+                        <input type="text" id="location" name="location" placeholder="पता" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="district">District *</label>
+                        <label for="district">डिस्ट्रिक्ट *</label>
                         <input type="text" id="district" name="district" value="{{ farmer.district }}" required>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="state">State</label>
+                        <label for="state">स्टेट</label>
                         <input type="text" id="state" name="state" value="Maharashtra">
                     </div>
 
                     <div class="form-group">
-                        <label for="storage">Storage Location (Optional)</label>
-                        <input type="text" id="storage" name="storage_location" placeholder="Where crop is stored">
+                        <label for="storage">स्टोरेज लोकेशन (ऑप्शनल)</label>
+                        <input type="text" id="storage" name="storage_location" placeholder="फसल कहाँ रखी है">
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="harvestDate">Harvest Date (Optional)</label>
+                    <label for="harvestDate">हार्वेस्ट डेट (ऑप्शनल)</label>
                     <input type="date" id="harvestDate" name="harvest_date">
                 </div>
             </fieldset>
 
             <!-- Photo Section -->
             <fieldset class="form-section">
-                <legend>📸 Oilseed Harvest Photos</legend>
-                <p class="section-description">Upload up to 4 photos of your oilseed harvest to help buyers assess quality</p>
+                <legend>📸 ऑयलसीड हार्वेस्ट फोटो</legend>
+                <p class="section-description">अपनी ऑयलसीड फसल की 4 फोटो अपलोड करें ताकि खरीदार क्वालिटी देख सकें</p>
                 
                 <div class="photos-grid">
                     <div class="photo-upload-group">
-                        <label for="photo1">Photo 1 (Required)</label>
+                        <label for="photo1">फोटो 1 (जरूरी)</label>
                         <div class="photo-input-wrapper">
                             <input type="file" id="photo1" name="photo1" accept="image/*" required>
                             <div class="photo-preview" id="preview1">
                                 <span class="preview-placeholder">📷</span>
-                                <span class="preview-text">Click to upload</span>
+                                <span class="preview-text">अपलोड करने के लिए क्लिक करें</span>
                             </div>
                         </div>
-                        <small>Main harvest photo - required for listing</small>
+                        <small>मुख्य फसल की फोटो - लिस्टिंग के लिए जरूरी</small>
                     </div>
 
                     <div class="photo-upload-group">
-                        <label for="photo2">Photo 2 (Optional)</label>
+                        <label for="photo2">फोटो 2 (ऑप्शनल)</label>
                         <div class="photo-input-wrapper">
                             <input type="file" id="photo2" name="photo2" accept="image/*">
                             <div class="photo-preview" id="preview2">
                                 <span class="preview-placeholder">📷</span>
-                                <span class="preview-text">Click to upload</span>
+                                <span class="preview-text">अपलोड करने के लिए क्लिक करें</span>
                             </div>
                         </div>
-                        <small>Different angle or detail view</small>
+                        <small>अलग एंगल या डिटेल व्यू</small>
                     </div>
 
                     <div class="photo-upload-group">
-                        <label for="photo3">Photo 3 (Optional)</label>
+                        <label for="photo3">फोटो 3 (ऑप्शनल)</label>
                         <div class="photo-input-wrapper">
                             <input type="file" id="photo3" name="photo3" accept="image/*">
                             <div class="photo-preview" id="preview3">
                                 <span class="preview-placeholder">📷</span>
-                                <span class="preview-text">Click to upload</span>
+                                <span class="preview-text">अपलोड करने के लिए क्लिक करें</span>
                             </div>
                         </div>
-                        <small>Quality/grading details</small>
+                        <small>क्वालिटी/ग्रेडिंग डिटेल्स</small>
                     </div>
 
                     <div class="photo-upload-group">
-                        <label for="photo4">Photo 4 (Optional)</label>
+                        <label for="photo4">फोटो 4 (ऑप्शनल)</label>
                         <div class="photo-input-wrapper">
                             <input type="file" id="photo4" name="photo4" accept="image/*">
                             <div class="photo-preview" id="preview4">
                                 <span class="preview-placeholder">📷</span>
-                                <span class="preview-text">Click to upload</span>
+                                <span class="preview-text">अपलोड करने के लिए क्लिक करें</span>
                             </div>
                         </div>
-                        <small>Storage/packaging info</small>
+                        <small>स्टोरेज/पैकेजिंग जानकारी</small>
                     </div>
                 </div>
             </fieldset>
@@ -195,10 +195,10 @@
             <!-- Submit Section -->
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary btn-lg">
-                    <span>🎯</span> Create Auction
+                    <span>🎯</span> क्रिएट ऑक्शन
                 </button>
                 <button type="button" class="btn btn-secondary btn-lg" onclick="window.history.back()">
-                    Cancel
+                    कैंसल
                 </button>
             </div>
 
@@ -962,7 +962,7 @@ document.getElementById('createAuctionForm').addEventListener('submit', async (e
 
         if (response.ok) {
             messageDiv.className = 'form-message success';
-            messageDiv.textContent = '✅ Auction created successfully! Redirecting...';
+            messageDiv.textContent = '✅ ऑक्शन सफलतापूर्वक क्रिएट हो गया! रीडायरेक्ट कर रहे हैं...';
             messageDiv.style.display = 'block';
             
             setTimeout(() => {
@@ -970,12 +970,12 @@ document.getElementById('createAuctionForm').addEventListener('submit', async (e
             }, 2000);
         } else {
             messageDiv.className = 'form-message error';
-            messageDiv.textContent = '❌ Error: ' + (data.error || 'Failed to create auction');
+            messageDiv.textContent = '❌ एरर: ' + (data.error || 'ऑक्शन क्रिएट करने में समस्या');
             messageDiv.style.display = 'block';
         }
     } catch (error) {
         document.getElementById('formMessage').className = 'form-message error';
-        document.getElementById('formMessage').textContent = '❌ Error: ' + error.message;
+        document.getElementById('formMessage').textContent = '❌ एरर: ' + error.message;
         document.getElementById('formMessage').style.display = 'block';
     }
 });

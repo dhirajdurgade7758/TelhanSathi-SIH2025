@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>आपकी जानकारी - Sahayak</title>
+    <title>प्रोफाइल संपादित करें - Sahayak</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <style>
         * {
@@ -75,11 +75,6 @@
             justify-content: center;
         }
 
-        .header-logo img {
-            height: 40px;
-            width: auto;
-        }
-
         .logo-text {
             font-size: 18px;
             font-weight: 600;
@@ -102,71 +97,71 @@
 
         .card-header h1 {
             font-size: 24px;
+            font-weight: 700;
             margin-bottom: 8px;
-            font-weight: 600;
         }
 
         .card-header p {
-            font-size: 13px;
-            opacity: 0.95;
+            font-size: 14px;
+            opacity: 0.9;
         }
 
-        .card-body {
+        .card-content {
             padding: 32px 24px;
         }
 
         .form-section {
             margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .form-section:last-child {
             margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
         }
 
         .section-title {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
             font-size: 16px;
             font-weight: 600;
             color: var(--primary-green);
-            margin-bottom: 18px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid var(--light-green);
+            margin-bottom: 20px;
         }
 
         .section-title .material-icons {
-            font-size: 20px;
+            font-size: 24px;
         }
 
         .form-group {
-            margin-bottom: 18px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
         }
 
         .form-group label {
-            display: flex;
-            align-items: center;
-            gap: 4px;
             font-size: 14px;
             font-weight: 500;
-            color: var(--text-dark);
             margin-bottom: 8px;
+            color: var(--text-dark);
         }
 
         .required {
             color: #ef4444;
-            font-weight: 700;
         }
 
         .form-group input,
         .form-group select,
         .form-group textarea {
-            width: 100%;
-            padding: 12px 14px;
+            padding: 12px;
             border: 1px solid var(--border-color);
             border-radius: 8px;
             font-size: 14px;
             font-family: inherit;
+            background: #fafafa;
             transition: all 0.3s ease;
             color: var(--text-dark);
         }
@@ -191,6 +186,30 @@
             gap: 16px;
         }
 
+        .profile-pic-preview {
+            width: 120px;
+            height: 120px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--light-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            border: 2px solid var(--border-color);
+        }
+
+        .profile-pic-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .no-pic {
+            font-size: 48px;
+            color: #aaa;
+        }
+
         .button-group {
             display: flex;
             gap: 12px;
@@ -200,120 +219,116 @@
         }
 
         .btn {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            padding: 14px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: inherit;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-green) 100%);
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--accent-green) 100%);
             color: white;
-            flex: 1;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(45, 80, 22, 0.25);
+            box-shadow: 0 8px 16px rgba(45, 80, 22, 0.2);
         }
 
-        .btn-primary:active {
-            transform: translateY(0);
+        .btn-secondary {
+            background: #e5e7eb;
+            color: var(--text-dark);
         }
 
-        .btn-primary .material-icons {
-            font-size: 20px;
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #dc2626;
+        }
+
+        small {
+            color: var(--text-light);
+            font-size: 12px;
         }
 
         @media (max-width: 600px) {
-            .card-body {
-                padding: 24px 16px;
-            }
-
             .form-row {
                 grid-template-columns: 1fr;
             }
 
             .button-group {
-                flex-direction: column;
+                flex-direction: column-reverse;
             }
 
-            .header-logo {
-                gap: 8px;
+            .btn {
+                width: 100%;
             }
-
-            .header-logo img {
-                height: 32px;
-            }
-
-            .logo-text {
-                font-size: 16px;
-            }
-        }
-
-        .info-banner {
-            background: #fffbeb;
-            border-left: 4px solid #f59e0b;
-            padding: 14px 16px;
-            border-radius: 6px;
-            margin-bottom: 24px;
-            font-size: 13px;
-            color: #92400e;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-
-        .info-banner .material-icons {
-            font-size: 18px;
-            flex-shrink: 0;
-            margin-top: 1px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
         <div class="header">
             <div class="header-back" onclick="window.history.back()">
-                <i class="material-icons">arrow_back</i>
+                <span class="material-icons">arrow_back</span>
             </div>
             <div class="header-logo">
-                <img src="static/img/agri_logo.jpg" alt="Sahayak Logo">
+                <span class="logo-text">प्रोफाइल संपादित करें</span>
             </div>
             <div style="width: 40px;"></div>
         </div>
 
-        <!-- Card -->
         <div class="card">
             <div class="card-header">
-                <h1>👨‍🌾 आपकी जानकारी</h1>
-                <p>कृपया अपने बारे में विवरण साझा करें</p>
+                <h1>अपनी जानकारी अपडेट करें</h1>
+                <p>अपनी प्रोफाइल को अपडेट रखें</p>
             </div>
 
-            <div class="card-body">
-                <!-- Info Banner -->
-                <div class="info-banner">
-                    <i class="material-icons">info</i>
-                    <span>आपकी व्यक्तिगत जानकारी सुरक्षित है। आप इसे बाद में अपडेट कर सकते हैं।</span>
-                </div>
-
+            <div class="card-content">
                 {% if error %}
-                <div style="background: #fee; border-left: 4px solid #e74c3c; padding: 14px 16px; border-radius: 6px; margin-bottom: 24px; font-size: 14px; color: #c0392b; display: flex; align-items: flex-start; gap: 10px;">
-                    <i class="material-icons" style="flex-shrink: 0; margin-top: 2px; font-size: 20px;">error</i>
-                    <span>{{ error }}</span>
-                </div>
+                <div class="error-message">{{ error }}</div>
                 {% endif %}
 
-                <form id="profileForm" method="POST" action="{{ url_for('onboarding.onboarding_post') }}" enctype="multipart/form-data">
+                <form id="editProfileForm" method="POST" enctype="multipart/form-data">
+                    <!-- Profile Picture -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="material-icons">photo_camera</i>
+                            प्रोफाइल तस्वीर
+                        </div>
+
+                        {% if pre.profile_pic %}
+                        <div class="profile-pic-preview">
+                            <img src="{{ url_for('static', filename='uploads/profile_pics/' + pre.profile_pic) }}" alt="Profile">
+                        </div>
+                        {% else %}
+                        <div class="profile-pic-preview">
+                            <span class="material-icons no-pic">account_circle</span>
+                        </div>
+                        {% endif %}
+
+                        <div class="form-group">
+                            <label>नई तस्वीर अपलोड करें</label>
+                            <input type="file" id="profile_pic" name="profile_pic" accept="image/*">
+                            <small>JPG, PNG (अधिकतम 5 MB)</small>
+                        </div>
+                    </div>
+
                     <!-- Personal Information -->
                     <div class="form-section">
                         <div class="section-title">
@@ -326,12 +341,6 @@
                                 आपका नाम <span class="required">*</span>
                             </label>
                             <input type="text" id="name" name="name" placeholder="अपना पूरा नाम दर्ज करें" value="{{ pre.name or '' }}" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label>प्रोफाइल तस्वीर</label>
-                            <input type="file" id="profile_pic" name="profile_pic" accept="image/*">
-                            <small style="color: var(--text-light); margin-top: 4px; display: block;">JPG, PNG (अधिकतम 5 MB)</small>
                         </div>
 
                         <div class="form-row">
@@ -382,25 +391,25 @@
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label>गाँव</label>
-                                <input type="text" id="village" name="village" placeholder="गाँव का नाम" value="{{ pre.village or '' }}">
+                                <label>तालुका</label>
+                                <input type="text" id="taluka" name="taluka" placeholder="तालुका का नाम" value="{{ pre.taluka or '' }}">
                             </div>
 
                             <div class="form-group">
-                                <label>तहसील</label>
-                                <input type="text" id="taluka" name="taluka" placeholder="तहसील का नाम" value="{{ pre.taluka or '' }}">
+                                <label>गाँव</label>
+                                <input type="text" id="village" name="village" placeholder="गाँव का नाम" value="{{ pre.village or '' }}">
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
                                 <label>राज्य</label>
-                                <input type="text" id="state" name="state" placeholder="राज्य का नाम" value="{{ pre.state or 'Maharashtra' }}">
+                                <input type="text" id="state" name="state" placeholder="राज्य" value="{{ pre.state or 'महाराष्ट्र' }}">
                             </div>
 
                             <div class="form-group">
                                 <label>पिन कोड</label>
-                                <input type="text" id="pincode" name="pincode" placeholder="6 अंक" pattern="\d{6}" value="{{ pre.pincode or '' }}">
+                                <input type="text" id="pincode" name="pincode" placeholder="6 अंकों का पिन कोड" value="{{ pre.pincode or '' }}">
                             </div>
                         </div>
                     </div>
@@ -426,11 +435,11 @@
                             <label>मिट्टी का प्रकार</label>
                             <select id="soil_type" name="soil_type">
                                 <option value="">-- चुनें --</option>
-                                <option value="black">काली मिट्टी</option>
-                                <option value="red">लाल मिट्टी</option>
-                                <option value="sandy">बलुई मिट्टी</option>
-                                <option value="clay">चिकनी मिट्टी</option>
-                                <option value="loamy">दोमट मिट्टी</option>
+                                <option value="black" {% if pre.soil_type == 'black' %}selected{% endif %}>काली मिट्टी</option>
+                                <option value="red" {% if pre.soil_type == 'red' %}selected{% endif %}>लाल मिट्टी</option>
+                                <option value="sandy" {% if pre.soil_type == 'sandy' %}selected{% endif %}>बलुई मिट्टी</option>
+                                <option value="clay" {% if pre.soil_type == 'clay' %}selected{% endif %}>चिकनी मिट्टी</option>
+                                <option value="loamy" {% if pre.soil_type == 'loamy' %}selected{% endif %}>दोमट मिट्टी</option>
                             </select>
                         </div>
 
@@ -438,36 +447,35 @@
                             <label>जल का प्रकार</label>
                             <select id="water_type" name="water_type">
                                 <option value="">-- चुनें --</option>
-                                <option value="freshwater">मीठा पानी</option>
-                                <option value="salt_water">खारा पानी</option>
-                                <option value="brackish_water">खारा-मीठा पानी</option>
+                                <option value="freshwater" {% if pre.water_type == 'freshwater' %}selected{% endif %}>मीठा पानी</option>
+                                <option value="salt_water" {% if pre.water_type == 'salt_water' %}selected{% endif %}>खारा पानी</option>
+                                <option value="brackish_water" {% if pre.water_type == 'brackish_water' %}selected{% endif %}>खारा-मीठा पानी</option>
                             </select>
                         </div>
 
                         <div class="form-group">
-                            <label>वर्तमान फसलें</label>
-                            <input type="text" id="current_crops" name="current_crops" placeholder="अपनी फसलें दर्ज करें (अल्पविराम से अलग)">
-                        </div>
-
-                        <div class="form-group">
                             <label>भूमि क्षेत्र (गुंठे में)</label>
-                            <input type="number" id="land_area_gunthas" name="land_area_gunthas" placeholder="गुंठों में क्षेत्र दर्ज करें" step="0.5">
+                            <input type="number" id="land_area_gunthas" name="land_area_gunthas" placeholder="गुंठों में क्षेत्र दर्ज करें" step="0.5" value="{{ pre.land_area_gunthas or '' }}">
                         </div>
 
-                        <!-- Hidden field for hectares calculation -->
-                        <input type="hidden" id="total_land_area_hectares" name="total_land_area_hectares" value="">
+                        <input type="hidden" id="total_land_area_hectares" name="total_land_area_hectares" value="{{ pre.total_land_area_hectares or '' }}">
 
                         <div class="form-group">
                             <label>फसल की कटाई की तारीख</label>
-                            <input type="date" id="harvest_date" name="harvest_date">
+                            <input type="date" id="harvest_date" name="harvest_date" value="{{ pre.harvest_date or '' }}">
+                        </div>
+
+                        <div class="form-group">
+                            <label>वर्तमान फसलें</label>
+                            <input type="text" id="current_crops" name="current_crops" placeholder="अपनी फसलें दर्ज करें (अल्पविराम से अलग)" value="{{ pre.current_crops or '' }}">
                         </div>
 
                         <div class="form-group">
                             <label>क्या आप तिलहन किसान हैं?</label>
                             <select id="is_oilseed_farmer" name="is_oilseed_farmer">
                                 <option value="">-- चुनें --</option>
-                                <option value="yes">हाँ</option>
-                                <option value="no">नहीं</option>
+                                <option value="yes" {% if pre.is_oilseed_farmer %}selected{% endif %}>हाँ</option>
+                                <option value="no" {% if not pre.is_oilseed_farmer %}selected{% endif %}>नहीं</option>
                             </select>
                         </div>
                     </div>
@@ -481,15 +489,15 @@
 
                         <div class="form-group">
                             <label>वार्षिक आय</label>
-                            <input type="number" id="annual_income" name="annual_income" placeholder="रुपये में वार्षिक आय" step="1000">
+                            <input type="number" id="annual_income" name="annual_income" placeholder="रुपये में वार्षिक आय" step="1000" value="{{ pre.annual_income or '' }}">
                         </div>
 
                         <div class="form-group">
                             <label>क्या आप PM-किसान लाभार्थी हैं?</label>
                             <select id="is_pm_kisan_beneficiary" name="is_pm_kisan_beneficiary">
                                 <option value="">-- चुनें --</option>
-                                <option value="yes">हाँ</option>
-                                <option value="no">नहीं</option>
+                                <option value="yes" {% if pre.is_pm_kisan_beneficiary %}selected{% endif %}>हाँ</option>
+                                <option value="no" {% if not pre.is_pm_kisan_beneficiary %}selected{% endif %}>नहीं</option>
                             </select>
                         </div>
 
@@ -497,17 +505,21 @@
                             <label>क्या आप विकलांग हैं?</label>
                             <select id="is_physically_handicapped" name="is_physically_handicapped">
                                 <option value="">-- चुनें --</option>
-                                <option value="yes">हाँ</option>
-                                <option value="no">नहीं</option>
+                                <option value="yes" {% if pre.is_physically_handicapped %}selected{% endif %}>हाँ</option>
+                                <option value="no" {% if not pre.is_physically_handicapped %}selected{% endif %}>नहीं</option>
                             </select>
                         </div>
                     </div>
 
                     <!-- Buttons -->
                     <div class="button-group">
+                        <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+                            <i class="material-icons">close</i>
+                            रद्द करें
+                        </button>
                         <button type="submit" class="btn btn-primary">
                             <i class="material-icons">done</i>
-                            जमा करें
+                            सहेजें
                         </button>
                     </div>
                 </form>
@@ -525,7 +537,7 @@
             document.getElementById('total_land_area_hectares').value = hectares;
         });
 
-        document.getElementById('profileForm').addEventListener('submit', function(e) {
+        document.getElementById('editProfileForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
             const name = document.getElementById('name').value.trim();
