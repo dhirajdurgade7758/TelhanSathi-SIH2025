@@ -7,35 +7,37 @@ import os
 
 profit_bp = Blueprint('profit', __name__, url_prefix='/profit')
 
-# Import the ML model stub
+# Import the ML profit simulator based on ARIMA
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Import the ML inference service for oilseed price prediction
 try:
-    from ml.inference_service import OilseedPricePredictor
-    ml_predictor = OilseedPricePredictor()
-    ML_AVAILABLE = True
+    from ml.profit_simulator_arima import get_profit_simulator
+    simulator = get_profit_simulator()
+    ML_AVAILABLE = simulator.model_available
+    logger_msg = "[OK] ARIMA Profit Simulator loaded successfully"
 except Exception as e:
-    print(f"⚠️  Warning: ML model not available - {str(e)}")
-    print("   Falling back to default calculations")
+    print(f"[WARNING] Profit Simulator not available - {str(e)}")
+    print("   ML models may not be trained")
     ML_AVAILABLE = False
-    ml_predictor = None
+    simulator = None
+    logger_msg = f"Profit Simulator Error: {str(e)}"
+
+print(logger_msg)
+
 
 
 def get_market_price(crop_name):
     """
-    Return default market prices for crops (₹/quintal).
-    Previously fetched from marketplace listings, now using hardcoded defaults.
+    Return market prices for crops from oilseed parameters (₹/quintal).
     """
-    # Fallback defaults (₹/quintal)
-    defaults = {
-        'Paddy': 2200,
-        'Mustard': 5200,
-        'Soybean': 4650,
+    price_map = {
         'Groundnut': 6100,
-        'Sunflower': 4800
+        'Linseed (Flaxseed)': 5500,
+        'Mustard': 5200,
+        'Sesame': 7200,
+        'Soybean': 4650,
     }
-    return defaults.get(crop_name, 3000)
+    return price_map.get(crop_name, 5000)
 
 
 @profit_bp.route('/simulator')
@@ -47,7 +49,7 @@ def simulator_page():
 
 @profit_bp.route('/api/init')
 def api_init():
-    """Return prefilled farmer data for the simulator."""
+    """Return prefilled farmer data and available markets/commodities."""
     if 'farmer_id_verified' not in session:
         return jsonify({'error': 'Not logged in'}), 401
 
@@ -55,46 +57,42 @@ def api_init():
     if not farmer:
         return jsonify({'error': 'Farmer not found'}), 404
 
+    # Get available markets and commodities from simulator
+    available_markets = simulator.get_available_markets() if ML_AVAILABLE and simulator else []
+    available_commodities = simulator.get_available_commodities() if ML_AVAILABLE and simulator else []
+
     # Get current crop or default to Mustard
     current_crop = farmer.current_crops.split(',')[0] if farmer.current_crops else 'Mustard'
+    if current_crop not in available_commodities:
+        current_crop = available_commodities[0] if available_commodities else 'Mustard'
     
     # Convert hectares to acres for display
     area_acres = round((farmer.total_land_area_hectares or 0.5) * 2.471054, 2)
     
-    # Extract state from farmer if available
-    state = farmer.state or 'Maharashtra'
-    district = farmer.district or 'Indore'
+    # Extract state from farmer if available - find matching market
+    market = farmer.district or (available_markets[0] if available_markets else 'Delhi')
+    if market not in available_markets:
+        market = available_markets[0] if available_markets else 'Delhi'
+    
     harvest_month = farmer.harvest_date.strftime('%B') if farmer.harvest_date else 'October'
-
-    # Get available regions from ML model
-    available_regions = ml_predictor.get_available_regions() if ML_AVAILABLE else {}
-    
-    # Build state and district options from available data
-    state_options = list(available_regions.keys()) if available_regions else ['Maharashtra']
-    selected_state = state if state in state_options else (state_options[0] if state_options else 'Maharashtra')
-    
-    # Get districts for selected state
-    district_options = available_regions.get(selected_state, ['Indore']) if available_regions else ['Indore']
-    selected_district = district if district in district_options else (district_options[0] if district_options else 'Indore')
 
     return jsonify({
         'farmer': {
             'id': farmer.id,
             'name': farmer.name,
-            'district': selected_district,
-            'state': selected_state,
+            'market': market,
+            'state': farmer.state or 'Maharashtra',
+            'district': farmer.district or 'Indore',
             'soil_type': farmer.soil_type or '',
             'water_type': farmer.water_type or 'Freshwater',
             'current_crop': current_crop,
             'area_in_acres': area_acres,
             'harvest_month': harvest_month
         },
-        'available_regions': available_regions,
-        'state_options': state_options,
-        'district_options': district_options,
-        'selected_state': selected_state,
-        'selected_district': selected_district,
-        'oilseeds_list': ['Mustard', 'Soybean', 'Groundnut', 'Sunflower', 'Safflower', 'Sesame'],
+        'available_markets': available_markets,
+        'available_commodities': available_commodities,
+        'selected_market': market,
+        'selected_commodity': current_crop,
         'harvest_months': ['January', 'February', 'March', 'April', 'May', 'June', 
                            'July', 'August', 'September', 'October', 'November', 'December'],
         'ml_available': ML_AVAILABLE
@@ -104,167 +102,108 @@ def api_init():
 @profit_bp.route('/api/simulate', methods=['POST'])
 def api_simulate():
     """
-    Accepts oilseed simulation parameters and calls ML model to predict profit.
-    Input format matches ML model signature.
-    DOES NOT FALLBACK - Returns error if ML fails.
+    Calculate profit using ARIMA-based price forecasts.
     """
     if 'farmer_id_verified' not in session:
         return jsonify({'error': 'Not logged in'}), 401
 
+    if not ML_AVAILABLE or not simulator:
+        return jsonify({
+            'error': 'ML मॉडल उपलब्ध नहीं है',
+            'details': 'कृपया सर्वर को रीस्टार्ट करें या डेटा सेट कॉन्फ़िगर करें'
+        }), 503
+
     data = request.json or {}
     
     try:
-        crop_name = data.get('crop_name', 'Mustard')
-        state = data.get('state', 'Maharashtra')
-        market_district = data.get('market_district', '')
-        harvest_month = data.get('harvest_month', 'October')
-        soil_type = data.get('soil_type', '')
-        water_type = data.get('water_type', 'Freshwater')
+        market = data.get('market', 'Delhi')
+        commodity = data.get('commodity', 'Soybean')
         area_in_acres = float(data.get('area_in_acres', 1.0))
-    except Exception as e:
+        harvest_month = data.get('harvest_month', 'October')
+        custom_cost_per_acre = data.get('custom_cost_per_acre', None)
+        
+        # Convert custom cost to float if provided
+        if custom_cost_per_acre is not None:
+            custom_cost_per_acre = float(custom_cost_per_acre)
+    except (ValueError, TypeError) as e:
         return jsonify({'error': 'अमान्य इनपुट', 'details': str(e)}), 400
 
-    # Use ML model - NO FALLBACK
-    if not ML_AVAILABLE or not ml_predictor:
-        return jsonify({
-            'error': 'ML मॉडल उपलब्ध नहीं है',
-            'details': 'कृपया सर्वर को रीस्टार्ट करें'
-        }), 503
-
     try:
-        # Default costs and yields for oilseeds (₹/acre and quintals/acre)
-        oilseed_params = {
-            'Mustard': {'cost': 18000, 'yield': 15},
-            'Soybean': {'cost': 20000, 'yield': 18},
-            'Groundnut': {'cost': 25000, 'yield': 20},
-            'Sunflower': {'cost': 22000, 'yield': 16},
-            'Sesame': {'cost': 19000, 'yield': 12},
-            'Linseed': {'cost': 17000, 'yield': 14},
-            'Safflower': {'cost': 16000, 'yield': 13}
-        }
-        
-        params = oilseed_params.get(crop_name, {'cost': 20000, 'yield': 15})
-        
-        # Get ML profit projections - WILL RAISE ERROR IF REGION NOT AVAILABLE
-        profit_df = ml_predictor.calculate_profitability(
-            commodity=crop_name,
-            land_size_acres=area_in_acres,
-            cost_per_acre=params['cost'],
-            yield_qt_per_acre=params['yield'],
-            state=state,
-            district=market_district
+        # Run profit simulation for 30 days with custom cost if provided
+        result = simulator.simulate_profit_30days(
+            market=market,
+            commodity=commodity,
+            area_acres=area_in_acres,
+            custom_cost_per_acre=custom_cost_per_acre
         )
         
-        if profit_df is None or len(profit_df) == 0:
+        if result['status'] == 'error':
             return jsonify({
-                'error': 'पूर्वानुमान डेटा उपलब्ध नहीं',
-                'details': f'{crop_name} के लिए {state} - {market_district} में कोई डेटा नहीं'
+                'error': 'पूर्वानुमान विफल',
+                'details': result['message']
             }), 400
         
-        # Get average metrics from 12-month projection
-        avg_price = profit_df['ARIMA_Forecast_Price'].mean()
-        avg_revenue = profit_df['Revenue'].mean()
-        avg_profit = profit_df['Profit'].mean()
-        avg_roi = profit_df['ROI_%'].mean()
-        
-        # Calculate breakeven and gross totals
-        total_cost = params['cost'] * area_in_acres
-        total_revenue = avg_price * params['yield'] * area_in_acres
-        total_profit = total_revenue - total_cost
-        profit_margin = (total_profit / total_revenue * 100) if total_revenue > 0 else 0
-        
+        # Format response for UI
         prediction = {
-            'gross_revenue': round(total_revenue, 2),
-            'total_cost': round(total_cost, 2),
-            'net_profit': round(total_profit, 2),
-            'profit_margin': f"{round(profit_margin, 1)}%",
-            'roi': f"{round(avg_roi, 1)}%",
-            'breakeven_months': max(1, int(total_cost / (avg_profit / 12)) if avg_profit > 0 else 12),
-            'forecast_price': round(avg_price, 2),
-            'monthly_profit': round(avg_profit, 2),
+            'gross_revenue': result['revenue']['total_30days'],
+            'total_cost': result['cost']['total_30days'],
+            'net_profit': result['profit']['total_30days'],
+            'profit_margin': f"{result['profit']['margin_percent']}%",
+            'roi': f"{result['financial']['roi_percent']}%",
+            'breakeven_months': result['financial']['breakeven_days'],
+            'forecast_price': result['price']['average_forecast'],
+            'monthly_profit': result['profit']['daily_average'] * 30,
+            'price_current': result['price']['current'],
+            'price_min': result['price']['minimum'],
+            'price_max': result['price']['maximum'],
+            'price_trend': result['price']['trend'],
             'model_used': 'ARIMA',
-            'forecast_months': len(profit_df)
+            'forecast_months': result['forecast_period_days'],
         }
         
-        # Return the prediction with additional context for the UI
         return jsonify({
-            'crop_name': crop_name,
+            'crop_name': commodity,
+            'market': market,
             'area_in_acres': area_in_acres,
-            'soil_type': soil_type,
-            'water_type': water_type,
+            'soil_type': data.get('soil_type', ''),
+            'water_type': data.get('water_type', 'Freshwater'),
             'harvest_month': harvest_month,
             'prediction': prediction,
             'ml_enabled': True
         })
         
     except ValueError as e:
-        # Region/commodity not available
         return jsonify({
-            'error': str(e),
-            'details': f'{state} - {market_district} में डेटा उपलब्ध नहीं है'
+            'error': 'डेटा उपलब्ध नहीं है',
+            'details': f'{market} में {commodity} के लिए डेटा उपलब्ध नहीं है'
         }), 400
     except Exception as e:
-        # Unexpected error
-        print(f"❌ ML prediction error: {str(e)}")
+        import traceback
+        print(f"❌ Profit simulation error: {e}")
+        traceback.print_exc()
         return jsonify({
             'error': 'पूर्वानुमान में त्रुटि',
             'details': str(e)
         }), 500
 
 
-def _get_default_prediction(crop_name, area_in_acres):
-    """Fallback calculation when ML model is not available."""
-    # Fallback defaults (₹/quintal)
-    default_prices = {
-        'Mustard': 5200,
-        'Soybean': 4650,
-        'Groundnut': 6100,
-        'Sunflower': 4800,
-        'Sesame': 7200,
-        'Linseed': 5500,
-        'Safflower': 5000
-    }
-    
-    default_yields = {
-        'Mustard': 15,
-        'Soybean': 18,
-        'Groundnut': 20,
-        'Sunflower': 16,
-        'Sesame': 12,
-        'Linseed': 14,
-        'Safflower': 13
-    }
-    
-    default_costs = {
-        'Mustard': 18000,
-        'Soybean': 20000,
-        'Groundnut': 25000,
-        'Sunflower': 22000,
-        'Sesame': 19000,
-        'Linseed': 17000,
-        'Safflower': 16000
-    }
-    
-    price = default_prices.get(crop_name, 5000)
-    yield_qt = default_yields.get(crop_name, 15)
-    cost_per_acre = default_costs.get(crop_name, 20000)
-    
-    gross_revenue = price * yield_qt * area_in_acres
-    total_cost = cost_per_acre * area_in_acres
-    net_profit = gross_revenue - total_cost
-    profit_margin = (net_profit / gross_revenue * 100) if gross_revenue > 0 else 0
-    roi = (net_profit / total_cost * 100) if total_cost > 0 else 0
-    
-    return {
-        'gross_revenue': round(gross_revenue, 2),
-        'total_cost': round(total_cost, 2),
-        'net_profit': round(net_profit, 2),
-        'profit_margin': f"{round(profit_margin, 1)}%",
-        'roi': f"{round(roi, 1)}%",
-        'breakeven_months': 6,
-        'forecast_price': price,
-        'monthly_profit': round(net_profit / 12, 2),
-        'model_used': 'Default',
-        'forecast_months': 0
-    }
+# ========== COMMODITY COMPARISON ROUTE ==========
 
+@profit_bp.route('/api/compare-commodities', methods=['POST'])
+def api_compare_commodities():
+    """Compare profit potential across commodities in a market."""
+    if 'farmer_id_verified' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+
+    if not ML_AVAILABLE or not simulator:
+        return jsonify({'error': 'ML models not available'}), 503
+
+    data = request.json or {}
+    market = data.get('market', 'Delhi')
+    area_in_acres = float(data.get('area_in_acres', 1.0))
+
+    try:
+        result = simulator.compare_commodities(market, area_in_acres)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
