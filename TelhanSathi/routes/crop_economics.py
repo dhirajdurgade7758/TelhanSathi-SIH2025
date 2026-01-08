@@ -38,11 +38,20 @@ OILSEEDS = {
     'coconut': {'name': 'Coconut', 'unit': 'per piece', 'icon': '🥥', 'api_name': 'Coconut'},
 }
 
-def fetch_live_prices_from_api(commodity_name, state_filter=None):
+# Major markets for oilseed trading in India
+MARKETS = {
+    'Chennai': 'Chennai',
+    'Delhi': 'Delhi',
+    'Indore': 'Indore',
+    'Mumbai': 'Mumbai',
+    'Surat': 'Surat',
+}
+
+def fetch_live_prices_from_api(commodity_name, market_filter=None):
     """
     Fetch live prices from Government API or database
     Returns list of prices from different markets
-    Can filter by state if provided
+    Can filter by market if provided
     """
     try:
         # Try government API with longer timeout
@@ -75,15 +84,14 @@ def fetch_live_prices_from_api(commodity_name, state_filter=None):
                                 0)
                         
                         if price and float(price) > 0:
-                            record_state = record.get('state', record.get('state_name', 'Unknown'))
-                            # Filter by state if provided
-                            if state_filter and record_state.lower() != state_filter.lower():
+                            record_market = record.get('market', record.get('market_name', 'Unknown'))
+                            # Filter by market if provided
+                            if market_filter and record_market.lower() != market_filter.lower():
                                 continue
                             
                             prices.append({
                                 'price': float(price),
-                                'market': record.get('market', record.get('market_name', 'Unknown')),
-                                'state': record_state,
+                                'market': record_market,
                                 'date': record.get('arrival_date', record.get('date', datetime.now().strftime('%Y-%m-%d'))),
                                 'min_price': float(record.get('min_price', 0)),
                                 'max_price': float(record.get('max_price', 0))
@@ -102,11 +110,11 @@ def fetch_live_prices_from_api(commodity_name, state_filter=None):
     
     # If no API data, return mock data for demonstration
     print(f"Using mock data for {commodity_name}")
-    return get_mock_prices(commodity_name, state_filter=state_filter)
+    return get_mock_prices(commodity_name, market_filter=market_filter)
 
 
-def get_mock_prices(commodity_name, state_filter=None):
-    """Return mock prices for demonstration, optionally filtered by state"""
+def get_mock_prices(commodity_name, market_filter=None):
+    """Return mock prices for demonstration, optionally filtered by market"""
     import random
     base_prices = {
         'Soyabean': 5500,
@@ -121,39 +129,20 @@ def get_mock_prices(commodity_name, state_filter=None):
     
     base = base_prices.get(commodity_name, 5000)
     
-    # Map states to markets for realistic mock data
-    state_markets = {
-        'andhra pradesh': ['Hyderabad', 'Warangal'],
-        'gujara': ['Ahmedabad', 'Surat'],
-        'karnataka': ['Bangalore', 'Belgaum'],
-        'madhya pradesh': ['Indore', 'Jabalpur'],
-        'maharashtra': ['Mumbai', 'Pune'],
-        'odisha': ['Bhubaneswar', 'Cuttack'],
-        'rajasthan': ['Jaipur', 'Jodhpur'],
-        'tamil nadu': ['Chennai', 'Coimbatore'],
-        'telangana': ['Hyderabad', 'Warangal'],
-        'uttar pradesh': ['Lucknow', 'Kanpur']
-    }
+    # Main markets for oilseed trading
+    all_markets = list(MARKETS.values())
     
-    # Select markets based on state filter
-    if state_filter:
-        state_lower = state_filter.lower()
-        # Find matching state
-        selected_markets = []
-        for state_key, markets in state_markets.items():
-            if state_key in state_lower or state_lower in state_key:
-                selected_markets = markets
-                break
-        
-        # If no exact match, use first 2 markets from any state
+    # Select markets based on market filter
+    if market_filter:
+        market_lower = market_filter.lower()
+        # Find matching market
+        selected_markets = [m for m in all_markets if m.lower() == market_lower]
+        # If no exact match, use the provided market name
         if not selected_markets:
-            all_markets = []
-            for markets in state_markets.values():
-                all_markets.extend(markets)
-            selected_markets = all_markets[:2]
+            selected_markets = [market_filter]
     else:
-        # If no state filter, use variety of markets
-        selected_markets = ['Mumbai', 'Indore', 'Madhya Pradesh', 'Rajasthan', 'Odisha', 'Karnataka']
+        # If no market filter, use all markets
+        selected_markets = all_markets
     
     prices = []
     for market in selected_markets[:6]:
@@ -161,7 +150,6 @@ def get_mock_prices(commodity_name, state_filter=None):
         prices.append({
             'price': round(base + variation, 2),
             'market': market,
-            'state': 'India',
             'date': datetime.now().strftime('%Y-%m-%d'),
             'min_price': round(base - 300, 2),
             'max_price': round(base + 300, 2)
@@ -175,59 +163,37 @@ def dashboard():
     """Serve crop economics dashboard page"""
     return render_template('crop_economics.html', oilseeds=OILSEEDS)
 
-@crop_economics_bp.route('/api/states', methods=['GET'])
+@crop_economics_bp.route('/api/markets', methods=['GET'])
 @login_required
-def get_states():
+def get_markets():
     """
-    Get list of all available states for mandi/market data
-    Returns hardcoded list of major oilseed-growing states in India
+    Get list of all available markets for oilseed trading data
+    Returns hardcoded list of major oilseed markets in India
     """
     try:
-        # Return known oilseed-growing states in India
-        default_states = [
-            'Andhra Pradesh',
-            'Gujarat',
-            'Karnataka',
-            'Madhya Pradesh',
-            'Maharashtra',
-            'Odisha',
-            'Rajasthan',
-            'Tamil Nadu',
-            'Telangana',
-            'Uttar Pradesh'
-        ]
-        return jsonify({'states': default_states})
+        # Return known oilseed trading markets in India
+        market_list = list(MARKETS.values())
+        return jsonify({'markets': market_list})
     except Exception as e:
-        print(f"Error fetching states: {str(e)}")
-        # Return default states on error
-        default_states = [
-            'Andhra Pradesh',
-            'Gujarat',
-            'Karnataka',
-            'Madhya Pradesh',
-            'Maharashtra',
-            'Odisha',
-            'Rajasthan',
-            'Tamil Nadu',
-            'Telangana',
-            'Uttar Pradesh'
-        ]
-        return jsonify({'states': default_states})
+        print(f"Error fetching markets: {str(e)}")
+        # Return default markets on error
+        market_list = list(MARKETS.values())
+        return jsonify({'markets': market_list})
 
 @crop_economics_bp.route('/api/prices', methods=['GET'])
 @login_required
 def get_prices():
     """
     Get live prices for all oilseeds from Government API
-    Can filter by state using ?state=STATE parameter
+    Can filter by market using ?market=MARKET parameter
     Returns: {crop_name: {average: price, count: num_markets, max: price, min: price, markets: [...]}}
     """
-    state_filter = request.args.get('state', None)
+    market_filter = request.args.get('market', None)
     prices = {}
     
     for crop_key, crop_info in OILSEEDS.items():
-        # Fetch from government API with state filter
-        api_prices = fetch_live_prices_from_api(crop_info['api_name'], state_filter=state_filter)
+        # Fetch from government API with market filter
+        api_prices = fetch_live_prices_from_api(crop_info['api_name'], market_filter=market_filter)
         
         if api_prices:
             # Calculate statistics
@@ -249,7 +215,7 @@ def get_prices():
                     'trend': 'live',
                     'source': 'Government API',
                     'markets': api_prices[:10],  # Top 10 markets
-                    'state_filtered': state_filter is not None
+                    'market_filtered': market_filter is not None
                 }
             else:
                 prices[crop_key] = get_empty_price(crop_info)
@@ -367,13 +333,13 @@ def debug_api():
 def get_comparison():
     """
     Get live price comparison across multiple crops from Government API
-    Can filter by state using ?state=STATE parameter
+    Can filter by market using ?market=MARKET parameter
     """
-    state_filter = request.args.get('state', None)
+    market_filter = request.args.get('market', None)
     comparison = []
     
     for crop_key, crop_info in OILSEEDS.items():
-        api_prices = fetch_live_prices_from_api(crop_info['api_name'], state_filter=state_filter)
+        api_prices = fetch_live_prices_from_api(crop_info['api_name'], market_filter=market_filter)
         
         if api_prices:
             price_values = [p['price'] for p in api_prices if p['price'] > 0]
@@ -393,13 +359,13 @@ def get_comparison():
 def get_top_crops():
     """
     Get top oilseeds by current market activity from Government API
-    Can filter by state using ?state=STATE parameter
+    Can filter by market using ?market=MARKET parameter
     """
-    state_filter = request.args.get('state', None)
+    market_filter = request.args.get('market', None)
     crop_data = []
     
     for crop_key, crop_info in OILSEEDS.items():
-        api_prices = fetch_live_prices_from_api(crop_info['api_name'], state_filter=state_filter)
+        api_prices = fetch_live_prices_from_api(crop_info['api_name'], market_filter=market_filter)
         
         if api_prices:
             price_values = [p['price'] for p in api_prices if p['price'] > 0]
@@ -422,16 +388,16 @@ def get_top_crops():
 def get_market_details(crop):
     """
     Get detailed price information across all markets for a crop
-    Can filter by state using ?state=STATE parameter
+    Can filter by market using ?market=MARKET parameter
     """
     crop_lower = crop.lower()
-    state_filter = request.args.get('state', None)
+    market_filter = request.args.get('market', None)
     
     if crop_lower not in OILSEEDS:
         return jsonify({'error': 'Crop not found'}), 404
     
     crop_info = OILSEEDS[crop_lower]
-    api_prices = fetch_live_prices_from_api(crop_info['api_name'], state_filter=state_filter)
+    api_prices = fetch_live_prices_from_api(crop_info['api_name'], market_filter=market_filter)
     
     if not api_prices:
         return jsonify({

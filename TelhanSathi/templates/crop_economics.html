@@ -442,8 +442,8 @@
             }
         }
 
-        /* State Selection Modal Styles */
-        .state-selection-overlay {
+        /* Market Selection Modal Styles */
+        .market-selection-overlay {
             position: fixed;
             top: 0;
             left: 0;
@@ -459,12 +459,12 @@
             transition: opacity 0.3s ease;
         }
 
-        .state-selection-overlay.active {
+        .market-selection-overlay.active {
             opacity: 1;
             pointer-events: auto;
         }
 
-        .state-selection-modal {
+        .market-selection-modal {
             background: #fff;
             border-radius: 16px;
             width: 90%;
@@ -477,11 +477,11 @@
             transition: transform 0.3s ease;
         }
 
-        .state-selection-overlay.active .state-selection-modal {
+        .market-selection-overlay.active .market-selection-modal {
             transform: scale(1);
         }
 
-        .state-selection-header {
+        .market-selection-header {
             background: linear-gradient(135deg, #2d5735 0%, #388e3c 100%);
             color: #fff;
             padding: 24px 20px;
@@ -489,7 +489,7 @@
             text-align: center;
         }
 
-        .state-selection-title {
+        .market-selection-title {
             font-size: 20px;
             font-weight: 700;
             margin: 0 0 8px 0;
@@ -499,23 +499,23 @@
             gap: 10px;
         }
 
-        .state-selection-title-icon {
+        .market-selection-title-icon {
             font-size: 28px;
         }
 
-        .state-selection-subtitle {
+        .market-selection-subtitle {
             font-size: 13px;
             opacity: 0.9;
             margin: 0;
         }
 
-        .state-selection-content {
+        .market-selection-content {
             flex: 1;
             padding: 20px;
             overflow-y: auto;
         }
 
-        .state-selection-description {
+        .market-selection-description {
             background: #f0f8f0;
             border-left: 4px solid #388e3c;
             padding: 12px;
@@ -526,7 +526,7 @@
             line-height: 1.5;
         }
 
-        .state-selection-label {
+        .market-selection-label {
             display: block;
             font-size: 13px;
             font-weight: 600;
@@ -536,7 +536,7 @@
             letter-spacing: 0.5px;
         }
 
-        .state-selection-dropdown {
+        .market-selection-dropdown {
             width: 100%;
             padding: 12px 14px;
             border: 2px solid #e5e7eb;
@@ -555,25 +555,25 @@
             padding-right: 40px;
         }
 
-        .state-selection-dropdown:hover {
+        .market-selection-dropdown:hover {
             border-color: #388e3c;
             box-shadow: 0 2px 8px rgba(56, 142, 60, 0.1);
         }
 
-        .state-selection-dropdown:focus {
+        .market-selection-dropdown:focus {
             outline: none;
             border-color: #388e3c;
             box-shadow: 0 0 0 3px rgba(56, 142, 60, 0.1);
         }
 
-        .state-selection-footer {
+        .market-selection-footer {
             padding: 16px 20px;
             border-top: 1px solid #e5e7eb;
             display: flex;
             gap: 10px;
         }
 
-        .state-selection-btn {
+        .market-selection-btn {
             flex: 1;
             padding: 12px;
             border: none;
@@ -584,57 +584,57 @@
             transition: all 0.3s ease;
         }
 
-        .state-selection-btn-primary {
+        .market-selection-btn-primary {
             background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
             color: #fff;
         }
 
-        .state-selection-btn-primary:hover:not(:disabled) {
+        .market-selection-btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(60, 142, 60, 0.4);
         }
 
-        .state-selection-btn-primary:disabled {
+        .market-selection-btn-primary:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
         }
 
-        .state-selection-btn-secondary {
+        .market-selection-btn-secondary {
             background: #f9fafb;
             color: #666;
             border: 1px solid #e5e7eb;
         }
 
-        .state-selection-btn-secondary:hover {
+        .market-selection-btn-secondary:hover {
             background: #f0f0f0;
         }
     
     </style>
 
     <div class="ce-content" id="main-content">
-        <!-- State Selection Modal -->
-        <div class="state-selection-overlay" id="stateSelectionOverlay">
-            <div class="state-selection-modal">
-                <div class="state-selection-header">
-                    <div class="state-selection-title">
-                        <span class="state-selection-title-icon">📍</span>
-                        <span>अपना राज्य चुनें</span>
+        <!-- Market Selection Modal -->
+        <div class="market-selection-overlay" id="marketSelectionOverlay">
+            <div class="market-selection-modal">
+                <div class="market-selection-header">
+                    <div class="market-selection-title">
+                        <span class="market-selection-title-icon">🏪</span>
+                        <span>अपना बाजार चुनें</span>
                     </div>
-                    <p class="state-selection-subtitle">रियल-टाइम मंडी की कीमतें देखने के लिए</p>
+                    <p class="market-selection-subtitle">रियल-टाइम मंडी की कीमतें देखने के लिए</p>
                 </div>
-                <div class="state-selection-content">
-                    <div class="state-selection-description">
-                        अपने राज्य में तिलहन की नवीनतम मंडी की कीमतें देखने के लिए अपना राज्य चुनें। कीमतें सरकारी मंडी डेटा से रियल-टाइम में अपडेट की जाती हैं।
+                <div class="market-selection-content">
+                    <div class="market-selection-description">
+                        अपने बाजार में तिलहन की नवीनतम मंडी की कीमतें देखने के लिए अपना बाजार चुनें। कीमतें सरकारी मंडी डेटा से रियल-टाइम में अपडेट की जाती हैं।
                     </div>
-                    <label class="state-selection-label">राज्य</label>
-                    <select class="state-selection-dropdown" id="stateDropdown">
-                        <option value="">-- राज्य चुनें --</option>
+                    <label class="market-selection-label">बाजार</label>
+                    <select class="market-selection-dropdown" id="marketDropdown">
+                        <option value="">-- बाजार चुनें --</option>
                     </select>
                 </div>
-                <div class="state-selection-footer">
-                    <button class="state-selection-btn state-selection-btn-secondary" onclick="skipStateSelection()">छोड़ें</button>
-                    <button class="state-selection-btn state-selection-btn-primary" id="proceedBtn" onclick="proceedWithState()" disabled>कीमतें देखें</button>
+                <div class="market-selection-footer">
+                    <button class="market-selection-btn market-selection-btn-secondary" onclick="skipMarketSelection()">छोड़ें</button>
+                    <button class="market-selection-btn market-selection-btn-primary" id="proceedBtn" onclick="proceedWithMarket()" disabled>कीमतें देखें</button>
                 </div>
             </div>
         </div>
@@ -775,23 +775,23 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 let comparisonChart = null;
-let selectedState = null;
+let selectedMarket = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         console.log('Loading crop economics data...');
         
-        // Load and display state selection modal
-        await loadStateSelectionModal();
+        // Load and display market selection modal
+        await loadMarketSelectionModal();
         
         // Show the modal
-        document.getElementById('stateSelectionOverlay').classList.add('active');
+        document.getElementById('marketSelectionOverlay').classList.add('active');
         
-        // Load prices with initial state (or all if no state selected)
-        const initialState = sessionStorage.getItem('selectedState') || '';
-        if (initialState) {
-            selectedState = initialState;
-            console.log('Loaded selected state from session:', selectedState);
+        // Load prices with initial market (or all if no market selected)
+        const initialMarket = sessionStorage.getItem('selectedMarket') || '';
+        if (initialMarket) {
+            selectedMarket = initialMarket;
+            console.log('Loaded selected market from session:', selectedMarket);
         }
         
     } catch (err) {
@@ -806,66 +806,63 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-async function loadStateSelectionModal() {
+async function loadMarketSelectionModal() {
     try {
-        const resp = await fetch('/crop-economics/api/states', { credentials: 'same-origin' });
-        if (!resp.ok) throw new Error('Failed to load states');
+        // Use hardcoded markets list or fetch from API
+        const markets = ['Chennai', 'Delhi', 'Indore', 'Mumbai', 'Surat'];
         
-        const data = await resp.json();
-        const states = data.states || [];
-        
-        const stateDropdown = document.getElementById('stateDropdown');
+        const marketDropdown = document.getElementById('marketDropdown');
         const proceedBtn = document.getElementById('proceedBtn');
         
         // Populate dropdown
-        states.forEach(state => {
+        markets.forEach(market => {
             const option = document.createElement('option');
-            option.value = state;
-            option.textContent = state;
-            stateDropdown.appendChild(option);
+            option.value = market;
+            option.textContent = market;
+            marketDropdown.appendChild(option);
         });
         
-        // Check if there's a saved state
-        const savedState = sessionStorage.getItem('selectedState');
-        if (savedState && states.includes(savedState)) {
-            stateDropdown.value = savedState;
+        // Check if there's a saved market
+        const savedMarket = sessionStorage.getItem('selectedMarket');
+        if (savedMarket && markets.includes(savedMarket)) {
+            marketDropdown.value = savedMarket;
             proceedBtn.disabled = false;
         }
         
         // Enable/disable proceed button based on selection
-        stateDropdown.addEventListener('change', (e) => {
+        marketDropdown.addEventListener('change', (e) => {
             proceedBtn.disabled = !e.target.value;
         });
     } catch (err) {
-        console.error('Error loading states:', err);
+        console.error('Error loading markets:', err);
     }
 }
 
-function skipStateSelection() {
-    sessionStorage.removeItem('selectedState');
-    selectedState = null;
-    closeStateSelectionModal();
+function skipMarketSelection() {
+    sessionStorage.removeItem('selectedMarket');
+    selectedMarket = null;
+    closeMarketSelectionModal();
     loadPricesData();
 }
 
-function proceedWithState() {
-    const selectedOption = document.getElementById('stateDropdown').value;
+function proceedWithMarket() {
+    const selectedOption = document.getElementById('marketDropdown').value;
     if (selectedOption) {
-        selectedState = selectedOption;
-        sessionStorage.setItem('selectedState', selectedOption);
-        console.log('Proceeding with state:', selectedState);
-        closeStateSelectionModal();
+        selectedMarket = selectedOption;
+        sessionStorage.setItem('selectedMarket', selectedOption);
+        console.log('Proceeding with market:', selectedMarket);
+        closeMarketSelectionModal();
         loadPricesData();
     }
 }
 
-function closeStateSelectionModal() {
-    document.getElementById('stateSelectionOverlay').classList.remove('active');
+function closeMarketSelectionModal() {
+    document.getElementById('marketSelectionOverlay').classList.remove('active');
 }
 
 async function loadPricesData() {
     try {
-        console.log('Loading prices for state:', selectedState || 'All States');
+        console.log('Loading prices for market:', selectedMarket || 'All Markets');
         await loadPrices();
         await loadComparisonChart();
         await loadTopCrops();
@@ -891,8 +888,8 @@ async function loadPricesData() {
 async function loadPrices() {
     try {
         let url = '/crop-economics/api/prices';
-        if (selectedState) {
-            url += `?state=${encodeURIComponent(selectedState)}`;
+        if (selectedMarket) {
+            url += `?market=${encodeURIComponent(selectedMarket)}`;
         }
         
         const resp = await fetch(url, { credentials: 'same-origin' });
@@ -920,7 +917,7 @@ async function loadPrices() {
                     ${hasData ? `
                         <div class="crop-price">₹${data.average}</div>
                         <div class="crop-unit">${data.unit}</div>
-                        <div class="crop-count">${data.count} ${selectedState ? 'in ' + selectedState : 'markets'}</div>
+                        <div class="crop-count">${data.count} ${selectedMarket ? 'in ' + selectedMarket : 'markets'}</div>
                         <div class="trend-badge ${trendClass}">
                             ${data.average > data.min ? '↑ Rising' : data.average < data.max ? '↓ Falling' : '→ Stable'}
                         </div>
@@ -942,8 +939,8 @@ async function loadPrices() {
 async function loadComparisonChart() {
     try {
         let url = '/crop-economics/api/comparison';
-        if (selectedState) {
-            url += `?state=${encodeURIComponent(selectedState)}`;
+        if (selectedMarket) {
+            url += `?market=${encodeURIComponent(selectedMarket)}`;
         }
         
         const resp = await fetch(url, { credentials: 'same-origin' });
@@ -1043,8 +1040,8 @@ async function loadComparisonChart() {
 async function loadTopCrops() {
     try {
         let url = '/crop-economics/api/top-crops';
-        if (selectedState) {
-            url += `?state=${encodeURIComponent(selectedState)}`;
+        if (selectedMarket) {
+            url += `?market=${encodeURIComponent(selectedMarket)}`;
         }
         
         const resp = await fetch(url, { credentials: 'same-origin' });
