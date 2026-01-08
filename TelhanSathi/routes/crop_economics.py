@@ -30,12 +30,10 @@ def login_required(f):
 # Common oilseeds in India (mapped to government API commodity names)
 OILSEEDS = {
     'soybean': {'name': 'Soybean', 'unit': 'per quintal', 'icon': '🫘', 'api_name': 'Soyabean'},
-    'mustard': {'name': 'Mustard', 'unit': 'per quintal', 'icon': '🌾', 'api_name': 'Mustard'},
-    'groundnut': {'name': 'Groundnut', 'unit': 'per quintal', 'icon': '🫘', 'api_name': 'Groundnut'},
-    'sunflower': {'name': 'Sunflower', 'unit': 'per quintal', 'icon': '🌻', 'api_name': 'Sunflower'},
-    'safflower': {'name': 'Safflower', 'unit': 'per quintal', 'icon': '🌻', 'api_name': 'Safflower'},
     'sesame': {'name': 'Sesame', 'unit': 'per kg', 'icon': '🌾', 'api_name': 'Sesame'},
-    'coconut': {'name': 'Coconut', 'unit': 'per piece', 'icon': '🥥', 'api_name': 'Coconut'},
+    'mustard': {'name': 'Mustard', 'unit': 'per quintal', 'icon': '🌾', 'api_name': 'Mustard'},
+    'linseed': {'name': 'Linseed (Flaxseed)', 'unit': 'per quintal', 'icon': '🌾', 'api_name': 'Linseed'},
+    'groundnut': {'name': 'Groundnut', 'unit': 'per quintal', 'icon': '🫘', 'api_name': 'Groundnut'},
 }
 
 # Major markets for oilseed trading in India
@@ -119,12 +117,10 @@ def get_mock_prices(commodity_name, market_filter=None):
     base_prices = {
         'Soyabean': 5500,
         'Soybean': 5500,
-        'Mustard': 6200,
-        'Groundnut': 7400,
-        'Sunflower': 6800,
-        'Safflower': 4900,
         'Sesame': 8200,
-        'Coconut': 4500
+        'Mustard': 6200,
+        'Linseed': 5800,
+        'Groundnut': 7400,
     }
     
     base = base_prices.get(commodity_name, 5000)
