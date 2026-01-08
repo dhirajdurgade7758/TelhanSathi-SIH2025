@@ -305,7 +305,7 @@ Manage and monitor all auctions created
 
 #### **View Auction Details**
 Detailed auction information and bid tracking
-![Auction Details Modal](documents/screenshots/winning%20bid%20details%20page%20farmer.jpeg)
+![Auction Details Modal](documents/screenshots/bid%20details%20page%20farmer.jpeg)
 
 #### **Winning Bid Details**
 Transaction confirmation and buyer details
