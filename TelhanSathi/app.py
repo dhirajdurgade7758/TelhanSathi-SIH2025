@@ -19,21 +19,27 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
 # ----------------------- DATABASE CONFIG -----------------------
-# Support both psycopg2 and psycopg drivers
+import re
+
 database_url = os.getenv('DATABASE_URL', 'sqlite:///telhan_sathi.db')
 
-# Convert internal URL to external URL if needed
-if 'dpg-' in database_url and '.render.com' not in database_url:
-    # Convert internal URL (dpg-xxxxx-a) to external URL (dpg-xxxxx-a.region-postgres.render.com)
-    # This handles: postgresql://user:pass@dpg-xxxxx-a/db → postgresql://user:pass@dpg-xxxxx-a.oregon-postgres.render.com/db
-    database_url = database_url.replace('@dpg-', '@dpg-').replace('.render.com', '')
-    # Add the external endpoint
-    if '@dpg-' in database_url:
-        parts = database_url.split('@dpg-')
-        database_url = parts[0] + '@dpg-' + parts[1].replace('/', '.oregon-postgres.render.com/', 1)
-
-# Convert postgresql:// to postgresql+psycopg:// for psycopg3
-if database_url.startswith('postgresql://'):
+# Handle internal Render PostgreSQL URL conversion
+# Input:  postgresql://user:pass@dpg-xxxxx-a/dbname
+# Output: postgresql+psycopg://user:pass@dpg-xxxxx-a.oregon-postgres.render.com/dbname
+if database_url.startswith('postgresql://') and '@dpg-' in database_url:
+    # Extract components
+    match = re.match(r'postgresql://(.+)@dpg-([a-z0-9]+)/(.+)', database_url)
+    if match:
+        credentials = match.group(1)
+        dpg_id = match.group(2)
+        dbname = match.group(3)
+        # Reconstruct with external endpoint
+        database_url = f'postgresql+psycopg://{credentials}@dpg-{dpg_id}.oregon-postgres.render.com/{dbname}'
+    else:
+        # Fallback: just convert dialect
+        database_url = database_url.replace('postgresql://', 'postgresql+psycopg://', 1)
+elif database_url.startswith('postgresql://'):
+    # Non-Render PostgreSQL - just convert dialect
     database_url = database_url.replace('postgresql://', 'postgresql+psycopg://', 1)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
