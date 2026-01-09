@@ -19,7 +19,24 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
 # ----------------------- DATABASE CONFIG -----------------------
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///telhan_sathi.db')
+# Support both psycopg2 and psycopg drivers
+database_url = os.getenv('DATABASE_URL', 'sqlite:///telhan_sathi.db')
+
+# Convert internal URL to external URL if needed
+if 'dpg-' in database_url and '.render.com' not in database_url:
+    # Convert internal URL (dpg-xxxxx-a) to external URL (dpg-xxxxx-a.region-postgres.render.com)
+    # This handles: postgresql://user:pass@dpg-xxxxx-a/db → postgresql://user:pass@dpg-xxxxx-a.oregon-postgres.render.com/db
+    database_url = database_url.replace('@dpg-', '@dpg-').replace('.render.com', '')
+    # Add the external endpoint
+    if '@dpg-' in database_url:
+        parts = database_url.split('@dpg-')
+        database_url = parts[0] + '@dpg-' + parts[1].replace('/', '.oregon-postgres.render.com/', 1)
+
+# Convert postgresql:// to postgresql+psycopg:// for psycopg3
+if database_url.startswith('postgresql://'):
+    database_url = database_url.replace('postgresql://', 'postgresql+psycopg://', 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
 
