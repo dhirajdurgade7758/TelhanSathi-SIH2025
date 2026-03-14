@@ -702,8 +702,14 @@
         </div>
 
         <div class="modal-content">
+            <!-- Loading Spinner -->
+            <div id="modalLoadingSpinner" class="modal-section" style="text-align: center; padding: 40px 20px;">
+                <div class="spinner" style="width: 40px; height: 40px; border: 4px solid #f0f0f0; border-top: 4px solid #388e3c; margin: 0 auto 12px;"></div>
+                <p style="color: #999; font-size: 14px; margin: 0;" id="loadingText">लोड हो रहा है...</p>
+            </div>
+
             <!-- Quick Stats -->
-            <div class="modal-section">
+            <div class="modal-section" style="display: none;" id="statsSection">
                 <div class="modal-section-title">बाजार अवलोकन</div>
                 <div class="modal-stats">
                     <div class="modal-stat-item">
@@ -718,7 +724,7 @@
             </div>
 
             <!-- Price Range -->
-            <div class="modal-section">
+            <div class="modal-section" style="display: none;" id="priceRangeSection">
                 <div class="modal-section-title">कीमत सीमा</div>
                 <div class="modal-price-range">
                     <div class="price-range-item">
@@ -737,7 +743,7 @@
             </div>
 
             <!-- Market Trend -->
-            <div class="modal-section">
+            <div class="modal-section" style="display: none;" id="trendSection">
                 <div class="modal-section-title">बाजार अंतर्दृष्टि</div>
                 <div class="modal-stats">
                     <div class="modal-stat-item">
@@ -752,7 +758,7 @@
             </div>
 
             <!-- Info -->
-            <div class="modal-section">
+            <div class="modal-section" style="display: none;" id="infoSection">
                 <div class="modal-section-title">जानकारी</div>
                 <div style="background: #f9fafb; padding: 12px; border-radius: 8px; border-left: 3px solid #2196F3;">
                     <p style="font-size: 12px; color: #666; line-height: 1.5; margin: 0;">
@@ -764,7 +770,6 @@
 
         <div class="modal-footer">
             <button class="modal-btn modal-btn-secondary" onclick="closeCropModal()">बंद करें</button>
-            <button class="modal-btn modal-btn-primary" onclick="viewBuyers()">खरीदार देखें</button>
         </div>
     </div>
 </div>
@@ -1080,6 +1085,16 @@ function showCropDetails(cropKey) {
     console.log('Showing details for:', cropKey);
     currentCropKey = cropKey;
 
+    // Open modal with loading state
+    document.getElementById('cropModal').classList.add('active');
+    
+    // Show loading spinner, hide content sections
+    document.getElementById('modalLoadingSpinner').style.display = 'block';
+    document.getElementById('statsSection').style.display = 'none';
+    document.getElementById('priceRangeSection').style.display = 'none';
+    document.getElementById('trendSection').style.display = 'none';
+    document.getElementById('infoSection').style.display = 'none';
+
     // Fetch prices to get crop data
     fetch('/crop-economics/api/prices', { credentials: 'same-origin' })
         .then(r => r.json())
@@ -1110,14 +1125,14 @@ function showCropDetails(cropKey) {
                 trendText = '→ Stable';
             }
             document.getElementById('modalTrend').textContent = trendText;
-
-            // Open modal
-            document.getElementById('cropModal').classList.add('active');
             
             // Load price history chart
             loadPriceHistoryChart(cropKey);
         })
-        .catch(err => console.error('Error loading crop details:', err));
+        .catch(err => {
+            console.error('Error loading crop details:', err);
+            document.getElementById('modalLoadingSpinner').innerHTML = '<p style="color: #d32f2f; font-size: 14px;">डेटा लोड करने में त्रुटि</p>';
+        });
 }
 
 async function loadPriceHistoryChart(cropKey) {
@@ -1275,9 +1290,22 @@ async function loadPriceHistoryChart(cropKey) {
             }
         });
 
+        // Hide loading spinner and show content sections
+        document.getElementById('modalLoadingSpinner').style.display = 'none';
+        document.getElementById('statsSection').style.display = 'block';
+        document.getElementById('priceRangeSection').style.display = 'block';
+        document.getElementById('trendSection').style.display = 'block';
+        document.getElementById('infoSection').style.display = 'block';
+
     } catch (error) {
         console.error('Error loading price history chart:', error);
         showChartError('Failed to load price history: ' + error.message);
+        // Hide loading spinner even on error
+        document.getElementById('modalLoadingSpinner').style.display = 'none';
+        document.getElementById('statsSection').style.display = 'block';
+        document.getElementById('priceRangeSection').style.display = 'block';
+        document.getElementById('trendSection').style.display = 'block';
+        document.getElementById('infoSection').style.display = 'block';
     }
 }
 
@@ -1297,12 +1325,6 @@ function closeCropModal(event) {
     currentCropKey = null;
 }
 
-function viewBuyers() {
-    if (!currentCropKey) return;
-    
-    // Marketplace removed - redirect to bidding system
-    alert('Marketplace has been removed. Please use the Bidding System to sell your crops.');
-    window.location.href = '/bidding/dashboard';
-}
+
 </script>
 {% endblock %}

@@ -1,23 +1,17 @@
 """
 Crop Economics & Market Pricing Routes
-Provides real-time average prices for oilseeds from Government API
+Provides mock market pricing data for oilseeds with simulated loading
 """
 
 from flask import Blueprint, render_template, jsonify, session, request
 from functools import wraps
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
-import requests
 from extensions import db
 
 crop_economics_bp = Blueprint('crop_economics', __name__, url_prefix='/crop-economics')
 
-# Government API Configuration
-# Using AGMARKNET API for real-time mandi prices
-GOVT_API_KEY = "579b464db66ec23bdd00000139dd36efa19740c954f95d9ca3b5abd0"
-AGMARKNET_API_BASE = "https://agmarknet.gov.in/SearchCmmMkt.aspx"
-# Alternative: Using data.gov.in Mandi Price dataset
-GOVT_API_BASE = "https://api.data.gov.in/resource/9ef84268-d588-465a-a5c3-375cda092f58"
+# Using mock data for development (real API integration can be added later)
 
 def login_required(f):
     @wraps(f)
@@ -47,67 +41,16 @@ MARKETS = {
 
 def fetch_live_prices_from_api(commodity_name, market_filter=None):
     """
-    Fetch live prices from Government API or database
-    Returns list of prices from different markets
-    Can filter by market if provided
+    Fetch live prices - returns mock data with simulated loading delay
+    This provides a realistic experience while avoiding API timeouts
     """
-    try:
-        # Try government API with longer timeout
-        params = {
-            'api-key': GOVT_API_KEY,
-            'format': 'json',
-            'filters[commodity]': commodity_name,
-            'limit': 100,
-            'sort': {'arrival_date': -1}  # Latest first
-        }
-        
-        # Increase timeout to 20 seconds for slower API responses
-        response = requests.get(GOVT_API_BASE, params=params, timeout=20)
-        print(f"API Response Status for {commodity_name}: {response.status_code}")
-        
-        if response.status_code == 200:
-            data = response.json()
-            print(f"API Data received for {commodity_name}: {len(data.get('records', []))} records")
-            
-            prices = []
-            
-            if 'records' in data and len(data['records']) > 0:
-                for record in data['records']:
-                    try:
-                        # Try different field names that might be in the API
-                        price = (record.get('modal_price') or 
-                                record.get('price') or 
-                                record.get('avg_price') or 
-                                record.get('close_price') or
-                                0)
-                        
-                        if price and float(price) > 0:
-                            record_market = record.get('market', record.get('market_name', 'Unknown'))
-                            # Filter by market if provided
-                            if market_filter and record_market.lower() != market_filter.lower():
-                                continue
-                            
-                            prices.append({
-                                'price': float(price),
-                                'market': record_market,
-                                'date': record.get('arrival_date', record.get('date', datetime.now().strftime('%Y-%m-%d'))),
-                                'min_price': float(record.get('min_price', 0)),
-                                'max_price': float(record.get('max_price', 0))
-                            })
-                    except (ValueError, TypeError) as e:
-                        print(f"Error parsing record for {commodity_name}: {str(e)}")
-                        continue
-            
-            if prices:
-                print(f"Prices parsed for {commodity_name}: {len(prices)} valid entries")
-                return prices
-    except requests.exceptions.Timeout:
-        print(f"API Timeout for {commodity_name} - switching to mock data")
-    except requests.exceptions.RequestException as e:
-        print(f"API Error fetching prices for {commodity_name}: {str(e)}")
+    import time
     
-    # If no API data, return mock data for demonstration
-    print(f"Using mock data for {commodity_name}")
+    # Simulate API latency with small delay (500-1000ms)
+    time.sleep(0.5)
+    
+    # Return mock data for demonstration
+    print(f"Loading mock data for {commodity_name}")
     return get_mock_prices(commodity_name, market_filter=market_filter)
 
 
@@ -180,7 +123,7 @@ def get_markets():
 @login_required
 def get_prices():
     """
-    Get live prices for all oilseeds from Government API
+    Get live prices for all oilseeds (mock data with simulated loading)
     Can filter by market using ?market=MARKET parameter
     Returns: {crop_name: {average: price, count: num_markets, max: price, min: price, markets: [...]}}
     """
@@ -188,7 +131,7 @@ def get_prices():
     prices = {}
     
     for crop_key, crop_info in OILSEEDS.items():
-        # Fetch from government API with market filter
+        # Fetch mock prices with simulated loading delay
         api_prices = fetch_live_prices_from_api(crop_info['api_name'], market_filter=market_filter)
         
         if api_prices:
@@ -209,7 +152,7 @@ def get_prices():
                     'unit': crop_info['unit'],
                     'icon': crop_info['icon'],
                     'trend': 'live',
-                    'source': 'Government API',
+                    'source': 'Mock Data',
                     'markets': api_prices[:10],  # Top 10 markets
                     'market_filtered': market_filter is not None
                 }
@@ -233,7 +176,7 @@ def get_empty_price(crop_info):
         'unit': crop_info['unit'],
         'icon': crop_info['icon'],
         'trend': 'no_data',
-        'source': 'Government API',
+        'source': 'Mock Data',
         'markets': []
     }
 
@@ -300,35 +243,11 @@ def get_price_history(crop):
         'source': 'Mock Data (Demo)'
     })
 
-
-@crop_economics_bp.route('/api/debug', methods=['GET'])
-def debug_api():
-    """Debug endpoint to test API connection"""
-    try:
-        commodity = 'Soyabean'
-        params = {
-            'api-key': GOVT_API_KEY,
-            'format': 'json',
-            'filters[commodity]': commodity,
-            'limit': 5
-        }
-        
-        response = requests.get(GOVT_API_BASE, params=params, timeout=10)
-        
-        return jsonify({
-            'status': response.status_code,
-            'url': response.url,
-            'data': response.json() if response.status_code == 200 else response.text
-        })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
 @crop_economics_bp.route('/api/comparison', methods=['GET'])
 @login_required
 def get_comparison():
     """
-    Get live price comparison across multiple crops from Government API
+    Get live price comparison across multiple crops (mock data with simulated loading)
     Can filter by market using ?market=MARKET parameter
     """
     market_filter = request.args.get('market', None)
@@ -354,7 +273,7 @@ def get_comparison():
 @login_required
 def get_top_crops():
     """
-    Get top oilseeds by current market activity from Government API
+    Get top oilseeds by current market activity (mock data with simulated loading)
     Can filter by market using ?market=MARKET parameter
     """
     market_filter = request.args.get('market', None)
@@ -383,7 +302,7 @@ def get_top_crops():
 @login_required
 def get_market_details(crop):
     """
-    Get detailed price information across all markets for a crop
+    Get detailed price information across all markets for a crop (mock data)
     Can filter by market using ?market=MARKET parameter
     """
     crop_lower = crop.lower()
@@ -409,6 +328,6 @@ def get_market_details(crop):
         'crop': crop_info['name'],
         'total_markets': len(api_prices),
         'markets': sorted_markets,
-        'source': 'Government API - data.gov.in'
+        'source': 'Mock Data'
     })
 
