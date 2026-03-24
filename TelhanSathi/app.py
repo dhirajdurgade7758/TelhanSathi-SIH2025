@@ -4,7 +4,7 @@ from flask_cors import CORS
 import os
 from dotenv import load_dotenv
 
-from extensions import db
+from extensions import db, socketio
 from flask_migrate import Migrate  # ✅ Added
 from models_marketplace_keep import *
 
@@ -12,6 +12,9 @@ load_dotenv()
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 CORS(app)
+
+# Initialize SocketIO with Flask app
+socketio.init_app(app)
 
 # ----------------------- SESSION CONFIG -----------------------
 app.config['SESSION_COOKIE_SECURE'] = False  # True only in production with HTTPS
@@ -87,6 +90,11 @@ app.register_blueprint(weather_bp)
 app.register_blueprint(redemption_bp)
 app.register_blueprint(buyer_auth_bp)
 
+# ----------------------- SOCKET.IO EVENT HANDLERS -----------------------
+# Register Socket.IO event handlers
+from routes.socketio_events import register_socketio_events
+register_socketio_events(socketio)
+
 # ----------------------- ROOT-LEVEL ESP32 ENDPOINTS -----------------------
 # Import the handler function from field_monitoring
 from routes.field_monitoring import handle_esp32_update
@@ -142,5 +150,6 @@ if __name__ == '__main__':
     # ❗️IMPORTANT: Do NOT use db.create_all() when using Flask-Migrate
     # Migrations now handle schema updates.
     
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # ❗️IMPORTANT: Use socketio.run() instead of app.run() for Socket.IO support
+    socketio.run(app, debug=True, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True)
 

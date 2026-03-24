@@ -470,7 +470,7 @@
         }
     </style>
 </head>
-<body>
+<body data-buyer-id="{{ buyer_id }}">
     <!-- PROFESSIONAL NAVBAR -->
     <nav class="navbar">
         <div class="navbar-content">
@@ -635,7 +635,7 @@
                         <div id="bidFormContainer" style="background: #f8f9fa; padding: 16px; border-radius: 8px; display: flex; flex-direction: column; gap: 12px;">
                             <div style="padding: 12px; background: white; border-radius: 6px; border-left: 4px solid var(--primary-color);">
                                 <div style="color: #666; font-size: 12px; margin-bottom: 4px;">Current Highest Bid</div>
-                                <div id="bidCurrentHighest" style="font-weight: 600; font-size: 16px; color: #27ae60;">₹0/Q</div>
+                                <div id="bidCurrentHighest" data-modal-field="highest-bid" style="font-weight: 600; font-size: 16px; color: #27ae60;">₹0/Q</div>
                             </div>
                             
                             <div style="padding: 12px; background: white; border-radius: 6px; border-left: 4px solid #ffc107;">
@@ -1490,10 +1490,37 @@
             let html = auctions.map(auction => {
                 const timeRemaining = Math.max(0, auction.time_remaining || 0);
                 const timeText = formatTimeRemaining(timeRemaining);
-                const statusBadgeColor = auction.status === 'active' ? '#27ae60' : '#e74c3c';
+                
+                // Determine status based on either status field OR time remaining
+                let statusBadgeColor = '#e74c3c'; // default red
+                let statusText = 'UNKNOWN';
+                
+                // Check if auction has ended by time remaining
+                const hasEnded = timeRemaining <= 0;
+                
+                if (hasEnded) {
+                    // Auction has ended regardless of status field
+                    statusBadgeColor = '#4caf50'; // dark green for completed
+                    statusText = 'COMPLETED';
+                } else if (auction.status) {
+                    // Auction is still active by time, check status field
+                    const status = String(auction.status).toLowerCase().trim();
+                    if (status === 'active') {
+                        statusBadgeColor = '#27ae60'; // bright green
+                        statusText = 'ACTIVE';
+                    } else if (status === 'completed' || status === 'closed') {
+                        statusBadgeColor = '#4caf50'; // dark green
+                        statusText = 'COMPLETED';
+                    } else if (status === 'pending') {
+                        statusBadgeColor = '#ff9800'; // orange
+                        statusText = 'PENDING';
+                    } else {
+                        statusText = status.toUpperCase();
+                    }
+                }
                 
                 return `
-                    <div style="background: white; border-radius: 10px; border: 1px solid var(--border-color); padding: 16px; display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: start;">
+                    <div data-auction-id="${auction.id}" data-auction-status="${hasEnded ? 'completed' : auction.status}" style="background: white; border-radius: 10px; border: 1px solid var(--border-color); padding: 16px; display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: start;">
                         <!-- Left: Auction Details -->
                         <div>
                             <div style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: start;">
@@ -1502,7 +1529,7 @@
                                     <p style="margin: 0; color: #666; font-size: 13px;">👨‍🌾 by ${auction.farmer_name || 'Unknown Farmer'}</p>
                                 </div>
                                 <div>
-                                    <span style="display: inline-block; padding: 4px 12px; background: ${statusBadgeColor}; color: white; border-radius: 20px; font-size: 11px; font-weight: 600;">${auction.status.toUpperCase()}</span>
+                                    <span data-field="status" style="display: inline-block; padding: 4px 12px; background: ${statusBadgeColor}; color: white; border-radius: 20px; font-size: 11px; font-weight: 600;">${statusText}</span>
                                 </div>
                             </div>
                             
@@ -1524,11 +1551,11 @@
                             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
                                 <div>
                                     <div style="color: #666; font-size: 12px;">📈 Highest Bid</div>
-                                    <div style="font-weight: 700; color: ${auction.bids_count > 0 ? '#27ae60' : '#999'};">${auction.bids_count > 0 ? '₹' + auction.highest_bid + '/Q' : 'No bid'}</div>
+                                    <div data-field="highest-bid" style="font-weight: 700; color: ${auction.bids_count > 0 ? '#27ae60' : '#999'};">${auction.bids_count > 0 ? '₹' + auction.highest_bid + '/Q' : 'No bid'}</div>
                                 </div>
                                 <div>
                                     <div style="color: #666; font-size: 12px;">🎯 Bids</div>
-                                    <div style="font-weight: 700; color: #2196f3;">${auction.bids_count || 0}</div>
+                                    <div data-field="bid-count" style="font-weight: 700; color: #2196f3;">${auction.bids_count || 0}</div>
                                 </div>
                                 <div>
                                     <div style="color: #666; font-size: 12px;">⏱️ Time Left</div>
@@ -1566,6 +1593,538 @@
                 });
             }, 100);
         }
+
+        // ==================== SOCKET.IO REAL-TIME AUCTION HANDLER ====================
+
+        // IMPORTANT: This function is called automatically by socket_bidding.js when an auction is created
+        // You can also manually test by calling: testAuctionReceived() in the browser console
+        
+        /**
+         * Handle new auctions received from Socket.IO in real-time
+         * This function is called when a farmer creates a new auction
+         */
+        function handleNewAuctionReceived(auctionData) {
+            console.log('🎯 [Real-time] NEW AUCTION HANDLER CALLED:', auctionData);
+            
+            // Visual notification
+            showNotification('🎉 New Auction Available', `New ${auctionData.crop_name} auction by ${auctionData.farmer_name}!`);
+            
+            // Add the new auction to the top of the list
+            const container = document.getElementById('auctions-container');
+            if (!container) return;
+            
+            // Get current HTML
+            const currentHTML = container.innerHTML;
+            
+            // Calculate time remaining
+            const now = new Date().getTime();
+            const endTime = new Date(auctionData.end_time).getTime();
+            const timeRemaining = Math.max(0, Math.floor((endTime - now) / 1000));
+            const timeText = formatTimeRemaining(timeRemaining);
+            
+            // Create new auction card HTML (same format as displayAuctions)
+            const newAuctionHTML = `
+                <div data-auction-id="${auctionData.auction_id}" style="background: white; border-radius: 10px; border: 2px solid var(--primary-color); padding: 16px; display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: start; animation: slideIn 0.3s ease-out;">
+                    <!-- Left: Auction Details -->
+                    <div>
+                        <div style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: start;">
+                            <div>
+                                <h4 style="margin: 0 0 6px 0; font-size: 16px; color: var(--text-dark);">${auctionData.crop_name}</h4>
+                                <p style="margin: 0; color: #666; font-size: 13px;">👨‍🌾 by ${auctionData.farmer_name || 'Unknown Farmer'}</p>
+                            </div>
+                            <div>
+                                <span style="display: inline-block; padding: 4px 12px; background: #10b981; color: white; border-radius: 20px; font-size: 11px; font-weight: 600;">ACTIVE</span>
+                                <span style="display: inline-block; padding: 4px 12px; background: #f59e0b; color: white; border-radius: 20px; font-size: 11px; font-weight: 600; margin-left: 8px;">🆕 NEW</span>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 12px;">
+                            <div>
+                                <div style="color: #666; font-size: 12px;">📍 Location</div>
+                                <div style="font-weight: 600; color: #2c3e50;">${auctionData.location || 'N/A'}</div>
+                            </div>
+                            <div>
+                                <div style="color: #666; font-size: 12px;">📦 Quantity</div>
+                                <div style="font-weight: 600; color: #2c3e50;">${auctionData.quantity_quintals || 0}Q</div>
+                            </div>
+                            <div>
+                                <div style="color: #666; font-size: 12px;">💰 Base Price</div>
+                                <div style="font-weight: 600; color: var(--primary-color);">₹${auctionData.base_price_per_quintal || 0}/Q</div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                            <div>
+                                <div style="color: #666; font-size: 12px;">📈 Current Bid</div>
+                                <div data-field="highest-bid" style="font-weight: 700; color: var(--primary-color);">₹${auctionData.base_price_per_quintal}/Q</div>
+                            </div>
+                            <div>
+                                <div style="color: #666; font-size: 12px;">🎯 Bids</div>
+                                <div data-field="bid-count" style="font-weight: 700; color: #2196f3;">0</div>
+                            </div>
+                            <div>
+                                <div style="color: #666; font-size: 12px;">⏱️ Time Left</div>
+                                <div style="font-weight: 600; color: #27ae60;">${timeText}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right: Action Buttons -->
+                    <div style="display: flex; flex-direction: column; gap: 8px; min-width: 160px;">
+                        <button class="view-auction-btn" data-auction-id="${auctionData.auction_id}" style="padding: 10px; background: var(--primary-color); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; white-space: nowrap;">
+                            📊 View & Bid Now
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Prepend new auction to the container
+            container.insertAdjacentHTML('afterbegin', newAuctionHTML);
+            
+            // Add event listener to the new button
+            setTimeout(() => {
+                const newBtn = container.querySelector('.view-auction-btn[data-auction-id="' + auctionData.auction_id + '"]');
+                if (newBtn) {
+                    newBtn.addEventListener('click', function() {
+                        viewAuctionDetails(auctionData.auction_id);
+                    });
+                }
+            }, 100);
+        }
+
+        /**
+         * Show a notification toast to the user
+         */
+        function showNotification(title, message) {
+            // Create a toast notification
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                color: white;
+                padding: 16px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+                z-index: 10000;
+                animation: slideInRight 0.3s ease-out;
+                font-weight: 600;
+                max-width: 320px;
+            `;
+            toast.innerHTML = `<div>${title}</div><div style="font-size: 12px; opacity: 0.9; margin-top: 4px;">${message}</div>`;
+            document.body.appendChild(toast);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                toast.style.animation = 'slideOutRight 0.3s ease-out';
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+
+        // ==================== MANUAL TEST FUNCTION ====================
+        // Call from browser console: testAuctionReceived()
+        window.testAuctionReceived = function() {
+            console.log('🧪 TEST: Simulating real-time auction...');
+            const testData = {
+                auction_id: 'TEST-' + Date.now(),
+                crop_name: '🧪 TEST CROP',
+                farmer_name: '🧪 Test Farmer',
+                location: 'Test Location',
+                quantity_quintals: 100,
+                base_price_per_quintal: 5000,
+                end_time: new Date(Date.now() + 86400000).toISOString()
+            };
+            handleNewAuctionReceived(testData);
+            console.log('✅ Test auction added! If you see it at top of list, real-time system is working');
+        };
+        console.log('✅ Dashboard Ready - Type testAuctionReceived() in console to test, or wait for real auctions');
+
+        // ==================== REAL-TIME BID UPDATE HANDLER ====================
+        /**
+         * Handle bid updates received from Socket.IO in real-time
+         * Updates auction cards AND the details modal if it's open
+         */
+        window.handleBidUpdate = function(bidData) {
+            console.log('💰 [Real-time BID] Update received:', bidData);
+            
+            const auctionId = bidData.auction_id;
+            const highestBid = bidData.highest_bid;
+            const buyerCount = bidData.buyer_count;
+            const minimumIncrement = bidData.minimum_bid_increment;
+            const minimumBidRequired = bidData.minimum_bid_required;
+            
+            // Check if auction details modal is open for this auction
+            const modal = document.getElementById('auctionModal');
+            if (modal && modal.style.display === 'flex') {
+                const modalAuctionId = modal.getAttribute('data-auction-id');
+                if (modalAuctionId === auctionId) {
+                    console.log('📝 Updating modal for auction:', auctionId);
+                    
+                    // Update Current Highest in LEFT SIDE (Pricing Information section)
+                    const auctionCurrentHighestDisplay = document.getElementById('auctionCurrentHighestDisplay');
+                    if (auctionCurrentHighestDisplay) {
+                        auctionCurrentHighestDisplay.textContent = '₹' + highestBid.toLocaleString('en-IN') + '/Q';
+                        // Add pulse animation
+                        auctionCurrentHighestDisplay.style.animation = 'none';
+                        setTimeout(() => {
+                            auctionCurrentHighestDisplay.style.animation = 'bidPulse 0.6s ease-out';
+                        }, 10);
+                    }
+                    
+                    // Update highest bid in RIGHT SIDE (Place Your Bid form)
+                    const modalBidElement = modal.querySelector('[data-modal-field="highest-bid"]');
+                    if (modalBidElement) {
+                        const oldBid = modalBidElement.textContent;
+                        modalBidElement.textContent = '₹' + highestBid.toLocaleString('en-IN') + '/q';
+                        
+                        // Add pulse animation
+                        modalBidElement.style.animation = 'none';
+                        setTimeout(() => {
+                            modalBidElement.style.animation = 'bidPulse 0.6s ease-out';
+                        }, 10);
+                    }
+                    
+                    // Update minimum bid increment
+                    const minIncrementElement = document.getElementById('bidMinIncrement');
+                    if (minIncrementElement && minimumIncrement !== undefined) {
+                        minIncrementElement.textContent = '₹' + minimumIncrement.toLocaleString('en-IN') + '/Q';
+                    }
+                    
+                    // Update minimum bid required
+                    const minRequiredElement = document.getElementById('bidMinRequired');
+                    if (minRequiredElement && minimumBidRequired !== undefined) {
+                        minRequiredElement.textContent = '₹' + minimumBidRequired.toLocaleString('en-IN') + '/Q';
+                    }
+                    
+                    // Update the input field placeholder and minimum value
+                    const bidAmountInput = document.getElementById('bidAmount');
+                    if (bidAmountInput && minimumBidRequired !== undefined) {
+                        bidAmountInput.min = minimumBidRequired;
+                        bidAmountInput.placeholder = `Enter amount (minimum: ₹${minimumBidRequired.toLocaleString('en-IN')})`;
+                    }
+                    
+                    // Update bid count in modal
+                    const modalBidCountElement = modal.querySelector('[data-modal-field="bid-count"]');
+                    if (modalBidCountElement) {
+                        modalBidCountElement.textContent = buyerCount;
+                    }
+                    
+                    // Reload the bids list (if displayed)
+                    setTimeout(() => {
+                        loadBidsInModal(auctionId);
+                    }, 300);
+                }
+            }
+            
+            // Also update auction cards on the page (browse section)
+            const auctionCards = document.querySelectorAll(`[data-auction-id="${auctionId}"]`);
+            auctionCards.forEach(card => {
+                // Find the highest bid display
+                const bidElements = card.querySelectorAll('[data-field="highest-bid"]');
+                bidElements.forEach(elem => {
+                    const oldBid = elem.textContent;
+                    elem.textContent = '₹' + highestBid.toLocaleString('en-IN');
+                    
+                    // Add pulse animation
+                    elem.style.animation = 'none';
+                    setTimeout(() => {
+                        elem.style.animation = 'bidPulse 0.6s ease-out';
+                    }, 10);
+                });
+                
+                // Update bid count
+                const bidCountElements = card.querySelectorAll('[data-field="bid-count"]');
+                bidCountElements.forEach(elem => {
+                    elem.textContent = buyerCount;
+                });
+            });
+            
+            // Refresh "My Bids" section if it's currently displayed
+            const myBidsTab = document.getElementById('my-bids');
+            if (myBidsTab && myBidsTab.style.display !== 'none') {
+                console.log('🔄 Refreshing My Bids section for auction:', auctionId);
+                // Reload my bids to update the "Increase Your Bid" boxes with new minimum bid requirements
+                setTimeout(() => {
+                    loadMyBids();
+                }, 500);
+            }
+            
+            // Show notification
+            showNotification('💰 New Bid Placed', `Highest bid updated to ₹${highestBid.toLocaleString('en-IN')}/q`);
+        };
+
+        // Handle real-time counter offer updates
+        window.handleCounterOfferUpdate = function(counterOfferData) {
+            console.log('🔔 [Real-time COUNTER OFFER] Update received:', counterOfferData);
+            
+            const eventType = counterOfferData.event_type;
+            
+            // Refresh "My Bids" section if it's currently displayed (for counter offer sent to buyer)
+            const myBidsTab = document.getElementById('my-bids');
+            if (myBidsTab && myBidsTab.style.display !== 'none') {
+                console.log('🔄 Refreshing My Bids section for counter offer update');
+                setTimeout(() => {
+                    loadMyBids();
+                }, 300);
+            }
+            
+            // Show notification based on event type
+            if (eventType === 'counter_offer_sent') {
+                showNotification(
+                    '🔔 Counter Offer Received',
+                    `Farmer offered ₹${counterOfferData.counter_price.toLocaleString('en-IN')}/Q for ${counterOfferData.crop_name}`
+                );
+            } else if (eventType === 'counter_offer_response') {
+                // This could be for farmer's side (if they're viewing)
+                const status = counterOfferData.status;
+                const message = status === 'accepted' 
+                    ? `Buyer accepted counter offer! ✓`
+                    : `Buyer rejected counter offer`;
+                
+                showNotification(
+                    `🔔 Counter Offer ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+                    message
+                );
+            }
+        };
+
+        // Handle bid acceptance from farmer
+        window.handleBidAccepted = function(bidData) {
+            console.log('✅ [Real-time BID ACCEPTANCE] Update received:', bidData);
+            
+            const auctionId = bidData.auction_id;
+            const winningBuyerId = bidData.winning_buyer_id;
+            const winningPrice = bidData.winning_price;
+            const cropName = bidData.crop_name;
+            const farmerName = bidData.farmer_name;
+            
+            // Get current logged-in buyer ID
+            const loggedInBuyerId = document.body.getAttribute('data-buyer-id');
+            
+            console.log(`Buyer ID: ${loggedInBuyerId}, Winning Buyer: ${winningBuyerId}, Auction: ${auctionId}`);
+            
+            // Immediately update status badges on the page
+            console.log('🎨 Updating status badges for auction:', auctionId);
+            const auctionCards = document.querySelectorAll(`[data-auction-id="${auctionId}"]`);
+            auctionCards.forEach(card => {
+                // Update data attribute
+                card.setAttribute('data-auction-status', 'completed');
+                
+                // Update status badge
+                const statusBadge = card.querySelector('[data-field="status"]');
+                if (statusBadge) {
+                    statusBadge.textContent = 'COMPLETED';
+                    statusBadge.style.background = '#4caf50';
+                    statusBadge.style.color = 'white';
+                    console.log('✅ Status badge updated');
+                }
+                
+                // Fade out the card slightly to indicate completion
+                card.style.opacity = '0.85';
+                card.style.borderColor = '#4caf50';
+                card.style.borderWidth = '2px';
+            });
+            
+            // If this auction is open in modal, close it
+            const modal = document.getElementById('auctionModal');
+            if (modal && modal.style.display === 'flex') {
+                const modalAuctionId = modal.getAttribute('data-auction-id');
+                if (modalAuctionId === auctionId) {
+                    console.log('🚪 Closing auction modal for completed auction');
+                    closeAuctionModal();
+                }
+            }
+            
+            // Reload ALL auctions on Browse Auctions tab (slight delay to ensure DB is updated)
+            console.log('🔄 Reloading auctions list for auction completion');
+            setTimeout(() => {
+                loadAuctions();
+            }, 300);
+            
+            // Reload "My Bids" section to update the auction status
+            console.log('🔄 Reloading My Bids section for auction completion');
+            setTimeout(() => {
+                loadMyBids();
+            }, 300);
+            
+            // Show notification based on who won
+            if (loggedInBuyerId === winningBuyerId) {
+                showNotification(
+                    '🏆 Your Bid Accepted!',
+                    `Congratulations! Your bid of ₹${winningPrice.toLocaleString('en-IN')}/Q for ${cropName} has been accepted!`
+                );
+            } else {
+                showNotification(
+                    '⏹️ Auction Closed',
+                    `${farmerName} accepted a bid for ${cropName} at ₹${winningPrice.toLocaleString('en-IN')}/Q`
+                );
+            }
+        };
+
+        // Handle auction extension
+        window.handleAuctionExtended = function(auctionData) {
+            console.log('⏱️ [Real-time AUCTION EXTENDED] Update received:', auctionData);
+            
+            const auctionId = auctionData.auction_id;
+            const newEndTime = auctionData.new_end_time;
+            const additionalHours = auctionData.additional_hours;
+            const cropName = auctionData.crop_name;
+            const farmerName = auctionData.farmer_name;
+            
+            // Reload auctions to get updated end times
+            console.log('🔄 Reloading auctions for extension update');
+            loadAuctions();
+            loadMyBids();
+            
+            showNotification(
+                '⏱️ Auction Extended',
+                `${farmerName} extended auction for ${cropName} by ${additionalHours} hour(s)`
+            );
+        };
+
+        // Handle auction price update
+        window.handleAuctionPriceUpdated = function(auctionData) {
+            console.log('💰 [Real-time AUCTION PRICE UPDATE] Update received:', auctionData);
+            
+            const auctionId = auctionData.auction_id;
+            const newMinimumPrice = auctionData.new_minimum_price;
+            const cropName = auctionData.crop_name;
+            const farmerName = auctionData.farmer_name;
+            
+            // Reload auctions to get updated prices
+            console.log('🔄 Reloading auctions for price update');
+            loadAuctions();
+            loadMyBids();
+            
+            showNotification(
+                '💰 Auction Price Updated',
+                `${farmerName} updated minimum price for ${cropName} to ₹${newMinimumPrice.toLocaleString('en-IN')}/Q`
+            );
+        };
+
+        // Handle auction cancellation
+        window.handleAuctionCancelled = function(auctionData) {
+            console.log('❌ [Real-time AUCTION CANCELLED] Update received:', auctionData);
+            
+            const auctionId = auctionData.auction_id;
+            const cropName = auctionData.crop_name;
+            const farmerName = auctionData.farmer_name;
+            
+            // Close modal if this auction is open
+            const modal = document.getElementById('auctionModal');
+            if (modal && modal.style.display === 'flex') {
+                const modalAuctionId = modal.getAttribute('data-auction-id');
+                if (modalAuctionId === auctionId) {
+                    console.log('🚪 Closing auction modal for cancelled auction');
+                    closeAuctionModal();
+                }
+            }
+            
+            // Reload auctions to remove cancelled auction
+            console.log('🔄 Reloading auctions for cancellation');
+            loadAuctions();
+            loadMyBids();
+            
+            showNotification(
+                '❌ Auction Cancelled',
+                `${farmerName} cancelled the auction for ${cropName}`
+            );
+        };
+
+        // Add bid pulse animation
+        if (!document.querySelector('style[data-bid-animations]')) {
+            const style = document.createElement('style');
+            style.setAttribute('data-bid-animations', 'true');
+            style.textContent = `
+                @keyframes bidPulse {
+                    0% { 
+                        transform: scale(1);
+                        color: var(--primary-color);
+                    }
+                    50% { 
+                        transform: scale(1.15);
+                        color: #f59e0b;
+                        font-weight: 700;
+                    }
+                    100% { 
+                        transform: scale(1);
+                        color: var(--primary-color);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Load bids in the modal for real-time updates
+        async function loadBidsInModal(auctionId) {
+            try {
+                const response = await fetch(`/bidding/buyer/auction/${auctionId}/api`);
+                const data = await response.json();
+                
+                if (!data.error) {
+                    const auction = data;
+                    const modal = document.getElementById('auctionModal');
+                    
+                    // Update the "Total Bids" count if it exists in the modal
+                    const bidCountElement = modal.querySelector('[data-modal-field="bid-count"]');
+                    if (bidCountElement) {
+                        bidCountElement.textContent = auction.bids_count || 0;
+                    }
+                    
+                    // Update highest bid
+                    const bidElement = modal.querySelector('[data-modal-field="highest-bid"]');
+                    if (bidElement) {
+                        bidElement.textContent = '₹' + (auction.current_highest_bid || auction.base_price || 0).toLocaleString('en-IN') + '/Q';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading bids:', error);
+            }
+        }
+
+        // Add CSS animations if not already present
+        if (!document.querySelector('style[data-socketio-animations]')) {
+            const style = document.createElement('style');
+            style.setAttribute('data-socketio-animations', 'true');
+            style.textContent = `
+                @keyframes slideIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-10px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                
+                @keyframes slideInRight {
+                    from {
+                        opacity: 0;
+                        transform: translateX(20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                }
+                
+                @keyframes slideOutRight {
+                    from {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                    to {
+                        opacity: 0;
+                        transform: translateX(20px);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // ==================== END SOCKET.IO HANDLERS ====================
 
         // Load auction statistics
         async function loadAuctionStats() {
@@ -1634,7 +2193,7 @@
                             </div>
                             <div style="padding: 12px; background: #f8f9fa; border-radius: 6px;">
                                 <div style="color: #666; font-size: 12px; margin-bottom: 4px;">Current Highest</div>
-                                <div style="font-weight: 600; font-size: 18px; color: #27ae60;">₹${auction.current_highest_bid || auction.base_price || 0}/Q</div>
+                                <div id="auctionCurrentHighestDisplay" style="font-weight: 600; font-size: 18px; color: #27ae60;">₹${auction.current_highest_bid || auction.base_price || 0}/Q</div>
                             </div>
                             <div style="padding: 12px; background: #f8f9fa; border-radius: 6px;">
                                 <div style="color: #666; font-size: 12px; margin-bottom: 4px;">Min Increment</div>
@@ -1642,7 +2201,7 @@
                             </div>
                             <div style="padding: 12px; background: #f8f9fa; border-radius: 6px;">
                                 <div style="color: #666; font-size: 12px; margin-bottom: 4px;">Total Bids</div>
-                                <div style="font-weight: 600; font-size: 18px;">${auction.bids_count || 0}</div>
+                                <div data-modal-field="bid-count" style="font-weight: 600; font-size: 18px;">${auction.bids_count || 0}</div>
                             </div>
                         </div>
                     </div>
@@ -2445,5 +3004,12 @@
             });
         }
     </script>
+
+    <!-- Socket.IO Client Library -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    
+    <!-- Custom Socket.IO Bidding Module -->
+    <script src="{{ url_for('static', filename='js/socket_bidding.js') }}"></script>
+
 </body>
 </html>

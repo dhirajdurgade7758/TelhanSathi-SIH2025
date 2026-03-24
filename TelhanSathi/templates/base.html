@@ -530,56 +530,18 @@
 
             // Load coins on page load
             loadHeaderCoins();
-
+            
             // Refresh coins every 30 seconds
             setInterval(loadHeaderCoins, 30000);
-
-            // ===== MULTILINGUAL SUPPORT =====
-            
-            // Store original text content for restoration
-            const originalPageContent = new Map();
-            
-            /**
-             * Store original text nodes for later restoration
-             */
-            window.storeOriginalContent = function() {
-                const walker = document.createTreeWalker(
-                    document.body,
-                    NodeFilter.SHOW_TEXT,
-                    null,
-                    false
-                );
-                
-                let node;
-                let index = 0;
-                while (node = walker.nextNode()) {
-                    const text = node.textContent.trim();
-                    
-                    // Skip if node is inside a no-translate element
-                    let parent = node.parentElement;
-                    let shouldSkip = false;
-                    
-                    while (parent) {
-                        if (parent.getAttribute('data-no-translate') === 'true') {
-                            shouldSkip = true;
-                            break;
-                        }
-                        parent = parent.parentElement;
-                    }
-                    
-                    if (!shouldSkip && text && text.length > 0) {
-                        originalPageContent.set(index, {
-                            node: node,
-                            text: text
-                        });
-                        index++;
-                    }
-                }
-                console.log(`✅ Stored ${originalPageContent.size} original text nodes`);
-            };
-
         });
     </script>
+
+    <!-- Socket.IO Client Library -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    
+    <!-- Custom Socket.IO Bidding Module -->
+    <script src="{{ url_for('serve_static', filename='js/socket_bidding.js') }}"></script>
+
     {% block script %}{% endblock %}
 </body>
 </html>

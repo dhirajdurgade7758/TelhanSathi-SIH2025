@@ -889,6 +889,51 @@ let currentAuctionId = '{{ auction.id }}';
 let selectedBidId = null;
 let selectedBidData = null;
 
+// 🔔 HANDLE REAL-TIME COUNTER OFFER UPDATES (defined early to be available for socket events)
+window.handleCounterOfferUpdate = function(counterOfferData) {
+    console.log('🔔 [Real-time COUNTER OFFER] Farmer side update received:', counterOfferData);
+    
+    const auctionId = counterOfferData.auction_id;
+    const eventType = counterOfferData.event_type;
+    
+    console.log(`Received event type: ${eventType}, for auction: ${auctionId}, current auction: ${currentAuctionId}`);
+    
+    // Only update if it's for the current auction
+    if (auctionId !== currentAuctionId) {
+        console.log('❌ Event is for different auction, ignoring');
+        return;
+    }
+    
+    // Only handle counter_offer_response (acceptance/rejection), not counter_offer_sent
+    // because counter_offer_sent is for when buyers receive counter offers
+    if (eventType === 'counter_offer_response') {
+        console.log('✅ Counter offer response event - reloading counter offers');
+        
+        const status = counterOfferData.status;
+        const notificationTitle = status === 'accepted' 
+            ? '✅ Counter Offer Accepted!' 
+            : '❌ Counter Offer Rejected';
+        const notificationMsg = status === 'accepted'
+            ? `Buyer accepted counter offer at ₹${counterOfferData.counter_price.toLocaleString('en-IN')}/Q`
+            : 'Buyer rejected your counter offer';
+        
+        // Show notification
+        if (typeof showNotification === 'function') {
+            showNotification(notificationTitle, notificationMsg);
+        } else {
+            alert(notificationTitle + '\n' + notificationMsg);
+        }
+        
+        // Reload counter offers after a slight delay
+        setTimeout(() => {
+            console.log('🔄 Reloading counter offers after delay');
+            loadCounterOffers();
+        }, 500);
+    } else {
+        console.log('❌ Event type not handled:', eventType);
+    }
+};
+
 function goBack() {
     window.history.back();
 }
@@ -909,7 +954,7 @@ function manageAuction(auctionId, bidsCount) {
 
 function closeManageModal() {
     document.getElementById('manageModal').classList.add('hidden');
-    currentAuctionId = null;
+    // Note: Don't set currentAuctionId to null - it's needed for loadCounterOffers()
 }
 
 function acceptBid() {
@@ -1043,6 +1088,8 @@ function submitCounterOffer() {
         return;
     }
     
+    console.log('📤 Sending counter offer:', { bid_id: selectedBidId, counter_price: counterPrice });
+    
     fetch(`/bidding/farmer/auction/${currentAuctionId}/counter-offer`, {
         method: 'POST',
         headers: {
@@ -1053,20 +1100,33 @@ function submitCounterOffer() {
             counter_price: counterPrice
         })
     })
-    .then(res => res.json())
+    .then(res => {
+        console.log('📝 API Response status:', res.status);
+        return res.json();
+    })
     .then(result => {
+        console.log('✅ Counter offer response:', result);
+        
         if (result.success) {
+            console.log('🎉 Counter offer sent successfully with ID:', result.counter_offer_id);
+            
             alert('Counter offer sent successfully!');
             closeCounterOfferModal();
             closeManageModal();
-            // Reload counter offers list
-            loadCounterOffers();
+            
+            // Wait a bit to ensure database commit, then reload counter offers list
+            console.log('⏳ Waiting 500ms before reloading counter offers...');
+            setTimeout(() => {
+                console.log('🔄 Now reloading counter offers');
+                loadCounterOffers();
+            }, 500);
         } else {
+            console.error('❌ Server returned error:', result);
             alert('Error: ' + (result.message || result.error || 'Failed to send counter offer'));
         }
     })
     .catch(err => {
-        console.error('Error:', err);
+        console.error('❌ Fetch error:', err);
         alert('Error sending counter offer');
     });
 }
@@ -1126,7 +1186,7 @@ function updateMinimumPrice() {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ min_price: parseFloat(price) })
+        body: JSON.stringify({ new_minimum_price: parseFloat(price) })
     })
     .then(res => res.json())
     .then(data => {
@@ -1184,12 +1244,25 @@ function loadCounterOffers() {
             const container = document.getElementById('counterOffersContainer');
             const noOffers = document.getElementById('noCounterOffers');
             
+            console.log('Counter offers data received:', data);
+            
+            // Check for API errors
+            if (data.error) {
+                console.error('API Error:', data.error);
+                container.innerHTML = '';
+                noOffers.innerHTML = `<p style="color: #f44336; margin: 0;">Error: ${data.error}</p>`;
+                noOffers.style.display = 'block';
+                return;
+            }
+            
             if (!data.counter_offers || data.counter_offers.length === 0) {
+                console.log('No counter offers found');
                 container.innerHTML = '';
                 noOffers.style.display = 'block';
                 return;
             }
             
+            console.log('Rendering', data.counter_offers.length, 'counter offers');
             noOffers.style.display = 'none';
             container.innerHTML = '';
             
@@ -1240,7 +1313,11 @@ function loadCounterOffers() {
         })
         .catch(err => {
             console.error('Error fetching counter offers:', err);
-            document.getElementById('counterOffersContainer').innerHTML = '<p style="color: #f44336;">Error loading counter offers</p>';
+            const container = document.getElementById('counterOffersContainer');
+            const noOffers = document.getElementById('noCounterOffers');
+            container.innerHTML = '';
+            noOffers.innerHTML = '<p style="color: #f44336; margin: 0;">Error loading counter offers. Please refresh the page.</p>';
+            noOffers.style.display = 'block';
         });
 }
 
@@ -1309,6 +1386,57 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+
+// Fallback notification function if not available from base template
+if (typeof showNotification !== 'function') {
+    window.showNotification = function(title, message) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 16px 20px;
+            border-radius: 8px;
+            border-left: 4px solid #4caf50;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1001;
+            font-weight: 600;
+            animation: slideIn 0.3s ease-out;
+            max-width: 400px;
+        `;
+        notification.innerHTML = `
+            <div style="color: #333; margin-bottom: 4px;">${title}</div>
+            <div style="color: #666; font-size: 0.9em;">${message}</div>
+        `;
+        document.body.appendChild(notification);
+        
+        // Add animation styles if not already present
+        if (!document.querySelector('style[data-notification-style]')) {
+            const style = document.createElement('style');
+            style.setAttribute('data-notification-style', 'true');
+            style.textContent = `
+                @keyframes slideIn {
+                    from {
+                        transform: translateX(400px);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            notification.style.animation = 'slideIn 0.3s ease-out reverse';
+            setTimeout(() => notification.remove(), 300);
+        }, 5000);
+    };
+}
 
 // Edit Auction Function
 function editAuction(auctionId) {

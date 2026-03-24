@@ -124,6 +124,34 @@ def create_auction():
             db.session.add(auction)
             db.session.commit()
             
+            # 🔴 BROADCAST NEW AUCTION TO ALL CONNECTED BUYERS IN REAL-TIME
+            try:
+                from routes.socketio_events import broadcast_auction_created
+                
+                farmer = Farmer.query.get(farmer_id)
+                auction_data = {
+                    'auction_id': auction.id,
+                    'crop_name': auction.crop_name,
+                    'farmer_name': farmer.name if farmer else 'Unknown',
+                    'quantity_quintals': auction.quantity_quintals,
+                    'base_price_per_quintal': auction.base_price_per_quintal,
+                    'quality_grade': auction.quality_grade,
+                    'location': auction.location,
+                    'district': auction.district,
+                    'state': auction.state,
+                    'minimum_bid_increment': auction.minimum_bid_increment,
+                    'start_time': auction.start_time.isoformat(),
+                    'end_time': auction.end_time.isoformat(),
+                    'status': auction.status,
+                    'description': auction.description,
+                    'created_at': auction.created_at.isoformat()
+                }
+                
+                broadcast_auction_created(auction_data)
+                
+            except Exception as e:
+                print(f"❌ Error broadcasting auction: {str(e)}")
+            
             return jsonify({
                 'success': True,
                 'auction_id': auction.id,
@@ -577,6 +605,23 @@ def accept_bid(auction_id):
         db.session.add(notification)
         db.session.commit()
         
+        # 📢 BROADCAST BID ACCEPTANCE TO ALL CONNECTED BUYERS IN REAL-TIME
+        try:
+            from routes.socketio_events import broadcast_bid_accepted
+            
+            bid_data = {
+                'auction_id': auction_id,
+                'bid_id': bid_id,
+                'winning_buyer_id': bid.buyer_id,
+                'winning_price': bid.bid_price_per_quintal,
+                'crop_name': auction.crop_name,
+                'farmer_name': auction.farmer.name if auction.farmer else 'Unknown',
+                'quantity': auction.quantity_quintals
+            }
+            broadcast_bid_accepted(bid_data)
+        except Exception as e:
+            print(f"❌ Error broadcasting bid acceptance: {str(e)}")
+        
         return jsonify({
             'success': True,
             'message': 'Bid accepted successfully'
@@ -695,6 +740,24 @@ def send_counter_offer(auction_id):
         db.session.add(notification)
         db.session.commit()
         
+        # 📢 BROADCAST COUNTER OFFER TO BUYER IN REAL-TIME
+        try:
+            from routes.socketio_events import broadcast_counter_offer_sent
+            
+            co_data = {
+                'auction_id': auction_id,
+                'counter_offer_id': counter_offer.id,
+                'bid_id': bid_id,
+                'buyer_id': bid.buyer_id,
+                'counter_price': counter_price,
+                'farmer_name': auction.farmer.name if auction.farmer else 'Unknown',
+                'crop_name': auction.crop_name,
+                'quantity': auction.quantity_quintals
+            }
+            broadcast_counter_offer_sent(co_data)
+        except Exception as e:
+            print(f"❌ Error broadcasting counter offer: {str(e)}")
+        
         return jsonify({
             'success': True,
             'counter_offer_id': counter_offer.id,
@@ -740,6 +803,21 @@ def extend_auction(auction_id):
         
         db.session.commit()
         
+        # 📢 BROADCAST AUCTION EXTENSION TO ALL BUYERS IN REAL-TIME
+        try:
+            from routes.socketio_events import broadcast_auction_extended
+            
+            extend_data = {
+                'auction_id': auction_id,
+                'new_end_time': auction.end_time.isoformat(),
+                'additional_hours': additional_hours,
+                'crop_name': auction.crop_name,
+                'farmer_name': auction.farmer.name if auction.farmer else 'Unknown'
+            }
+            broadcast_auction_extended(extend_data)
+        except Exception as e:
+            print(f"❌ Error broadcasting auction extension: {str(e)}")
+        
         return jsonify({
             'success': True,
             'new_end_time': auction.end_time.isoformat(),
@@ -751,7 +829,7 @@ def extend_auction(auction_id):
         return jsonify({'error': str(e)}), 500
 
 
-@bidding_bp.route('/farmer/auction/<auction_id>/update-minimum', methods=['POST'])
+@bidding_bp.route('/farmer/auction/<auction_id>/update-price', methods=['POST'])
 def update_minimum_price(auction_id):
     """Update minimum bid price for auction"""
     if 'farmer_id_verified' not in session:
@@ -781,6 +859,20 @@ def update_minimum_price(auction_id):
         
         auction.base_price_per_quintal = new_minimum
         db.session.commit()
+        
+        # 📢 BROADCAST AUCTION PRICE UPDATE TO ALL BUYERS IN REAL-TIME
+        try:
+            from routes.socketio_events import broadcast_auction_price_updated
+            
+            price_data = {
+                'auction_id': auction_id,
+                'new_minimum_price': new_minimum,
+                'crop_name': auction.crop_name,
+                'farmer_name': auction.farmer.name if auction.farmer else 'Unknown'
+            }
+            broadcast_auction_price_updated(price_data)
+        except Exception as e:
+            print(f"❌ Error broadcasting price update: {str(e)}")
         
         return jsonify({
             'success': True,
@@ -825,6 +917,19 @@ def cancel_auction(auction_id):
             db.session.add(notification)
         
         db.session.commit()
+        
+        # 📢 BROADCAST AUCTION CANCELLATION TO ALL BUYERS IN REAL-TIME
+        try:
+            from routes.socketio_events import broadcast_auction_cancelled
+            
+            cancel_data = {
+                'auction_id': auction_id,
+                'crop_name': auction.crop_name,
+                'farmer_name': auction.farmer.name if auction.farmer else 'Unknown'
+            }
+            broadcast_auction_cancelled(cancel_data)
+        except Exception as e:
+            print(f"❌ Error broadcasting auction cancellation: {str(e)}")
         
         return jsonify({
             'success': True,
@@ -1138,6 +1243,27 @@ def place_bid(auction_id):
         
         db.session.commit()
         
+        # 📢 BROADCAST BID UPDATE TO ALL CONNECTED BUYERS AND FARMER IN REAL-TIME
+        try:
+            from routes.socketio_events import broadcast_bid_placed
+            
+            # Calculate minimum bid required for next bid
+            minimum_bid_increment = auction.minimum_bid_increment
+            next_minimum_bid = bid_price + minimum_bid_increment
+            
+            bid_data = {
+                'auction_id': auction_id,
+                'bid_price_per_quintal': bid_price,
+                'bid_total_amount': bid_price * auction.quantity_quintals,
+                'buyer_count': len(auction.bids),
+                'highest_bid': auction.current_highest_bid,
+                'minimum_bid_increment': minimum_bid_increment,
+                'minimum_bid_required': next_minimum_bid
+            }
+            broadcast_bid_placed(auction_id, bid_data)
+        except Exception as e:
+            print(f"❌ Error broadcasting bid: {str(e)}")
+        
         return jsonify({
             'success': True,
             'message': 'Bid placed successfully',
@@ -1241,6 +1367,23 @@ def accept_counter_offer(counter_offer_id):
         
         db.session.add(notification)
         db.session.commit()
+        
+        # 📢 BROADCAST COUNTER OFFER ACCEPTANCE TO FARMER IN REAL-TIME
+        try:
+            from routes.socketio_events import broadcast_counter_offer_response
+            
+            response_data = {
+                'auction_id': counter_offer.auction_id,
+                'counter_offer_id': counter_offer.id,
+                'bid_id': counter_offer.bid_id,
+                'buyer_id': counter_offer.buyer_id,
+                'status': 'accepted',
+                'counter_price': counter_offer.counter_price_per_quintal,
+                'crop_name': auction.crop_name if auction else 'Unknown'
+            }
+            broadcast_counter_offer_response(response_data)
+        except Exception as e:
+            print(f"❌ Error broadcasting counter offer acceptance: {str(e)}")
         
         return jsonify({
             'success': True,
