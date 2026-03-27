@@ -37,18 +37,18 @@ if database_url.startswith('postgresql://') and '@dpg-' in database_url:
         dpg_id = match.group(2)  # Now includes the full ID like dpg-xxxxx-a
         dbname = match.group(3)
         # Reconstruct with external endpoint
-        # Use sslmode=allow to handle SSL gracefully during connections
-        database_url = f'postgresql+psycopg://{credentials}@{dpg_id}.oregon-postgres.render.com/{dbname}?sslmode=allow'
+        # Use sslmode=require with sslcertmode=disable for self-signed cert compatibility
+        database_url = f'postgresql+psycopg://{credentials}@{dpg_id}.oregon-postgres.render.com/{dbname}?sslmode=require&sslcertmode=disable'
     else:
         # Fallback: just convert dialect and add SSL
         database_url = database_url.replace('postgresql://', 'postgresql+psycopg://', 1)
         if '?' not in database_url:
-            database_url += '?sslmode=allow'
+            database_url += '?sslmode=require&sslcertmode=disable'
 elif database_url.startswith('postgresql://'):
     # Non-Render PostgreSQL - convert dialect and add SSL
     database_url = database_url.replace('postgresql://', 'postgresql+psycopg://', 1)
     if '?' not in database_url:
-        database_url += '?sslmode=allow'
+        database_url += '?sslmode=require&sslcertmode=disable'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
