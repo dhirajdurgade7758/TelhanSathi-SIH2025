@@ -30,25 +30,28 @@ database_url = os.getenv('DATABASE_URL', 'sqlite:///telhan_sathi.db')
 # Input:  postgresql://user:pass@dpg-xxxxx-a/dbname
 # Output: postgresql+psycopg://user:pass@dpg-xxxxx-a.oregon-postgres.render.com/dbname
 if database_url.startswith('postgresql://') and '@dpg-' in database_url:
-    # Extract components - Fix: [a-z0-9-]+ to match Render's dpg-xxxxx-a format
+    # Extract components
     match = re.match(r'postgresql://(.+)@(dpg-[a-z0-9-]+)/(.+)', database_url)
     if match:
         credentials = match.group(1)
-        dpg_id = match.group(2)  # Now includes the full ID like dpg-xxxxx-a
+        dpg_id = match.group(2)
         dbname = match.group(3)
-        # Reconstruct with external endpoint
-        # Use sslmode=prefer to allow both SSL and non-SSL connections gracefully
-        database_url = f'postgresql+psycopg://{credentials}@{dpg_id}.oregon-postgres.render.com/{dbname}?sslmode=prefer'
+        # Reconstruct with external endpoint - Use sslmode=require for Render
+        database_url = f'postgresql+psycopg://{credentials}@{dpg_id}.oregon-postgres.render.com/{dbname}?sslmode=require'
     else:
-        # Fallback: just convert dialect and add SSL
+        # Fallback: convert dialect only
         database_url = database_url.replace('postgresql://', 'postgresql+psycopg://', 1)
         if '?' not in database_url:
-            database_url += '?sslmode=prefer'
+            database_url += '?sslmode=require'
 elif database_url.startswith('postgresql://'):
-    # Non-Render PostgreSQL - convert dialect and add SSL
+    # Non-Render PostgreSQL - convert dialect
     database_url = database_url.replace('postgresql://', 'postgresql+psycopg://', 1)
     if '?' not in database_url:
-        database_url += '?sslmode=prefer'
+        database_url += '?sslmode=require'
+
+# Debug: Print (without password)
+db_url_debug = database_url.split('@')[0] + '@***:5432/telhan_sathi' if '@' in database_url else database_url
+print(f"[CONFIG] Database URL configured (formatted): {db_url_debug}")
 
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -58,36 +61,37 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-pro
 db.init_app(app)
 
 # Initialize migrations
-migrate = Migrate(app, db)     # ✅ Added (Important for flask db migrate/upgrade)
+migrate = Migrate(app, db)
 
-# Initialize database tables on app startup
+# Initialize database tables on app startup with better error handling
 def init_db_tables():
-    """Initialize database tables with retry logic"""
+    """Initialize database tables with extended retry logic"""
     import time
-    max_retries = 5
+    max_retries = 10  # More retries for initial startup
     retry_count = 0
     
     while retry_count < max_retries:
         try:
             with app.app_context():
-                print("[DB INIT] Creating database tables...")
+                print(f"[DB INIT] Attempt {retry_count + 1}/{max_retries}: Creating database tables...")
                 db.create_all()
                 print("[DB INIT] ✓ Database tables initialized successfully!")
                 return True
         except Exception as e:
             retry_count += 1
+            error_msg = str(e)
             if retry_count < max_retries:
-                wait_time = 3 * retry_count
-                print(f"[DB INIT] ⚠ Attempt {retry_count}/{max_retries} failed: {type(e).__name__}")
-                print(f"[DB INIT] Retrying in {wait_time} seconds...")
+                wait_time = 2 * retry_count  # 2s, 4s, 6s, ... exponential
+                print(f"[DB INIT] ⚠ Connection failed: {type(e).__name__}")
+                print(f"[DB INIT] Retrying in {wait_time} seconds... ({retry_count}/{max_retries})")
                 time.sleep(wait_time)
             else:
-                print(f"[DB INIT] ✗ Cannot initialize database after {max_retries} attempts")
-                print(f"[DB INIT] Error: {str(e)[:100]}...")
+                print(f"[DB INIT] ⚠ Could not connect after {max_retries} attempts")
+                print(f"[DB INIT] Database will be initialized on first request")
                 return False
 
-# Try to initialize on startup
-app.logger.info("[APP STARTUP] Attempting database initialization...")
+# Execute initialization
+print("[APP] Starting database initialization...")
 init_db_tables()
 
 
