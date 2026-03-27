@@ -30,20 +30,24 @@ database_url = os.getenv('DATABASE_URL', 'sqlite:///telhan_sathi.db')
 # Input:  postgresql://user:pass@dpg-xxxxx-a/dbname
 # Output: postgresql+psycopg://user:pass@dpg-xxxxx-a.oregon-postgres.render.com/dbname
 if database_url.startswith('postgresql://') and '@dpg-' in database_url:
-    # Extract components
-    match = re.match(r'postgresql://(.+)@dpg-([a-z0-9]+)/(.+)', database_url)
+    # Extract components - Fix: [a-z0-9-]+ to match Render's dpg-xxxxx-a format
+    match = re.match(r'postgresql://(.+)@(dpg-[a-z0-9-]+)/(.+)', database_url)
     if match:
         credentials = match.group(1)
-        dpg_id = match.group(2)
+        dpg_id = match.group(2)  # Now includes the full ID like dpg-xxxxx-a
         dbname = match.group(3)
         # Reconstruct with external endpoint
-        database_url = f'postgresql+psycopg://{credentials}@dpg-{dpg_id}.oregon-postgres.render.com/{dbname}'
+        database_url = f'postgresql+psycopg://{credentials}@{dpg_id}.oregon-postgres.render.com/{dbname}?sslmode=require'
     else:
-        # Fallback: just convert dialect
+        # Fallback: just convert dialect and add SSL
         database_url = database_url.replace('postgresql://', 'postgresql+psycopg://', 1)
+        if '?' not in database_url:
+            database_url += '?sslmode=require'
 elif database_url.startswith('postgresql://'):
-    # Non-Render PostgreSQL - just convert dialect
+    # Non-Render PostgreSQL - convert dialect and add SSL
     database_url = database_url.replace('postgresql://', 'postgresql+psycopg://', 1)
+    if '?' not in database_url:
+        database_url += '?sslmode=require'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
