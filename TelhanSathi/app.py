@@ -36,21 +36,27 @@ if database_url.startswith('postgresql://') and '@dpg-' in database_url:
         credentials = match.group(1)
         dpg_id = match.group(2)
         dbname = match.group(3)
-        # Reconstruct with external endpoint - Use sslmode=require for Render
-        database_url = f'postgresql+psycopg://{credentials}@{dpg_id}.oregon-postgres.render.com/{dbname}?sslmode=require'
+        # Reconstruct with external endpoint if needed
+        # Check if it's already external (has .render.com)
+        if '.render.com' not in database_url:
+            database_url = f'postgresql+psycopg://{credentials}@{dpg_id}.oregon-postgres.render.com/{dbname}?sslmode=require'
+        else:
+            # Already external, just convert dialect
+            database_url = database_url.replace('postgresql://', 'postgresql+psycopg://', 1)
+            if '?sslmode' not in database_url:
+                database_url += '?sslmode=require'
     else:
-        # Fallback: convert dialect only
         database_url = database_url.replace('postgresql://', 'postgresql+psycopg://', 1)
-        if '?' not in database_url:
+        if '?sslmode' not in database_url:
             database_url += '?sslmode=require'
 elif database_url.startswith('postgresql://'):
-    # Non-Render PostgreSQL - convert dialect
+    # Simple conversion to psycopg dialect
     database_url = database_url.replace('postgresql://', 'postgresql+psycopg://', 1)
-    if '?' not in database_url:
+    if '?sslmode' not in database_url:
         database_url += '?sslmode=require'
 
 # Debug: Print (without password)
-db_url_debug = database_url.split('@')[0] + '@***:5432/telhan_sathi' if '@' in database_url else database_url
+db_url_debug = database_url.split('@')[0] + '@***:5432/...' if '@' in database_url else database_url
 print(f"[CONFIG] Database URL configured (formatted): {db_url_debug}")
 
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
