@@ -37,18 +37,18 @@ if database_url.startswith('postgresql://') and '@dpg-' in database_url:
         dpg_id = match.group(2)  # Now includes the full ID like dpg-xxxxx-a
         dbname = match.group(3)
         # Reconstruct with external endpoint
-        # Use sslmode=require with sslcertmode=disable for self-signed cert compatibility
-        database_url = f'postgresql+psycopg://{credentials}@{dpg_id}.oregon-postgres.render.com/{dbname}?sslmode=require&sslcertmode=disable'
+        # Use sslmode=prefer to allow both SSL and non-SSL connections gracefully
+        database_url = f'postgresql+psycopg://{credentials}@{dpg_id}.oregon-postgres.render.com/{dbname}?sslmode=prefer'
     else:
         # Fallback: just convert dialect and add SSL
         database_url = database_url.replace('postgresql://', 'postgresql+psycopg://', 1)
         if '?' not in database_url:
-            database_url += '?sslmode=require&sslcertmode=disable'
+            database_url += '?sslmode=prefer'
 elif database_url.startswith('postgresql://'):
     # Non-Render PostgreSQL - convert dialect and add SSL
     database_url = database_url.replace('postgresql://', 'postgresql+psycopg://', 1)
     if '?' not in database_url:
-        database_url += '?sslmode=require&sslcertmode=disable'
+        database_url += '?sslmode=prefer'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -59,6 +59,36 @@ db.init_app(app)
 
 # Initialize migrations
 migrate = Migrate(app, db)     # ✅ Added (Important for flask db migrate/upgrade)
+
+# Initialize database tables on app startup
+def init_db_tables():
+    """Initialize database tables with retry logic"""
+    import time
+    max_retries = 5
+    retry_count = 0
+    
+    while retry_count < max_retries:
+        try:
+            with app.app_context():
+                print("[DB INIT] Creating database tables...")
+                db.create_all()
+                print("[DB INIT] ✓ Database tables initialized successfully!")
+                return True
+        except Exception as e:
+            retry_count += 1
+            if retry_count < max_retries:
+                wait_time = 3 * retry_count
+                print(f"[DB INIT] ⚠ Attempt {retry_count}/{max_retries} failed: {type(e).__name__}")
+                print(f"[DB INIT] Retrying in {wait_time} seconds...")
+                time.sleep(wait_time)
+            else:
+                print(f"[DB INIT] ✗ Cannot initialize database after {max_retries} attempts")
+                print(f"[DB INIT] Error: {str(e)[:100]}...")
+                return False
+
+# Try to initialize on startup
+app.logger.info("[APP STARTUP] Attempting database initialization...")
+init_db_tables()
 
 
 # ----------------------- BLUEPRINTS -----------------------
