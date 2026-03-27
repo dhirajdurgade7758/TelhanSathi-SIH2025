@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 
 from extensions import db, socketio
 from flask_migrate import Migrate  # ✅ Added
+from models import *  # ✅ Import main models
 from models_marketplace_keep import *
 
 load_dotenv()
@@ -134,6 +135,28 @@ app.register_blueprint(bidding_bp)
 app.register_blueprint(weather_bp)
 app.register_blueprint(redemption_bp)
 app.register_blueprint(buyer_auth_bp)
+
+# ----------------------- DATABASE INITIALIZATION ENDPOINT -----------------------
+@app.route('/api/init-db', methods=['POST'])
+def init_db_endpoint():
+    """Endpoint to manually initialize database tables"""
+    try:
+        print("[DB INIT API] Initializing database tables...")
+        db.create_all()
+        inspector = db.inspect(db.engine)
+        tables = inspector.get_table_names()
+        print(f"[DB INIT API] ✓ Created {len(tables)} tables")
+        return {
+            'status': 'success',
+            'message': f'Database initialized with {len(tables)} tables',
+            'tables': tables
+        }, 200
+    except Exception as e:
+        print(f"[DB INIT API] ✗ Error: {str(e)}")
+        return {
+            'status': 'error',
+            'message': str(e)
+        }, 500
 
 # ----------------------- SOCKET.IO EVENT HANDLERS -----------------------
 # Register Socket.IO event handlers
