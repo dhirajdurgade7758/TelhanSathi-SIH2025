@@ -716,3 +716,51 @@ class FarmerRecommendation(db.Model):
             'created_at': self.created_at.isoformat()
         }
 
+
+class Admin(db.Model):
+    """
+    Admin user model for TelhanSathi platform administration.
+    Stores admin credentials and profile information.
+    """
+    __tablename__ = 'admins'
+    
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    
+    # Admin Credentials
+    email = db.Column(db.String(255), unique=True, nullable=False, index=True)
+    password_hash = db.Column(db.String(255), nullable=False)
+    
+    # Admin Profile
+    full_name = db.Column(db.String(255), nullable=False)
+    phone_number = db.Column(db.String(15))
+    
+    # Role and Permissions
+    role = db.Column(db.String(50), default='admin')  # admin, super_admin, moderator
+    department = db.Column(db.String(100))  # e.g., Finance, Support, Analytics
+    
+    # Account Status
+    is_active = db.Column(db.Boolean, default=True)
+    is_verified = db.Column(db.Boolean, default=True)
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    last_login = db.Column(db.DateTime)
+    
+    def __repr__(self):
+        return f'<Admin {self.email} - {self.role}>'
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'email': self.email,
+            'full_name': self.full_name,
+            'phone_number': self.phone_number,
+            'role': self.role,
+            'department': self.department,
+            'is_active': self.is_active,
+            'is_verified': self.is_verified,
+            'created_at': self.created_at.isoformat(),
+            'last_login': self.last_login.isoformat() if self.last_login else None
+        }
+

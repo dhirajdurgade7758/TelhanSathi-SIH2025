@@ -108,6 +108,11 @@ from routes.onboarding import onboarding_bp
 from routes.sahayak import sahayak_bp
 from routes.subsidies import subsidies_bp
 from routes.admin import admin_bp
+from routes.admin_auth import admin_auth_bp
+from routes.admin_store import admin_store_bp
+from routes.admin_schemes import admin_schemes_bp
+from routes.admin_notifications import admin_notifications_bp
+from routes.admin_farmers import admin_farmers_bp
 from routes.notifications import notifications_bp
 from routes.crop_economics import crop_economics_bp
 from routes.profit_simulator import profit_bp
@@ -126,6 +131,11 @@ app.register_blueprint(onboarding_bp)
 app.register_blueprint(sahayak_bp)
 app.register_blueprint(subsidies_bp)
 app.register_blueprint(admin_bp)
+app.register_blueprint(admin_auth_bp)
+app.register_blueprint(admin_store_bp)
+app.register_blueprint(admin_schemes_bp)
+app.register_blueprint(admin_notifications_bp)
+app.register_blueprint(admin_farmers_bp)
 app.register_blueprint(notifications_bp)
 app.register_blueprint(crop_economics_bp)   
 app.register_blueprint(profit_bp)
