@@ -650,7 +650,7 @@
             <div class="price-grid" id="price-grid">
                 <div class="loading">
                     <div class="spinner"></div>
-                    Loading prices...
+                    कीमतों को लोड हो रहा है...
                 </div>
             </div>
         </div>
@@ -664,7 +664,11 @@
                 कीमत तुलना
             </div>
             <div class="chart-container">
-                <canvas id="comparisonChart" class="chart-canvas"></canvas>
+                <div class="loading" id="comparisonChartLoader">
+                    <div class="spinner"></div>
+                    कीमतों को लोड हो रहा है...
+                </div>
+                <canvas id="comparisonChart" class="chart-canvas" style="display: none;"></canvas>
             </div>
         </div>
 
@@ -965,7 +969,8 @@ async function loadComparisonChart() {
 
         if (validData.length === 0) {
             document.getElementById('comparisonChart').style.display = 'none';
-            document.querySelector('.chart-container').innerHTML = '<div class="empty-state"><p>No price data available yet</p></div>';
+            document.getElementById('comparisonChartLoader').style.display = 'none';
+            document.querySelector('.chart-container').innerHTML = '<div class="empty-state"><p>अभी कोई कीमत डेटा उपलब्ध नहीं है</p></div>';
             return;
         }
 
@@ -1036,9 +1041,12 @@ async function loadComparisonChart() {
             }
         });
 
+        document.getElementById('comparisonChartLoader').style.display = 'none';
         document.getElementById('comparisonChart').style.display = 'block';
     } catch (err) {
         console.error('Error loading comparison chart:', err);
+        document.getElementById('comparisonChartLoader').style.display = 'none';
+        document.querySelector('.chart-container').innerHTML = '<div class="empty-state"><p>कीमत डेटा लोड करने में त्रुटि</p></div>';
     }
 }
 

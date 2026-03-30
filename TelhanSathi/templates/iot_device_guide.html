@@ -10,25 +10,9 @@
         box-sizing: border-box;
     }
 
-    body {
-        background: linear-gradient(135deg, #0f172a 0%, #1a2742 100%);
-        color: #e0e0e0;
-        font-family: 'Inter', 'Segoe UI', sans-serif;
-    }
-
-    .frame {
-        background: transparent;
-        box-shadow: none;
-        max-width: 100%;
-        padding: 0;
-    }
-
     .main-container {
-        background: linear-gradient(135deg, #0f172a 0%, #1a2742 100%);
-        min-height: 100vh;
         padding: 20px;
-        padding-bottom: 120px;
-        overflow-y: auto;
+        padding-bottom: 20px;
     }
 
     /* ===== HEADER SECTION ===== */
@@ -58,11 +42,12 @@
         background-clip: text;
         margin-bottom: 10px;
         font-weight: 700;
+        color: #388e3c;
     }
 
     .header-section p {
         font-size: 1rem;
-        color: #b0b0b0;
+        color: #666;
         margin-bottom: 30px;
         max-width: 600px;
         margin-left: auto;
@@ -134,13 +119,14 @@
     }
 
     .flow-item {
-        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        background: #fff;
         padding: 20px;
         border-radius: 12px;
         text-align: center;
         border: 2px solid #4caf50;
         min-width: 150px;
         position: relative;
+        color: #333;
     }
 
     .flow-item.active {
@@ -180,8 +166,8 @@
     }
 
     .sensor-card {
-        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-        border: 2px solid #4caf50;
+        background: #fff;
+        border: 2px solid #e0e0e0;
         border-radius: 15px;
         padding: 25px;
         cursor: pointer;
@@ -236,7 +222,7 @@
 
     .sensor-description {
         font-size: 0.95rem;
-        color: #a0a0a0;
+        color: #666;
         line-height: 1.5;
         transition: color 0.3s ease;
     }
@@ -272,8 +258,8 @@
     }
 
     .step-card {
-        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-        border: 1px solid rgba(76, 175, 80, 0.2);
+        background: #fff;
+        border: 1px solid #e0e0e0;
         border-radius: 12px;
         padding: 25px;
         position: relative;
@@ -307,11 +293,11 @@
         font-size: 1.2rem;
         font-weight: 600;
         margin-bottom: 10px;
-        color: #e0e0e0;
+        color: #388e3c;
     }
 
     .step-description {
-        color: #a0a0a0;
+        color: #666;
         font-size: 0.95rem;
         line-height: 1.6;
     }
@@ -351,12 +337,12 @@
     .feature-title {
         font-weight: 600;
         margin-bottom: 5px;
-        color: #e0e0e0;
+        color: #388e3c;
     }
 
     .feature-desc {
         font-size: 0.9rem;
-        color: #a0a0a0;
+        color: #666;
     }
 
     /* ===== CTA SECTION ===== */
