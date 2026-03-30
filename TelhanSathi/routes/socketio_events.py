@@ -14,6 +14,27 @@ connected_users = {}
 def register_socketio_events(socketio):
     """Register all Socket.IO event handlers"""
     
+    # ===================== DEFAULT NAMESPACE HANDLERS =====================
+    @socketio.on('connect', namespace='/')
+    def handle_default_connect():
+        """Handle default namespace connection"""
+        try:
+            print(f"[SOCKETIO] Client connected to default namespace: {request.sid}")
+            # Just acknowledge the connection
+            return True
+        except Exception as e:
+            print(f"[SOCKETIO ERROR] Default connect error: {str(e)}")
+            return False
+    
+    @socketio.on('disconnect', namespace='/')
+    def handle_default_disconnect():
+        """Handle default namespace disconnection"""
+        try:
+            print(f"[SOCKETIO] Client disconnected from default namespace: {request.sid}")
+        except Exception as e:
+            print(f"[SOCKETIO ERROR] Default disconnect error: {str(e)}")
+    
+    # ===================== BIDDING NAMESPACE HANDLERS =====================
     @socketio.on('connect', namespace='/bidding')
     def handle_connect():
         """Handle buyer connection"""
