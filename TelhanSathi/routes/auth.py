@@ -9,7 +9,7 @@ import secrets
 # Avoid circular imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from models import Farmer, OTPRecord
+from models import Farmer, OTPRecord, CoinBalance, Notification
 from extensions import db
 from utils import generate_otp, send_otp_sms, calculate_otp_expiry, is_farmer_eligible_for_subsidy
 from models_marketplace_keep import Chat, ChatMessage
@@ -116,6 +116,56 @@ def login_with_mobile():
                 coins_earned=0  # Initialize coins to 0
             )
             db.session.add(farmer)
+            db.session.flush()  # Flush to get the farmer.id before committing
+            
+            # Create CoinBalance with 500 welcome coins for demo app
+            coin_balance = CoinBalance(
+                farmer_id=farmer.id,
+                total_coins=500,
+                available_coins=500,  # 500 coins as welcome bonus
+                redeemed_coins=0
+            )
+            db.session.add(coin_balance)
+            
+            # Create welcome notification
+            welcome_notif = Notification(
+                farmer_id=farmer.id,
+                title='टेलहन साथी में आपका स्वागत है! 🎉',
+                description='आपने सफलतापूर्वक पंजीकरण कर लिया है। आपको 500 स्वागत सिक्के मिले हैं! इन सिक्कों का उपयोग रिडेम्पशन स्टोर में कर सकते हैं।',
+                notification_type='system_update',
+                icon='celebration',
+                color='success',
+                related_type='general',
+                is_important=True
+            )
+            db.session.add(welcome_notif)
+            
+            # Create scheme notification
+            scheme_notif = Notification(
+                farmer_id=farmer.id,
+                title='सरकारी योजनाएं खोजें',
+                description='आप अब सभी सरकारी योजनाओं और सब्सिडी के लिए आवेदन कर सकते हैं। अपनी खेत की जानकारी पूरी करें और सर्वोत्तम योजनाएं पाएं।',
+                notification_type='scheme_update',
+                icon='policy',
+                color='info',
+                related_type='general',
+                action_link='/subsidies'
+            )
+            db.session.add(scheme_notif)
+            
+            # Create feature notification
+            feature_notif = Notification(
+                farmer_id=farmer.id,
+                title='डिजिटल मंडी - नीलामी शुरू करें',
+                description='अपनी फसल को सीधे खरीदारों को बेचें और बेहतर कीमत पाएं। अभी खेत के विवरण जोड़ें और नीलामी शुरू करें।',
+                notification_type='deal_alert',
+                icon='storefront',
+                color='success',
+                related_type='general',
+                action_link='/auction'
+            )
+            db.session.add(feature_notif)
+            
             db.session.commit()
             
             # Mark as new farmer

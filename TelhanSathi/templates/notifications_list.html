@@ -144,12 +144,14 @@
                 overflow-x: hidden;
                 display: flex;
                 flex-direction: column;
+                min-height: 0;
             }
 
             /* Notifications List */
             .notifications-container {
-                flex: 1;
-                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+                gap: 0;
             }
 
             .notification-item {
@@ -354,7 +356,7 @@
             .pagination button {
                 background: #f0f0f0;
                 border: 1px solid #ddd;
-                padding: 6px 10px
+                padding: 6px 10px;
                 border-radius: 4px;
                 cursor: pointer;
                 font-size: 12px;
@@ -385,7 +387,7 @@
 
             .notif-footer button {
                 flex: 1;
-                padding: 10px
+                padding: 10px;
                 border: none;
                 border-radius: 6px;
                 cursor: pointer;
