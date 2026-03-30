@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* BASE & BACKGROUND STYLES (Login Page Style) */
         * {
             margin: 0;
             padding: 0;
@@ -17,64 +16,43 @@
         body {
             font-family: 'Noto Sans Devanagari', sans-serif;
             min-height: 100vh;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf0 100%);
+            background: linear-gradient(180deg, #2d5735 0%, #1e3a24 100%);
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 0;
-            color: #333;
+            color: #1e3a24;
         }
 
-        /* MOBILE: FULL WIDTH (Login Page Style) */
-        @media (max-width: 768px) {
-            body {
-                /* Ensures the green background covers the whole mobile screen */
-                background: linear-gradient(135deg, #1e3a24 0%, #2d5735 100%);
-                display: block;
-                padding: 0;
-            }
-        }
-
-        /* MAIN CONTAINER (Login Page Style) */
         .main-container {
             width: 100%;
-            max-width: 480px;
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            max-width: 420px;
+            height: 100vh;
+            background: #f7f9f7;
+            border-radius: 8px;
+            box-shadow: 0 4px 60px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            position: relative;
             overflow: hidden;
-            height: auto;
         }
 
-        /* MOBILE: FULL SCREEN (Adjusted for better flow without footer) */
         @media (max-width: 768px) {
             .main-container {
                 max-width: 100%;
-                /* Removed min-height: 100vh */
                 border-radius: 0;
                 box-shadow: none;
-                background: transparent;
-                display: flex;
-                flex-direction: column;
             }
         }
 
-        /* HEADER (Login Page Style) */
         .header {
             background: linear-gradient(135deg, #1a4721 0%, #2e7d32 100%);
-            padding: 32px;
+            padding: 24px;
             display: flex;
             align-items: center;
-            gap: 20px;
-            color: #fff;
+            gap: 16px;
+            color: white;
             flex-shrink: 0;
-        }
-
-        @media (max-width: 768px) {
-            .header {
-                padding: 28px 24px;
-                border-radius: 0;
-            }
         }
 
         .logo-container {
@@ -88,7 +66,7 @@
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
             flex-shrink: 0;
         }
-        
+
         .logo-container img {
             width: 100%;
             height: 100%;
@@ -105,7 +83,7 @@
             font-weight: 700;
             color: white;
             line-height: 1.3;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .ministry {
@@ -115,214 +93,283 @@
         }
 
         @media (max-width: 768px) {
-            .app-title {
-                font-size: 24px;
+            .header {
+                padding: 24px;
             }
-            
+
+            .logo-container {
+                width: 48px;
+                height: 48px;
+            }
+
+            .app-title {
+                font-size: 22px;
+            }
+
             .ministry {
                 font-size: 13px;
             }
         }
-        
-        /* OTP CONTENT AREA */
-        .otp-content {
-            padding: 40px 32px;
-            background: white;
-            flex-grow: 1; 
+
+        .content {
+            padding: 32px 24px;
+            flex: 1;
+            overflow-y: auto;
         }
-        
+
         @media (max-width: 768px) {
-            .otp-content {
-                background: white;
-                border-radius: 0;
-                padding: 32px 24px;
-                position: relative;
-                z-index: 1;
+            .content {
+                padding: 28px 20px;
             }
         }
 
-
         .section-heading {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 600;
-            margin-bottom: 12px;
             color: #1e3a24;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
-            gap: 12px;
-        }
-        
-        .section-heading .material-icons {
-            font-size: 24px;
-            color: #2e7d32;
-        }
-
-
-        .otp-instruction {
-            font-size: 15px;
-            color: #666;
-            margin-bottom: 30px;
-        }
-
-        .otp-container {
-            display: flex;
-            justify-content: space-between;
-            gap: 6px;
-            margin-bottom: 30px;
-            max-width: 320px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .otp-input {
-            width: 45px;
-            height: 55px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            background-color: #f8f9fa;
-            color: #333;
-            font-size: 22px;
-            font-weight: 600;
-            text-align: center;
-            outline: none;
-            transition: all 0.2s ease;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
-            font-family: 'Noto Sans Devanagari', sans-serif;
-        }
-
-        .otp-input:focus {
-            border-color: #4caf50;
-            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
-            background-color: white;
-        }
-
-        .resend-group {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            font-size: 14px;
-            margin-bottom: 20px;
-            padding: 0 5px;
-        }
-
-        .timer-display {
-            font-weight: 500;
-            color: #444;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            line-height: 1.4;
-            flex-shrink: 0;
-        }
-
-        .timer-display span {
-            font-weight: 700;
-            color: #d32f2f;
-        }
-
-
-        .resend-link {
-            color: #2e7d32;
-            text-decoration: none;
-            font-weight: 600;
-            cursor: pointer;
-            transition: color 0.3s;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            text-align: right;
-            line-height: 1.2;
-        }
-
-        .resend-link .resend-icon-text {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .resend-link:hover:not(.disabled) {
-            color: #4caf50;
-        }
-
-        .resend-link.disabled {
-            color: #999;
-            cursor: default;
-        }
-
-        .primary-button {
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            text-align: center;
-            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
-            color: #fff;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            transition: all 0.2s ease;
-            font-family: 'Noto Sans Devanagari', sans-serif;
-            margin-top: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             gap: 10px;
         }
 
-        .primary-button:hover {
-            opacity: 0.9;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        .section-heading .material-icons {
+            color: #2e7d32;
+            font-size: 24px;
         }
 
-        .primary-button:disabled {
+        .otp-instruction {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 24px;
+            line-height: 1.5;
+            padding: 12px;
+            background: #f0f8f4;
+            border-radius: 8px;
+            border-left: 4px solid #4caf50;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .input-label .material-icons {
+            font-size: 18px;
+            color: #2e7d32;
+        }
+
+        .otp-input-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 32px;
+            padding: 24px 16px;
+            margin-left: 6px;
+            margin-right: 6px;
+        }
+
+        .otp-digit {
+            width: 50px;
+            height: 50px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 22px;
+            font-weight: 700;
+            color: #1e3a24;
+            background: white;
+            font-family: 'Courier New', monospace;
+            outline: none;
+            transition: all 0.2s ease;
+            cursor: text;
+        }
+
+        .otp-digit:focus {
+            border-color: #4caf50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.12);
+            background: white;
+        }
+
+        .otp-digit.filled {
+            border-color: #4caf50;
+            background: white;
+            color: #1e3a24;
+        }
+
+        .otp-digit::placeholder {
+            color: #d8d8d8;
+            font-weight: 400;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            color: #333;
+            font-size: 15px;
+            font-weight: 500;
+            font-family: 'Noto Sans Devanagari', sans-serif;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .input-field:focus {
+            border-color: #4caf50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        .input-field::placeholder {
+            color: #999;
+        }
+
+        .verify-button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: 'Noto Sans Devanagari', sans-serif;
+            cursor: pointer;
+            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .verify-button:hover {
+            background: linear-gradient(135deg, #43a047 0%, #27632a 100%);
+            transform: translateY(-1px);
+        }
+
+        .verify-button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
-            background: linear-gradient(135deg, #a5d6a7 0%, #7cb342 100%);
         }
 
-        .button-helper-text {
-            font-size: 12px; 
+        .verify-button .material-icons {
+            font-size: 18px;
+        }
+
+        .resend-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            gap: 16px;
+        }
+
+        .resend-left {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .timer {
+            font-size: 13px;
+            color: #d32f2f;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .timer .material-icons {
+            font-size: 16px;
+        }
+
+        .resend-right {
+            text-align: right;
+        }
+
+        .resend-text {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 0;
+        }
+
+        .resend-button {
+            background: none;
+            border: none;
+            color: #4caf50;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'Noto Sans Devanagari', sans-serif;
+            text-decoration: underline;
+            padding: 0;
+            transition: opacity 0.2s;
+            display: inline;
+        }
+
+        .resend-button:hover {
+            opacity: 0.8;
+        }
+
+        .resend-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .footer-text {
+            font-size: 12px;
             color: #999;
             text-align: center;
             margin-top: 20px;
+            padding-top: 16px;
+            line-height: 1.4;
         }
 
         .error-message {
-            color: #d32f2f;
-            font-size: 14px;
-            text-align: left;
-            margin-bottom: 20px;
             background: #fff5f5;
-            padding: 14px 16px;
-            border-radius: 10px;
+            color: #d32f2f;
+            padding: 12px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 18px;
             border: 1px solid #ffcdd2;
             display: flex;
             align-items: flex-start;
-            gap: 12px;
+            gap: 10px;
         }
-        
+
         .error-message .material-icons {
-            font-size: 20px;
+            font-size: 18px;
             flex-shrink: 0;
             color: #d32f2f;
         }
 
-        /* FOOTER (REMOVED FOOTER CSS) */
-        /* All footer-related CSS has been removed */
-        
-        /* Loading State */
         .loading {
             position: relative;
             color: transparent !important;
-            pointer-events: none;
         }
 
         .loading::after {
             content: '';
             position: absolute;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-top-color: white;
             border-radius: 50%;
@@ -335,11 +382,10 @@
     </style>
 </head>
 <body>
-
     <div class="main-container">
         <div class="header">
             <div class="logo-container">
-                 <img src="im/agri logo.jpg" alt="Logo">
+                <img src="static/img/agri_logo.jpg" alt="Logo">
             </div>
             <div class="title-section">
                 <div class="app-title">टेलहन साथी</div>
@@ -347,14 +393,14 @@
             </div>
         </div>
 
-        <div class="otp-content">
+        <div class="content">
             <div class="section-heading">
-                 <span class="material-icons">lock_open</span>
-                 सुरक्षा सत्यापन
+                <span class="material-icons">lock_open</span>
+                सुरक्षा सत्यापन
             </div>
-            
+
             <div class="otp-instruction">
-                OTP आपके पंजीकृत मोबाइल नंबर पर भेजा गया है, जिसका नंबर ******{{ phone_masked }} है।
+                OTP आपके पंजीकृत मोबाइल नंबर पर भेजा गया है, जिसका नंबर ****{{ phone_masked }} है।
             </div>
 
             {% if error %}
@@ -364,178 +410,231 @@
             </div>
             {% endif %}
 
-            <form method="POST" action="{{ url_for('auth.verify_otp_post') }}">
+            <form method="POST" action="{{ url_for('auth.verify_otp_post') }}" id="otpForm">
                 <input type="hidden" name="farmer_id" value="{{ farmer_id }}">
+                <input type="hidden" name="otp_code" id="otp_code_hidden" value="">
                 
-                <div class="otp-container" id="otp-container">
-                    <input type="tel" class="otp-input" maxlength="1" data-index="0" inputmode="numeric" required>
-                    <input type="tel" class="otp-input" maxlength="1" data-index="1" inputmode="numeric" required>
-                    <input type="tel" class="otp-input" maxlength="1" data-index="2" inputmode="numeric" required>
-                    <input type="tel" class="otp-input" maxlength="1" data-index="3" inputmode="numeric" required>
-                    <input type="tel" class="otp-input" maxlength="1" data-index="4" inputmode="numeric" required>
-                    <input type="tel" class="otp-input" maxlength="1" data-index="5" inputmode="numeric" required>
+                <div class="input-group">
+                    <label class="input-label">
+                        <span class="material-icons">pin</span>
+                        6 अंकीय OTP दर्ज करें
+                    </label>
+                    <div class="otp-input-container">
+                        <input type="text" class="otp-digit" maxlength="1" placeholder="0" pattern="[0-9]" data-index="0">
+                        <input type="text" class="otp-digit" maxlength="1" placeholder="0" pattern="[0-9]" data-index="1">
+                        <input type="text" class="otp-digit" maxlength="1" placeholder="0" pattern="[0-9]" data-index="2">
+                        <input type="text" class="otp-digit" maxlength="1" placeholder="0" pattern="[0-9]" data-index="3">
+                        <input type="text" class="otp-digit" maxlength="1" placeholder="0" pattern="[0-9]" data-index="4">
+                        <input type="text" class="otp-digit" maxlength="1" placeholder="0" pattern="[0-9]" data-index="5">
+                    </div>
                 </div>
 
-                <div class="resend-group">
-                    <div class="timer-display">
-                        <span class="material-icons" style="font-size: 18px; color: #444;">timer</span>
-                        OTP पुनः भेजें: <span id="countdown">00:30</span>
-                    </div>
-                    <a href="#" class="resend-link disabled" id="resend-link">
-                         <span class="resend-icon-text">
-                             <span class="material-icons" style="font-size: 18px;">refresh</span>
-                             OTP प्राप्त नहीं हुआ?
-                         </span>
-                         <span>पुनः प्रयास करें!</span>
-                    </a>
-                </div>
-                
-                <div class="button-group">
-                    <button type="submit" class="primary-button" id="verify-button" disabled>
-                        <span class="material-icons">check_circle</span>
-                        सत्यापित करें
-                    </button>
-                </div>
-                
-                <div class="button-helper-text">सत्यापन करके, आप हमारी नियम और गोपनीयता शर्तों से सहमत हैं।</div>
+                <button type="submit" class="verify-button" id="verifyBtn">
+                    <span class="material-icons">verified</span>
+                    सत्यापित करें
+                </button>
             </form>
+
+            <div class="resend-section">
+                <div class="resend-left">
+                    <span class="material-icons" style="font-size: 16px; color: #333;">schedule</span>
+                    <span>OTP पुनः भेजें:</span>
+                    <div class="timer" id="timerDisplay" style="display: none; color: #d32f2f; margin: 0;">
+                        <span id="countdown">30</span>s
+                    </div>
+                </div>
+                <div class="resend-right">
+                    <div class="resend-text">
+                        OTP प्राप्त नहीं हुआ?
+                        <button type="button" class="resend-button" id="resendBtn" onclick="resendOTP()">
+                            पुन: प्रयास करें!
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-text">
+                सहायता करते, आप हमारी निजता और गोपनीयता नीति से सहमत हैं।
+            </div>
         </div>
-        
-        </div>
+    </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const inputs = document.querySelectorAll('.otp-input');
-            const countdownEl = document.getElementById('countdown');
-            const resendLink = document.getElementById('resend-link');
-            const verifyButton = document.getElementById('verify-button');
-            const otpContainer = document.getElementById('otp-container');
-            
-            // Check if farmer_id hidden input exists
-            const farmerIdInput = document.querySelector('input[name="farmer_id"]');
-            const farmerId = farmerIdInput ? farmerIdInput.value : '';
+        let resendTimer = 0;
+        let timerInterval = null;
 
-            let countdownTime = 30;
-            let timer;
-
-            // Store OTP in hidden field
-            function updateOtpField() {
-                const otp = Array.from(inputs).map(input => input.value).join('');
-                // Create hidden input if it doesn't exist
-                let otpInput = document.querySelector('input[name="otp_code"]');
-                if (!otpInput) {
-                    otpInput = document.createElement('input');
-                    otpInput.type = 'hidden';
-                    otpInput.name = 'otp_code';
-                    otpContainer.parentElement.appendChild(otpInput);
-                }
-                otpInput.value = otp;
-                
-                // Enable/Disable Verify button based on OTP length
-                verifyButton.disabled = otp.length !== inputs.length;
-            }
-            
-            // Initial button state
-            updateOtpField();
-
-            function startTimer() {
-                resendLink.classList.add('disabled');
-                resendLink.removeEventListener('click', handleResend);
-                countdownTime = 30;
-                countdownEl.textContent = '00:' + countdownTime.toString().padStart(2, '0');
-
-                timer = setInterval(() => {
-                    countdownTime--;
-                    countdownEl.textContent = '00:' + countdownTime.toString().padStart(2, '0');
-                    
-                    if (countdownTime <= 0) {
-                        clearInterval(timer);
-                        countdownEl.textContent = '00:00';
-                        resendLink.classList.remove('disabled');
-                        resendLink.addEventListener('click', handleResend);
-                    }
-                }, 1000);
-            }
-
-            function handleResend(event) {
-                event.preventDefault();
-                // Ensure the fetch URL and method match your backend setup
-                fetch('{{ url_for("auth.resend_otp") }}', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ farmer_id: farmerId })
-                }).then(r => r.json()).then(data => {
-                    if (data.success) {
-                        // Clear OTP inputs
-                        inputs.forEach(input => input.value = '');
-                        updateOtpField(); 
-                        inputs[0].focus();
-                        startTimer();
-                        // You can add a toast notification or alert for resend success here
-                    }
-                });
-            }
-
-            // OTP Input Auto-Jump and Backspace
-            inputs.forEach((input, index) => {
-                input.addEventListener('input', (e) => {
-                    input.value = input.value.replace(/[^0-9]/g, '');
-                    updateOtpField();
-
-                    if (input.value.length === 1 && index < inputs.length - 1) {
-                        inputs[index + 1].focus();
-                    } else if (input.value.length === 1 && index === inputs.length - 1) {
-                        input.blur();
-                    }
-                });
-
-                input.addEventListener('keydown', (e) => {
-                    if (e.key === 'Backspace' && input.value.length === 0 && index > 0) {
-                        inputs[index - 1].focus();
-                    } else if (e.key === 'ArrowRight' && index < inputs.length - 1) {
-                        inputs[index + 1].focus();
-                    } else if (e.key === 'ArrowLeft' && index > 0) {
-                        inputs[index - 1].focus();
-                    }
-                });
-                
-                // Handle paste event
-                input.addEventListener('paste', (e) => {
-                    e.preventDefault();
-                    const pasteData = e.clipboardData.getData('text').trim().replace(/\D/g, '');
-                    for (let i = 0; i < inputs.length && i < pasteData.length; i++) {
-                        inputs[i].value = pasteData[i];
-                    }
-                    updateOtpField();
-                    // Move focus to the next empty input or last input
-                    const nextIndex = Math.min(pasteData.length, inputs.length - 1);
-                    if (nextIndex < inputs.length) {
-                        inputs[nextIndex].focus();
-                    } else {
-                        inputs[inputs.length - 1].blur();
-                    }
-                });
-            });
-            
-            // Submission logic 
-            document.querySelector('form').addEventListener('submit', (e) => {
-                if (Array.from(inputs).some(input => input.value.length === 0)) {
-                    // Simple alert for incomplete OTP
-                    e.preventDefault();
-                    alert('कृपया संपूर्ण OTP दर्ज करें।');
-                    return;
-                }
-                
-                // Show loading state
-                verifyButton.classList.add('loading');
-                verifyButton.disabled = true;
-                verifyButton.textContent = 'सत्यापन हो रहा है...';
-            });
-
-            // Start timer on load
-            startTimer();
+        // Start timer on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            startResendTimer(30);
         });
-    </script>
 
+        // OTP Digit Input Handler
+        const otpDigits = document.querySelectorAll('.otp-digit');
+        
+        otpDigits.forEach((digit, index) => {
+            digit.addEventListener('input', function(e) {
+                // Only allow numbers
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 1) value = value.substring(0, 1);
+                e.target.value = value;
+
+                // Mark as filled for styling
+                if (value) {
+                    e.target.classList.add('filled');
+                } else {
+                    e.target.classList.remove('filled');
+                }
+
+                // Move to next input
+                if (value && index < otpDigits.length - 1) {
+                    otpDigits[index + 1].focus();
+                }
+
+                // Update hidden input
+                updateHiddenOTP();
+            });
+
+            // Handle backspace
+            digit.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    otpDigits[index - 1].focus();
+                }
+                if (e.key === 'ArrowLeft' && index > 0) {
+                    otpDigits[index - 1].focus();
+                }
+                if (e.key === 'ArrowRight' && index < otpDigits.length - 1) {
+                    otpDigits[index + 1].focus();
+                }
+            });
+
+            // Handle paste
+            digit.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                const digits = pastedText.replace(/\D/g, '').split('');
+                
+                if (digits.length >= 6) {
+                    otpDigits.forEach((input, i) => {
+                        input.value = digits[i] || '';
+                        if (input.value) input.classList.add('filled');
+                    });
+                    updateHiddenOTP();
+                    otpDigits[5].focus();
+                }
+            });
+
+            // Focus on first input by default
+            if (index === 0) {
+                setTimeout(() => digit.focus(), 100);
+            }
+        });
+
+        function updateHiddenOTP() {
+            const otp = Array.from(otpDigits).map(input => input.value).join('');
+            document.getElementById('otp_code_hidden').value = otp;
+        }
+
+        // Form submission
+        document.getElementById('otpForm')?.addEventListener('submit', function(e) {
+            const otp = Array.from(otpDigits).map(input => input.value).join('');
+            if (otp.length !== 6) {
+                e.preventDefault();
+                showError('OTP 6 अंकों का होना चाहिए');
+                return false;
+            }
+            
+            const button = document.getElementById('verifyBtn');
+            button.classList.add('loading');
+            button.disabled = true;
+            return true;
+        });
+
+        function resendOTP() {
+            const farmerId = '{{ farmer_id }}';
+            const btn = document.getElementById('resendBtn');
+            
+            btn.disabled = true;
+            
+            fetch('/resend-otp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ farmer_id: farmerId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showSuccess('OTP दोबारा से भेज दिया गया है');
+                    startResendTimer(30);
+                } else {
+                    showError(data.error || 'OTP भेजने में त्रुटि');
+                    btn.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('OTP भेजने में त्रुटि');
+                btn.disabled = false;
+            });
+        }
+
+        function startResendTimer(seconds) {
+            // Clear any existing interval
+            if (timerInterval) clearInterval(timerInterval);
+            
+            resendTimer = seconds;
+            document.getElementById('resendBtn').style.display = 'none';
+            document.getElementById('timerDisplay').style.display = 'block';
+            
+            // Set initial countdown value
+            document.getElementById('countdown').textContent = resendTimer;
+            
+            timerInterval = setInterval(function() {
+                resendTimer--;
+                document.getElementById('countdown').textContent = String(resendTimer).padStart(2, '0');
+                
+                if (resendTimer <= 0) {
+                    clearInterval(timerInterval);
+                    document.getElementById('timerDisplay').style.display = 'none';
+                    document.getElementById('resendBtn').style.display = 'inline-block';
+                    document.getElementById('resendBtn').disabled = false;
+                }
+            }, 1000);
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.innerHTML = `
+                <span class="material-icons">error</span>
+                <span>${message}</span>
+            `;
+            
+            const content = document.querySelector('.content');
+            const existingError = content.querySelector('.error-message');
+            if (existingError) existingError.remove();
+            
+            const firstChild = content.querySelector('.section-heading');
+            firstChild.parentNode.insertBefore(errorDiv, firstChild.nextSibling);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.style.cssText = 'background: #f1f8e9; color: #2e7d32; padding: 12px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 18px; border: 1px solid #c5e1a5; display: flex; align-items: flex-start; gap: 10px;';
+            successDiv.innerHTML = `
+                <span class="material-icons" style="font-size: 18px; flex-shrink: 0;">check_circle</span>
+                <span>${message}</span>
+            `;
+            
+            const content = document.querySelector('.content');
+            const existingError = content.querySelector('.error-message');
+            if (existingError) existingError.remove();
+            
+            const firstChild = content.querySelector('.section-heading');
+            firstChild.parentNode.insertBefore(successDiv, firstChild.nextSibling);
+            setTimeout(() => successDiv.remove(), 3000);
+        }
+    </script>
 </body>
 </html>

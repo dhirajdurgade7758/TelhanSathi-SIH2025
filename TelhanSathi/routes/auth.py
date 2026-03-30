@@ -69,57 +69,6 @@ def login():
     return render_template('login.html')
 
 @auth_bp.route('/login', methods=['POST'])
-def login_with_farmer_id():
-    """Handle login with Farmer ID"""
-    farmer_id = request.form.get('farmer_id', '').strip()
-    
-    if not farmer_id:
-        return render_template('login.html', error='Please enter your Farmer ID')
-    
-    # Check if farmer exists
-    farmer = Farmer.query.filter_by(farmer_id=farmer_id).first()
-    if not farmer:
-        return render_template('login.html', error='Farmer not found. Please contact support.')
-    
-    # Generate and send OTP
-    otp_code = generate_otp()
-    otp_record = OTPRecord(
-        farmer_id=farmer.id,
-        otp_code=otp_code,
-        expires_at=calculate_otp_expiry()
-    )
-    
-    db.session.add(otp_record)
-    db.session.commit()
-    
-    # Send OTP
-    send_otp_sms(farmer.phone_number, otp_code)
-    
-    # Store farmer_id in session
-    session['farmer_id'] = farmer_id
-    session['phone_number'] = farmer.phone_number
-    session['login_method'] = 'farmer_id'
-    
-    # Redirect to OTP verification page
-    phone_masked = farmer.phone_number[-4:] + '****'
-    return render_template('otp.html', farmer_id=farmer_id, phone_masked=phone_masked)
-
-
-@auth_bp.route('/otp', methods=['GET'])
-def otp():
-    """Serve OTP page - called from login"""
-    farmer_id = session.get('farmer_id')
-    phone_masked = session.get('phone_number', '')
-    if phone_masked:
-        phone_masked = phone_masked[-4:] + '****'
-    
-    if not farmer_id:
-        return redirect(url_for('auth.login'))
-    
-    return render_template('otp.html', farmer_id=farmer_id, phone_masked=phone_masked)
-
-
-@auth_bp.route('/login-with-mobile', methods=['POST'])
 def login_with_mobile():
     """Handle login with mobile number - creates new farmer if needed"""
     import re
