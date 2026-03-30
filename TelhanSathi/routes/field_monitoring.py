@@ -10,6 +10,10 @@ from flask import Response
 import time
 import json
 
+@iot.route('/device-guide')
+def device_guide():
+    return render_template("iot_device_guide.html")
+
 @iot.route('/device-control')
 def device_control():
     return render_template("field_monitoring.html")

@@ -23,6 +23,11 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+# Migration scripts (contain sensitive database credentials)
+migrate_to_render.py
+migrate_*.py
+export.sql
+
 # Virtual environments
 .venv/
 venv/

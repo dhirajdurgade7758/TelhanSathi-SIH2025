@@ -408,7 +408,7 @@
   <section class="special-section">
 
     <!-- SPECIAL FULL WIDTH CARD -->
-    <a href="{{ url_for('iot.device_control') }}" class="special-card" style="text-decoration: none; color: inherit;">
+    <a href="{{ url_for('iot.device_guide') }}" class="special-card" style="text-decoration: none; color: inherit;">
       <div class="special-card-icon">
         <img src="https://cdn-icons-png.freepik.com/512/5110/5110528.png" alt="">
       </div>
@@ -445,7 +445,7 @@
   <div class="info-slider-container-2">
 
     <!-- CARD 1: Subsidy & Govt Schemes -->
-    <div class="info-card-slide-2" onclick="window.location.href='/schemes'">
+    <a href="{{ url_for('subsidies.subsidies_list') }}" class="info-card-slide-2" style="text-decoration: none; color: inherit;">
       <img class="info-card-img-2"
         src="static/img/sarkari-yojana-1735992951.jpg">
       <div class="info-card-content-2">
@@ -455,10 +455,10 @@
         </div>
         <span class="material-symbols-outlined info-card-arrow-2">arrow_forward</span>
       </div>
-    </div>
+    </a>
 
     <!-- CARD 2: IoT आधारित स्मार्ट कृषि -->
-    <div class="info-card-slide-2" onclick="window.location.href='/iot-farming'">
+    <div class="info-card-slide-2" onclick="window.location.href='/field-monitoring/device-guide'">
       <img class="info-card-img-2"
         src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ9RHvRr8k0TWHtIsLsjyWRmpDqqnMFzkMCGfCmU2Gc1Vak_tZGKRME2_vzmk-VJf0AD3g&usqp=CAU">
       <div class="info-card-content-2">
@@ -484,7 +484,7 @@
     </a>
 
     <!-- CARD 4: आपका डिजिटल कृषि प्लेटफ़ॉर्म -->
-    <div class="info-card-slide-2" onclick="window.location.href='/platform'">
+    <a href="{{ url_for('profit.simulator_page') }}" class="info-card-slide-2" style="text-decoration: none; color: inherit;">
       <img class="info-card-img-2"
         src="static/img/1.png">
       <div class="info-card-content-2">
@@ -494,7 +494,7 @@
         </div>
         <span class="material-symbols-outlined info-card-arrow-2">arrow_forward</span>
       </div>
-    </div>
+    </a>
 
   </div>
 </div>
