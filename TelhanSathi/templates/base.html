@@ -18,6 +18,116 @@
             color: #1e3a24;
             background-color: #1e3a24;
             background-image: linear-gradient(180deg, #2d5735 0%, #1e3a24 100%);
+            position: relative;
+        }
+
+        /* Background Message */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(76, 175, 80, 0.15) 0%, rgba(76, 175, 80, 0.05) 100%);
+            border-radius: 50%;
+            filter: blur(40px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '📱 Mobile Preview\A\AOpen this on your mobile device\Ato experience the exact app feel.';
+            white-space: pre;
+            position: fixed;
+            top: 40px;
+            right: 30px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            text-align: right;
+            line-height: 1.5;
+            pointer-events: none;
+            z-index: 1;
+            font-weight: 500;
+            animation: fadeInMessage 1s ease-out 0.5s both;
+            backdrop-filter: blur(10px);
+            padding: 14px 18px;
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid rgba(76, 175, 80, 0.2);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        body:hover::after {
+            background: rgba(76, 175, 80, 0.15);
+            border-color: rgba(76, 175, 80, 0.4);
+            color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+        }
+
+        /* Add decorative left-side elements */
+        .frame::before {
+            content: '';
+            position: fixed;
+            left: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 200px;
+            background: linear-gradient(180deg, transparent 0%, rgba(76, 175, 80, 0.5) 50%, transparent 100%);
+            border-radius: 2px;
+            pointer-events: none;
+            z-index: 0;
+            animation: fadeInMessage 1.2s ease-out 0.5s both;
+        }
+
+        @keyframes fadeInMessage {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateY(-50%) translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(-50%) translateX(0);
+            }
+        }
+
+        @media (max-width: 1000px) {
+            body::after {
+                bottom: 15px;
+                right: 15px;
+                font-size: 12px;
+            }
+
+            .frame::before {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body::before {
+                display: none;
+            }
+
+            body::after {
+                display: none;
+            }
+
+            .frame::before {
+                display: none;
+            }
         }
 
         /* FRAME (Main App Container) */
