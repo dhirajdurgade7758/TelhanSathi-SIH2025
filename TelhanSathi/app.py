@@ -3,6 +3,8 @@ from flask import Flask, render_template, send_from_directory, url_for, redirect
 from flask_cors import CORS
 import os
 from dotenv import load_dotenv
+from apscheduler.schedulers.background import BackgroundScheduler
+import requests
 
 from extensions import db, socketio
 from flask_migrate import Migrate  # ✅ Added
@@ -16,6 +18,28 @@ CORS(app)
 
 # Initialize SocketIO with Flask app
 socketio.init_app(app)
+
+# ----------------------- BACKGROUND SCHEDULER (Keep Render App Active) -----------------------
+scheduler = BackgroundScheduler()
+
+def ping_app():
+    """Ping the app to keep it active on Render."""
+    try:
+        # Get the app URL from environment or use localhost for development
+        app_url = os.getenv('APP_URL', 'http://localhost:5000')
+        requests.get(f'{app_url}/ping', timeout=5)
+        print(f"[SCHEDULER] ✓ Pinged app at {datetime.utcnow().isoformat()}")
+    except Exception as e:
+        print(f"[SCHEDULER] ⚠ Failed to ping app: {str(e)}")
+
+# Add the ping job - runs every 4 minutes
+scheduler.add_job(ping_app, 'interval', minutes=4, id='app_pinger')
+
+# Start scheduler in the context of the app
+def start_scheduler():
+    if not scheduler.running:
+        scheduler.start()
+        print("[SCHEDULER] ✓ Background scheduler started - app will stay active")
 
 # ----------------------- SESSION CONFIG -----------------------
 app.config['SESSION_COOKIE_SECURE'] = False  # True only in production with HTTPS
@@ -207,6 +231,12 @@ def dashboard():
     return render_template('dashboard.html')
 
 
+@app.route('/ping')
+def ping():
+    """Health check endpoint to prevent Render app from sleeping."""
+    return {'status': 'ok', 'timestamp': datetime.utcnow().isoformat()}, 200
+
+
 @app.route('/static/<path:filename>')
 def serve_static(filename):
     """Serve static files."""
@@ -224,6 +254,9 @@ def set_language_context():
 
 
 # ----------------------- APP RUN -----------------------
+# Start the background scheduler when the app initializes
+start_scheduler()
+
 if __name__ == '__main__':
     # ❗️IMPORTANT: Do NOT use db.create_all() when using Flask-Migrate
     # Migrations now handle schema updates.
