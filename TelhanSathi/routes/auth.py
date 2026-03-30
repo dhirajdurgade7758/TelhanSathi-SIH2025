@@ -151,7 +151,7 @@ def login_with_mobile():
     
     # Redirect to OTP verification page
     phone_masked = mobile_number[-4:]
-    return render_template('otp.html', farmer_id=farmer.farmer_id, phone_masked=phone_masked)
+    return render_template('otp.html', farmer_id=farmer.farmer_id, phone_masked=phone_masked, generated_otp=otp_code)
 
 
 @auth_bp.route('/verify-otp', methods=['POST'])
@@ -163,15 +163,25 @@ def verify_otp_post():
     if not farmer_id or not otp_code:
         phone_masked = session.get('phone_number', '')
         if phone_masked:
-            phone_masked = phone_masked[-4:] + '****'
-        return render_template('otp.html', farmer_id=farmer_id, phone_masked=phone_masked, error='Invalid OTP input')
+            phone_masked = phone_masked[-4:]
+        # Get current OTP for demo display
+        farmer = Farmer.query.filter_by(farmer_id=farmer_id).first()
+        generated_otp = None
+        if farmer:
+            latest_otp = OTPRecord.query.filter_by(
+                farmer_id=farmer.id,
+                is_verified=False
+            ).order_by(OTPRecord.created_at.desc()).first()
+            if latest_otp:
+                generated_otp = latest_otp.otp_code
+        return render_template('otp.html', farmer_id=farmer_id, phone_masked=phone_masked, generated_otp=generated_otp, error='Invalid OTP input')
     
     # Find farmer
     farmer = Farmer.query.filter_by(farmer_id=farmer_id).first()
     if not farmer:
         phone_masked = session.get('phone_number', '')
         if phone_masked:
-            phone_masked = phone_masked[-4:] + '****'
+            phone_masked = phone_masked[-4:]
         return render_template('otp.html', farmer_id=farmer_id, phone_masked=phone_masked, error='Farmer not found')
     
     # Find latest OTP record
@@ -184,15 +194,21 @@ def verify_otp_post():
     if not otp_record:
         phone_masked = session.get('phone_number', '')
         if phone_masked:
-            phone_masked = phone_masked[-4:] + '****'
-        return render_template('otp.html', farmer_id=farmer_id, phone_masked=phone_masked, error='Invalid OTP')
+            phone_masked = phone_masked[-4:]
+        # Get current OTP for demo display
+        latest_otp = OTPRecord.query.filter_by(
+            farmer_id=farmer.id,
+            is_verified=False
+        ).order_by(OTPRecord.created_at.desc()).first()
+        generated_otp = latest_otp.otp_code if latest_otp else None
+        return render_template('otp.html', farmer_id=farmer_id, phone_masked=phone_masked, generated_otp=generated_otp, error='Invalid OTP')
     
     # Check expiry
     if otp_record.is_expired():
         phone_masked = session.get('phone_number', '')
         if phone_masked:
-            phone_masked = phone_masked[-4:] + '****'
-        return render_template('otp.html', farmer_id=farmer_id, phone_masked=phone_masked, error='OTP has expired')
+            phone_masked = phone_masked[-4:]
+        return render_template('otp.html', farmer_id=farmer_id, phone_masked=phone_masked, generated_otp=otp_record.otp_code, error='OTP has expired')
     
     # Mark OTP as verified
     otp_record.is_verified = True
@@ -271,7 +287,7 @@ def resend_otp():
     
     send_otp_sms(farmer.phone_number, otp_code)
     
-    return jsonify({'success': True, 'message': 'OTP resent successfully'}), 200
+    return jsonify({'success': True, 'message': 'OTP resent successfully', 'generated_otp': otp_code}), 200
 
 
 @auth_bp.route('/register', methods=['GET'])

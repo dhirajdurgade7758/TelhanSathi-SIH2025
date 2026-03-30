@@ -379,6 +379,84 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        .demo-banner {
+            background: linear-gradient(135deg, #fff3cd 0%, #fffbea 100%);
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .demo-icon {
+            width: 40px;
+            height: 40px;
+            background: #ff9800;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .demo-icon .material-icons {
+            font-size: 20px;
+        }
+
+        .demo-content {
+            flex: 1;
+        }
+
+        .demo-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #ff9800;
+            margin-bottom: 6px;
+        }
+
+        .demo-text {
+            font-size: 12px;
+            color: #d97706;
+            line-height: 1.5;
+        }
+
+        .otp-display {
+            background: linear-gradient(135deg, #fff9e6 0%, #fffef2 100%);
+            border: 2px solid #ffc107;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .otp-display-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .otp-display-value {
+            font-size: 36px;
+            font-weight: 800;
+            color: #ff9800;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 8px;
+            word-spacing: 12px;
+        }
+
+        .otp-display-copy-hint {
+            font-size: 11px;
+            color: #999;
+            margin-top: 12px;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -399,8 +477,20 @@
                 सुरक्षा सत्यापन
             </div>
 
-            <div class="otp-instruction">
-                OTP आपके पंजीकृत मोबाइल नंबर पर भेजा गया है, जिसका नंबर ****{{ phone_masked }} है।
+            <div class="demo-banner">
+                <div class="demo-icon">
+                    <span class="material-icons">info</span>
+                </div>
+                <div class="demo-content">
+                    <div class="demo-title">डेमो एप्लिकेशन</div>
+                    <div class="demo-text">यह एक टेस्ट संस्करण है। आपका OTP नीचे दिखाया गया है। वास्तविक संस्करण में SMS से OTP प्राप्त होगा।</div>
+                </div>
+            </div>
+
+            <div class="otp-display">
+                <div class="otp-display-label">आपका OTP</div>
+                <div class="otp-display-value">{{ generated_otp }}</div>
+                <div class="otp-display-copy-hint">OTP को नीचे दर्ज करें</div>
             </div>
 
             {% if error %}
@@ -565,6 +655,18 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    // Update displayed OTP in demo banner
+                    const otpDisplay = document.querySelector('.otp-display-value');
+                    if (otpDisplay && data.generated_otp) {
+                        otpDisplay.textContent = data.generated_otp;
+                    }
+                    
+                    // Clear any previously entered OTP digits
+                    document.querySelectorAll('.otp-digit').forEach(digit => {
+                        digit.value = '';
+                        digit.classList.remove('filled');
+                    });
+                    
                     showSuccess('OTP दोबारा से भेज दिया गया है');
                     startResendTimer(30);
                 } else {

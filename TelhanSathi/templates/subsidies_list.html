@@ -133,10 +133,20 @@
 
         /* SCROLLABLE LIST CONTAINER */
         .subsidy-list-container {
-            flex-grow: 1;
+            flex: 1;
             overflow-y: auto;
-            padding: 0 15px 20px;
+            overflow-x: hidden;
+            padding: 0 15px 15px;
             position: relative;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        #subsidy-cards-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
         /* 4. SUBSIDY CARDS */
@@ -236,7 +246,6 @@
             <div id="subsidy-cards-list">
                 <!-- Cards will be populated by JavaScript -->
             </div>
-            <br><br>
         </div>
     </div>
 {% endblock %}
