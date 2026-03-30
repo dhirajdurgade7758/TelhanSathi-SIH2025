@@ -1,3 +1,15 @@
+# CRITICAL: Monkey-patch eventlet BEFORE all other imports (including Flask)
+eventlet_available = False
+try:
+    import eventlet
+    eventlet.monkey_patch()
+    print("[INIT] ✓ Eventlet monkey-patched successfully")
+    eventlet_available = True
+except (ImportError, AttributeError):
+    # eventlet not available or incompatible with Python version (3.10+)
+    print("[INIT] ⚠ Eventlet not available or incompatible - using threading mode")
+    eventlet_available = False
+
 from datetime import datetime
 from flask import Flask, render_template, send_from_directory, url_for, redirect, session, request, g
 from flask_cors import CORS
@@ -19,7 +31,12 @@ app = Flask(__name__, template_folder='templates', static_folder='static')
 CORS(app)
 
 # Initialize SocketIO with Flask app
-socketio.init_app(app)
+# Use proper WSGIServer configuration for WebSocket handling
+socketio.init_app(
+    app,
+    cors_allowed_origins="*",
+    async_mode='eventlet' if eventlet_available else 'threading',
+)
 
 # ----------------------- BACKGROUND SCHEDULER (Keep Render App Active) -----------------------
 scheduler = BackgroundScheduler()
@@ -233,6 +250,14 @@ def init_db_endpoint():
 # Register Socket.IO event handlers
 from routes.socketio_events import register_socketio_events
 register_socketio_events(socketio)
+
+# Global SocketIO error handler
+@socketio.on_error_default
+def default_error_handler(e):
+    """Handle any unhandled errors in Socket.IO"""
+    print(f"[SOCKETIO ERROR] Unhandled error: {type(e).__name__}: {str(e)}")
+    import traceback
+    traceback.print_exc()
 
 # ----------------------- ROOT-LEVEL ESP32 ENDPOINTS -----------------------
 # Import the handler function from field_monitoring
