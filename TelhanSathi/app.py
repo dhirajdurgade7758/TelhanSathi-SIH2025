@@ -273,9 +273,9 @@ def root_esp32_update():
 
 @app.route('/')
 def home():
-    """If authenticated → go to profile, else → login."""
+    """If authenticated → go to dashboard, else → login."""
     if 'farmer_id_verified' in session:
-        return redirect(url_for('auth.profile'))
+        return redirect(url_for('dashboard'))
     return redirect(url_for('auth.login'))
 
 
