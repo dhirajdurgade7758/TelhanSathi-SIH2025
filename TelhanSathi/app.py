@@ -4,7 +4,9 @@ from flask_cors import CORS
 import os
 from dotenv import load_dotenv
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.executors.pool import ThreadPoolExecutor
 import requests
+import logging
 
 from extensions import db, socketio
 from flask_migrate import Migrate  # ✅ Added
@@ -22,24 +24,59 @@ socketio.init_app(app)
 # ----------------------- BACKGROUND SCHEDULER (Keep Render App Active) -----------------------
 scheduler = BackgroundScheduler()
 
+# Configure scheduler with thread pool to avoid blocking WebSocket
+scheduler_config = {
+    'apscheduler.executors.default': {
+        'type': 'threadpool',
+        'max_workers': 1
+    },
+    'apscheduler.job_defaults.coalesce': True,
+    'apscheduler.job_defaults.max_instances': 1,
+}
+scheduler.configure(scheduler_config)
+
 def ping_app():
     """Ping the app to keep it active on Render."""
     try:
         # Get the app URL from environment or use localhost for development
         app_url = os.getenv('APP_URL', 'http://localhost:5000')
-        requests.get(f'{app_url}/ping', timeout=5)
-        print(f"[SCHEDULER] ✓ Pinged app at {datetime.utcnow().isoformat()}")
+        response = requests.get(f'{app_url}/ping', timeout=5)
+        if response.status_code == 200:
+            print(f"[SCHEDULER] ✓ Pinged app at {datetime.utcnow().isoformat()}")
+        else:
+            print(f"[SCHEDULER] ⚠ Ping returned status {response.status_code}")
     except Exception as e:
         print(f"[SCHEDULER] ⚠ Failed to ping app: {str(e)}")
 
 # Add the ping job - runs every 4 minutes
-scheduler.add_job(ping_app, 'interval', minutes=4, id='app_pinger')
+try:
+    scheduler.add_job(ping_app, 'interval', minutes=4, id='app_pinger')
+except Exception:
+    pass  # Job might already exist
 
 # Start scheduler in the context of the app
 def start_scheduler():
-    if not scheduler.running:
-        scheduler.start()
-        print("[SCHEDULER] ✓ Background scheduler started - app will stay active")
+    try:
+        # Check if we're in development mode first (takes precedence)
+        flask_env = os.getenv('FLASK_ENV', 'production').lower()
+        
+        if flask_env == 'development':
+            print("[SCHEDULER] ℹ Development mode detected - scheduler disabled to avoid SocketIO conflicts")
+            return
+        
+        # Only start scheduler on Render (production) when APP_URL is explicitly set to Render
+        app_url = os.getenv('APP_URL', '')
+        is_production = app_url and 'onrender.com' in app_url.lower()
+        
+        if not is_production:
+            print("[SCHEDULER] ℹ Production mode but APP_URL not set to Render - scheduler disabled")
+            return
+            
+        if not scheduler.running:
+            scheduler.start()
+            print(f"[SCHEDULER] ✓ Background scheduler started on Render - app will stay active")
+    except Exception as e:
+        print(f"[SCHEDULER] ⚠ Failed to start scheduler: {str(e)}")
 
 # ----------------------- SESSION CONFIG -----------------------
 app.config['SESSION_COOKIE_SECURE'] = False  # True only in production with HTTPS
