@@ -717,6 +717,55 @@ class FarmerRecommendation(db.Model):
         }
 
 
+class WeatherRecommendation(db.Model):
+    """
+    Stores AI-generated weather-based recommendations for farmers.
+    Provides crop-specific advice on irrigation, fertilizer, pest control, and weather alerts.
+    Prevents repeated Gemini API calls by caching recommendations in database.
+    """
+    __tablename__ = 'weather_recommendations'
+    
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    farmer_id = db.Column(db.String(36), db.ForeignKey('farmers.id'), nullable=False, index=True)
+    
+    # Weather data snapshot when recommendation was generated
+    weather_data = db.Column(db.JSON)  # 7-day forecast data
+    
+    # AI-generated recommendations in structured format
+    recommendations = db.Column(db.JSON)  # {irrigation_advice, pest_alerts, fertilizer_timing, weather_warnings, seasonal_insights}
+    
+    # Chat context for follow-up questions (stores conversation history)
+    chat_context = db.Column(db.JSON, default=None)  # [{"role": "user", "content": "..."}, {"role": "assistant", "content": "..."}]
+    
+    # AI method used
+    ai_method = db.Column(db.String(50), default='gemini')  # gemini, rule_based
+    
+    # Metadata
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    expires_at = db.Column(db.DateTime)  # Recommendation expires after 24 hours
+    last_refreshed_at = db.Column(db.DateTime, default=datetime.utcnow)  # Track when recommendation was last refreshed
+    
+    # Relationships
+    farmer = db.relationship('Farmer', backref='weather_recommendations', lazy=True)
+    
+    def __repr__(self):
+        return f'<WeatherRecommendation {self.farmer_id} created_at={self.created_at}>'
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'farmer_id': self.farmer_id,
+            'weather_data': self.weather_data,
+            'recommendations': self.recommendations,
+            'chat_context': self.chat_context,
+            'ai_method': self.ai_method,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'expires_at': self.expires_at.isoformat() if self.expires_at else None,
+            'last_refreshed_at': self.last_refreshed_at.isoformat() if self.last_refreshed_at else None,
+            'is_valid': self.expires_at > datetime.utcnow() if self.expires_at else False
+        }
+
+
 class Admin(db.Model):
     """
     Admin user model for TelhanSathi platform administration.
