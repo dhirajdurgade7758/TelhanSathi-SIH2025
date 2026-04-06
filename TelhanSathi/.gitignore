@@ -48,6 +48,10 @@ env/
 *.sqlite
 *.sqlite3
 
+# Static uploads
+static/uploads/auctions/
+static/uploads/profile_pics/
+
 # Flask
 instance/
 .webassets-cache
