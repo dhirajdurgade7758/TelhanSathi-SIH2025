@@ -31,7 +31,31 @@
 
 ---
 
-## 👨‍🌾 FARMER-SIDE FEATURES (10 Major Modules)
+## � FEATURE SCREENSHOTS
+
+### 👨‍🌾 Farmer Interface
+
+| | | |
+|---|---|---|
+| **Home Page** | **Auction Dashboard** | **Auction Details** |
+| ![Home](documents/screenshots/home%20page.jpeg) | ![Bidding Dashboard](documents/screenshots/bidding%20dashboard%20farmer.jpeg) | ![Bid Details](documents/screenshots/bid%20details%20page%20farmer.jpeg) |
+| **Profit Simulator** 🤖 | **Crop Economics** | **12-Month Trends** |
+| ![Profit Sim](documents/screenshots/profit%20simulator%20page%20farmer.jpeg) | ![Economics](documents/screenshots/crop%20economics%20page%20farmer.jpeg) | ![Trends](documents/screenshots/detailed%20crop%20economics%20page%20with%2012%20months%20trend%20farmer.jpeg) |
+| **Government Subsidies** | **Redemption Store** 🎁 | **Chat System** 💬 |
+| ![Subsidies](documents/screenshots/schemes%20and%20subsides%20page%20farmer.jpeg) | ![Store](documents/screenshots/redeemption%20store%20page%20farmer.jpeg) | ![Chat](documents/screenshots/chat%20with%20farmer%20page%20buyer.jpeg) |
+
+### 🛍️ Buyer Interface
+
+| | | |
+|---|---|---|
+| **Buyer Dashboard** | **Browse Auctions** | **My Bids Tracking** |
+| ![Dashboard](documents/screenshots/bidding%20dashboard%20buyer.jpeg) | ![Browse](documents/screenshots/view%20auction%20details%20modal%20buyer.jpeg) | ![Bids](documents/screenshots/mybids%20page%20buyer.jpeg) |
+| **Chat with Farmers** 💬 | | |
+| ![Chat](documents/screenshots/chat%20with%20farmer%20page%20buyer.jpeg) | | |
+
+---
+
+## �👨‍🌾 FARMER-SIDE FEATURES (10 Major Modules)
 
 ### 1. **Authentication & Onboarding**
 - Registration flow with OTP verification
@@ -304,31 +328,7 @@ TelhanSathi-SIH2025/
 
 ---
 
-## 📸 FEATURE SCREENSHOTS
-
-### 👨‍🌾 Farmer Interface
-
-| | | |
-|---|---|---|
-| **Home Page** | **Auction Dashboard** | **Auction Details** |
-| ![Home](documents/screenshots/home%20page.jpeg) | ![Bidding Dashboard](documents/screenshots/bidding%20dashboard%20farmer.jpeg) | ![Bid Details](documents/screenshots/bid%20details%20page%20farmer.jpeg) |
-| **Profit Simulator** 🤖 | **Crop Economics** | **12-Month Trends** |
-| ![Profit Sim](documents/screenshots/profit%20simulator%20page%20farmer.jpeg) | ![Economics](documents/screenshots/crop%20economics%20page%20farmer.jpeg) | ![Trends](documents/screenshots/detailed%20crop%20economics%20page%20with%2012%20months%20trend%20farmer.jpeg) |
-| **Government Subsidies** | **Redemption Store** 🎁 | **Chat System** 💬 |
-| ![Subsidies](documents/screenshots/schemes%20and%20subsides%20page%20farmer.jpeg) | ![Store](documents/screenshots/redeemption%20store%20page%20farmer.jpeg) | ![Chat](documents/screenshots/chat%20with%20farmer%20page%20buyer.jpeg) |
-
-### 🛍️ Buyer Interface
-
-| | | |
-|---|---|---|
-| **Buyer Dashboard** | **Browse Auctions** | **My Bids Tracking** |
-| ![Dashboard](documents/screenshots/bidding%20dashboard%20buyer.jpeg) | ![Browse](documents/screenshots/view%20auction%20details%20modal%20buyer.jpeg) | ![Bids](documents/screenshots/mybids%20page%20buyer.jpeg) |
-| **Chat with Farmers** 💬 | | |
-| ![Chat](documents/screenshots/chat%20with%20farmer%20page%20buyer.jpeg) | | |
-
----
-
-## 🚀 Key Features Deep Dive
+##  Key Features Deep Dive
 
 ### **Real-time Auction System (NILAMI)**
 - ✅ Create auctions with reserve pricing
