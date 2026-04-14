@@ -224,9 +224,8 @@ def _get_gemini_weather_recommendations(farmer, forecast):
         # Build farmer and weather context
         farmer_context = _get_farmer_context(farmer)
         
-        # Create detailed prompt for Gemini
-        prompt = f"""
-आप एक कृषि सलाहकार हैं जो भारतीय किसानों को फसल प्रबंधन और मौसम-आधारित खेती में विशेषज्ञ सलाह देते हैं।
+        # Create detailed prompt for Gemini (English for clarity, translate output to Hindi)
+        prompt = f"""आप एक कृषि विशेषज्ञ हैं जो भारतीय किसानों को मौसम-आधारित फसल प्रबंधन में विस्तृत सलाह देते हैं।
 
 किसान की जानकारी:
 - नाम: {farmer_context.get('name', 'Unknown')}
@@ -234,53 +233,98 @@ def _get_gemini_weather_recommendations(farmer, forecast):
 - भूमि क्षेत्र: {farmer_context.get('land_area_hectares', 0)} हेक्टेयर
 - मिट्टी का प्रकार: {farmer_context.get('soil_type', 'निर्दिष्ट नहीं')}
 - वर्तमान फसलें: {farmer_context.get('current_crops', 'निर्दिष्ट नहीं')}
-- पानी का प्रकार: {farmer_context.get('water_type', 'निर्दिष्ट नहीं')}
+- पानी का स्रोत: {farmer_context.get('water_type', 'निर्दिष्ट नहीं')}
+- तेलहन किसान: {farmer_context.get('is_oilseed_farmer', False)}
 
 7 दिन का मौसम पूर्वानुमान:
 {json.dumps(forecast, indent=2)}
 
-किसान के स्थान, फसलों, मिट्टी के प्रकार और आने वाले 7 दिन के मौसम पूर्वानुमान के आधार पर, हिंदी में कार्ययोग्य सिफारिशें प्रदान करें।
+कार्य: किसान के मौसम, फसलों और मिट्टी के आधार पर विस्तृत कृषि सिफारिशें दीजिए। प्रत्येक सिफारिश में:
+1. संक्षिप्त सारांश (2-3 वाक्य)
+2. विस्तृत व्याख्या (6-8 विस्तृत वाक्य)
+3. विशिष्ट कार्रवाई के कदम
+4. चेतावनियां व सावधानियां
 
-केवल वैध JSON प्रारूप में प्रतिक्रिया दें:
+केवल यह JSON वापस करें (कोई मार्कडाउन नहीं, कोई अतिरिक्त पाठ नहीं, कोई अंग्रेजी नहीं):
 
 {{
     "critical_alerts": [
-        {{"type": "पाला|अत्यधिक बारिश|सूखा|ओले|अत्यधिक गर्मी", "severity": "high|medium|low", "days": [1-7], "summary": "1-2 पंक्ति हिंदी में", "details": "विस्तृत व्याख्या हिंदी में", "action": "करने योग्य कदम"}}
+        {{
+            "type": "अत्यधिक वर्षा|सूखा|पाला|ओले|अत्यधिक गर्मी|तूफान",
+            "severity": "high|medium|low",
+            "affected_days": [दिन संख्याएं],
+            "hindi_emoji": "उपयुक्त emoji",
+            "hindi_title": "खतरे का नाम हिंदी में",
+            "hindi_summary": "यह चेतावनी क्या है (2-3 पूर्ण वाक्य हिंदी में)",
+            "hindi_details": "विस्तृत व्याख्या (कम से कम 6-8 पूर्ण वाक्य हिंदी में)। समझाएं कि यह आपकी फसल को कैसे प्रभावित करेगा, क्या समस्याएं हो सकती हैं, और साधारण किसान क्या सोचेंगे।",
+            "hindi_action": "विस्तृत कार्रवाई के कदम (कम से कम 3-4 स्पष्ट निर्देश हिंदी में)"
+        }}
     ],
     "irrigation_advice": {{
-        "summary": "सिंचाई需दी है या नहीं (1-2 पंक्ति में हिंदी)",
-        "details": "विस्तृत जानकारी हिंदी में",
-        "needed": true/false,
+        "hindi_emoji": "💧",
+        "hindi_title": "सिंचाई की सलाह",
+        "hindi_summary": "क्या सिंचाई की जरूरत है (2-3 वाक्य हिंदी में)",
+        "hindi_details": "विस्तृत निर्देश (कम से कम 6-8 वाक्य हिंदी में)। कब सिंचाई करें, कितना पानी दें, किस तरीके से करें।",
+        "needed": true|false,
         "timing": "तुरंत|अगले 3 दिन|अगले सप्ताह",
-        "quantity_mm": संख्या
+        "quantity_mm": संख्या,
+        "hindi_method": "सिंचाई का तरीका हिंदी में (ड्रिप, बाढ़, आदि)"
     }},
-    "pest_alerts": [
-        {{"pest": "कीट का नाम हिंदी में", "summary": "संक्षिप्त चेतावनी हिंदी में", "details": "विस्तृत जानकारी हिंदी में", "risk_level": "high|medium|low", "prevention": "रोकथाम के उपाय हिंदी में"}}
+    "pest_disease_alerts": [
+        {{
+            "hindi_emoji": "🐛",
+            "pest_disease_hindi": "कीट/रोग का नाम हिंदी में",
+            "hindi_summary": "यह कीट/रोग क्या है और क्या नुकसान करता है (2-3 वाक्य हिंदी में)",
+            "hindi_details": "विस्तृत जानकारी (कम से कम 6-8 वाक्य हिंदी में)। यह कब आता है, कैसे दिखता है, क्या लक्षण हैं, क्या नुकसान करता है।",
+            "risk_level": "high|medium|low",
+            "hindi_prevention": "रोकथाम के विस्तृत उपाय (कम से कम 5-6 वाक्य हिंदी में)। कौन सी दवा लगाएं, कितनी बार, कब लगाएं।",
+            "critical_window": "दिन X से दिन Y तक सबसे ज्यादा खतरा"
+        }}
     ],
     "fertilizer_timing": {{
-        "summary": "खाद के बारे में संक्षिप्त सुझाव हिंदी में", 
-        "details": "विस्तृत जानकारी हिंदी में",
-        "next_application_day": संख्या,
+        "hindi_emoji": "🌾",
+        "hindi_title": "खाद का समय और तरीका",
+        "hindi_summary": "खाद के बारे में सारांश (2-3 वाक्य हिंदी में)",
+        "hindi_details": "विस्तृत निर्देश (कम से कम 6-8 वाक्य हिंदी में)। कौन सी खाद लगाएं, कितनी मात्रा में, कब लगाएं, कैसे लगाएं।",
+        "next_application_day": दिन संख्या,
         "type": "नाइट्रोजन|पोटेशियम|फॉस्फोरस|मिश्रित",
-        "quantity_kg_per_hectare": संख्या
+        "quantity_kg_per_hectare": संख्या,
+        "hindi_precautions": "महत्वपूर्ण सावधानियां (3-4 वाक्य हिंदी में)"
     }},
     "weather_warnings": [
-        {{"condition": "मौसम की स्थिति हिंदी में", "summary": "संक्षिप्त चेतावनी", "details": "विस्तृत विवरण हिंदी में", "timing": "समय अवधि"}}
+        {{
+            "hindi_emoji": "⚠️",
+            "condition_hindi": "मौसम की स्थिति का नाम हिंदी में",
+            "hindi_summary": "मौसम की स्थिति का सारांश (2-3 वाक्य हिंदी में)",
+            "hindi_details": "विस्तृत विश्लेषण (कम से कम 6-8 वाक्य हिंदी में)। क्या होगा, कब होगा, किस हद तक होगा, क्या नुकसान हो सकता है।",
+            "timing": "मौसम कब आएगा (दिन X से दिन Y तक)",
+            "hindi_preparedness": "तैयारी के कदम (कम से कम 4-5 वाक्य हिंदी में)"
+        }}
     ],
+    "soil_management": {{
+        "hindi_emoji": "🌱",
+        "hindi_title": "मिट्टी की देखभाल",
+        "hindi_summary": "मिट्टी की देखभाल (2-3 वाक्य हिंदी में)",
+        "hindi_details": "विस्तृत सलाह (कम से कम 6-8 वाक्य हिंदी में)। मिट्टी को स्वस्थ कैसे रखें, क्या करें, क्या न करें।",
+        "mulching_required": true|false,
+        "drainage_required": true|false,
+        "hindi_specific_steps": "विशिष्ट कदम (3-4 वाक्य हिंदी में)"
+    }},
     "seasonal_insights": {{
-        "summary": "मौसमी सुझाव संक्षिप्त रूप में हिंदी में",
-        "details": "विस्तृत जानकारी हिंदी में",
-        "planting_window": "बुवाई का समय",
-        "harvest_timeline": "कटाई का समय"
+        "hindi_emoji": "📈",
+        "hindi_title": "मौसमी सुझाव",
+        "hindi_summary": "इस मौसम के लिए क्या करें (2-3 वाक्य हिंदी में)",
+        "hindi_details": "व्यापक सलाह (कम से कम 8-10 वाक्य हिंदी में)। इस समय क्या अवसर हैं, क्या जोखिम हैं, कौन से काम प्राथमिकता दें।",
+        "optimal_practices": "सर्वोत्तम तरीके (6-8 वाक्य हिंदी में)"
     }}
 }}
 
-महत्वपूर्ण निर्देश:
-1. सभी पाठ हिंदी में हो
-2. प्रत्येक सिफारिश में "summary" (1-2 पंक्ति) और "details" (विस्तृत जानकारी) हो
-3. तेलहन फसलों (मूंगफली, सोयाबीन, सूरजमुखी) के लिए विशेष ध्यान दें
-4. केवल वैध JSON प्रारूप वापस करें, कोई मार्कडाउन नहीं
-"""
+अत्यंत महत्वपूर्ण निर्देश (MANDATORY):
+1. प्रत्येक वर्ण, शब्द, वाक्य पूरी तरह हिंदी में होना चाहिए - कोई अंग्रेजी नहीं
+2. "details" वाले सभी फील्ड में कम से कम 6-8 पूरे वाक्य हिंदी में लिखें
+3. संख्याएं (1, 2, 3, आदि) ठीक है, लेकिन बाकी सब हिंदी में हो
+4. असली किसानों की भाषा में लिखें - जटिल न हो, सरल और समझने में आसान हो
+5. केवल JSON ही भेजें - कोई व्याख्या, कोई markdown, कोई अन्य पाठ नहीं"""
         
         # Call Gemini API
         genai.configure(api_key=api_key)
@@ -313,62 +357,116 @@ def _get_gemini_weather_recommendations(farmer, forecast):
 
 
 def _get_rule_based_weather_recommendations(farmer, forecast):
-    """Rule-based fallback recommendations (no API calls)"""
+    """Rule-based fallback recommendations with Hindi translations"""
     try:
         recommendations = {
             'critical_alerts': [],
             'irrigation_advice': {},
-            'pest_alerts': [],
+            'pest_disease_alerts': [],
             'fertilizer_timing': {},
             'weather_warnings': [],
+            'soil_management': {},
             'seasonal_insights': {},
-            'general_notes': 'Rule-based recommendations generated (AI unavailable)'
+            'ai_method': 'rule_based'
         }
         
-        # Check for excessive rainfall
+        # Calculate weather statistics
         total_rainfall = sum(day.get('precip_mm', 0) for day in forecast)
+        avg_temp = sum(day.get('temp_max', 25) for day in forecast) / len(forecast) if forecast else 25
+        max_wind = max((day.get('wind_kmh', 0) for day in forecast), default=0)
+        rainy_days = [i+1 for i, d in enumerate(forecast) if d.get('precip_mm', 0) > 2]
+        
+        # Check for excessive rainfall
         if total_rainfall > 50:
             recommendations['critical_alerts'].append({
-                'type': 'excessive_rain',
+                'type': 'अत्यधिक वर्षा',
                 'severity': 'high',
-                'days': [i+1 for i, d in enumerate(forecast) if d.get('precip_mm', 0) > 10],
-                'description': 'High rainfall forecast - risk of waterlogging',
-                'action': 'Ensure adequate drainage and avoid irrigation'
+                'affected_days': rainy_days,
+                'hindi_summary': 'अगले 7 दिनों में अत्यधिक वर्षा की संभावना है। इससे खेत में जलभराव हो सकता है।',
+                'hindi_details': f'कुल वर्षा {total_rainfall:.1f} मिमी की संभावना है जो आपकी फसल के लिए हानिकारक हो सकती है। इस अवधि में मिट्टी में अतिरिक्त पानी होगा जिससे पौधों की जड़ें सड़ सकती हैं। आपको तुरंत जल निकासी व्यवस्था सुनिश्चित करनी चाहिए। बाढ़ के पानी को खेत से बाहर निकालने के लिए नालियां बनाएं।',
+                'hindi_action': 'खेत में तुरंत जल निकासी नालियां बनाएं। सिंचाई बिल्कुल न करें। ट्रैक्टर या अन्य यंत्रों से अतिरिक्त पानी निकालने में सहायता लें।',
+                'crop_impact': 'फसल में पत्ती धब्बा रोग की संभावना'
             })
         
-        # Irrigation advice based on rainfall
-        if total_rainfall < 10:
+        # Check for drought conditions
+        elif total_rainfall < 5 and avg_temp > 28:
+            recommendations['critical_alerts'].append({
+                'type': 'सूखा',
+                'severity': 'high',
+                'affected_days': list(range(1, 8)),
+                'hindi_summary': 'सूखे की स्थिति बनने वाली है। कम वर्षा और उच्च तापमान पौधों के लिए दबाव बनाएंगे।',
+                'hindi_details': f'अगले 7 दिनों में केवल {total_rainfall:.1f} मिमी वर्षा की संभावना है और तापमान {avg_temp:.1f}°C रहेगा। ये परिस्थितियां आपकी फसल को सूखा ग्रस्त कर सकती हैं। पौधों की पत्तियां पीली पड़ सकती हैं और विकास रुक सकता है। मिट्टी की नमी कम हो जाएगी।',
+                'hindi_action': 'तुरंत गहरी सिंचाई करें। ड्रिप सिंचाई का उपयोग करें यदि संभव हो। पौधों के पास गीली घास (मल्च) लगाएं।',
+                'crop_impact': 'फसल की पैदावार में कमी'
+            })
+        
+        # Irrigation advice based on rainfall and temperature
+        if total_rainfall < 15:
             recommendations['irrigation_advice'] = {
+                'hindi_summary': f'आपको निश्चित रूप से सिंचाई की आवश्यकता है क्योंकि अगले 7 दिनों में केवल {total_rainfall:.1f} मिमी वर्षा की संभावना है।',
+                'hindi_details': f'मौसम के आंकड़ों के अनुसार अगले सप्ताह में अपर्याप्त वर्षा होगी। आपको {25 - total_rainfall:.0f}mm से अधिक सिंचाई करनी चाहिए। सिंचाई सुबह 5-7 बजे या शाम 6-8 बजे करें जब तापमान कम हो। ड्रिप सिंचाई सर्वोत्तम है क्योंकि इससे पानी की बर्बादी कम होती है। मिट्टी की नमी जांचें - यदि मिट्टी सूखी है तो तुरंत सिंचाई करें।',
                 'needed': True,
-                'timing': 'immediate',
-                'quantity_mm': 20,
-                'reason': 'Low rainfall forecast - irrigation recommended',
-                'crop_specific_tips': {'default': 'Apply 20-25mm irrigation'}
+                'timing': 'immediate' if total_rainfall < 5 else 'next 3 days',
+                'quantity_mm': max(20, 25 - total_rainfall),
+                'frequency_days': 3 if avg_temp > 30 else 4
+            }
+        else:
+            recommendations['irrigation_advice'] = {
+                'hindi_summary': 'पर्याप्त वर्षा की संभावना है, इसलिए आपको अतिरिक्त सिंचाई की तत्काल आवश्यकता नहीं है।',
+                'hindi_details': f'अगले 7 दिनों में {total_rainfall:.1f} मिमी वर्षा की संभावना है जो आपकी फसल के लिए काफी है। तुरंत सिंचाई न करें। हालांकि, यदि वर्षा 2-3 दिन में न हो तो सिंचाई के लिए तैयार रहें। मिट्टी की नमी नियमित रूप से जांचते रहें। अत्यधिक वर्षा के बाद तुरंत jल निकास की व्यवस्था सुनिश्चित करें।',
+                'needed': False,
+                'timing': 'as needed',
+                'quantity_mm': 0,
+                'frequency_days': 0
             }
         
-        # Generic pest alerts based on temperature
-        avg_temp = sum(day.get('temp_max', 25) for day in forecast) / len(forecast) if forecast else 25
-        if avg_temp > 30:
-            recommendations['pest_alerts'].append({
-                'pest': 'Various insects (high temperature stress)',
-                'risk_level': 'medium',
-                'reason': f'Average temperature forecast: {avg_temp:.1f}°C - favorable for pest development',
-                'prevention': 'Monitor crops regularly, consider preventive spraying if needed'
-            })
+        # Pest alerts based on temperature and humidity
+        if avg_temp > 28 and total_rainfall > 30:
+            recommendations['pest_disease_alerts'] = [
+                {
+                    'pest_disease_hindi': 'पत्ती धब्बा रोग (Leaf Spot)',
+                    'hindi_summary': 'गर्म और आर्द्र मौसम में पत्ती धब्बा रोग के विकास के लिए अनुकूल परिस्थितियां हैं।',
+                    'hindi_details': 'यह कवक रोग उच्च तापमान ({:.1f}°C) और अधिक वर्षा ({:.1f}mm) में तेजी से फैलता है। संक्रमित पत्तियों पर भूरे या काले धब्बे दिखाई देंगे। यह रोग पौधे की पत्तियों को नष्ट कर देता है जिससे प्रकाश संश्लेषण में कमी आती है। फसल की पैदावार में 20-30% तक कमी हो सकती है।'.format(avg_temp, total_rainfall),
+                    'risk_level': 'high',
+                    'hindi_prevention': 'ट्राइकोडर्मा या कॉपर आधारित कवकनाशी का छिड़काव करें। पौधों के बीच उचित दूरी बनाए रखें ताकि हवा का प्रवाह अच्छा हो। संक्रमित पत्तियों को तुरंत तोड़कर जला दें। गीली घास न लगाएं जो रोग को बढ़ावा दे।',
+                    'critical_window': 'दिन 2-6'
+                }
+            ]
+        elif avg_temp > 32:
+            recommendations['pest_disease_alerts'] = [
+                {
+                    'pest_disease_hindi': 'थ्रिप्स और मकड़ियों की बहुलता',
+                    'hindi_summary': 'बहुत गर्म मौसम में कीटों की गतिविधि तेजी से बढ़ जाती है।',
+                    'hindi_details': f'तापमान {avg_temp:.1f}°C होने से थ्रिप्स, एफिड्स और मकड़ियां तेजी से प्रजनन करेंगे। ये कीट पौधे की कोमल पत्तियों को चूसते हैं जिससे पत्तियां पीली और मुड़ जाती हैं। नीम का तेल या कीटनाशक का छिड़काव करें। पौधों की निरंतर निगरानी रखें।',
+                    'risk_level': 'medium',
+                    'hindi_prevention': 'नीम का तेल 3% घोल का छिड़काव करें। स्ट्रिंग ट्रैप या पीले रंग के चिपचिपे ट्रैप लगाएं। पौधों के चारों ओर सहायक पौधे लगाएं जो कीटों को आकर्षित करें।',
+                    'critical_window': 'दिन 1-7'
+                }
+            ]
         
         # Fertilizer timing
         recommendations['fertilizer_timing'] = {
-            'next_application_day': 3,
-            'type': 'nitrogen',
-            'quantity_kg_per_hectare': 50,
-            'precautions': 'Apply before expected rainfall for better absorption',
-            'crop_specific': {'default': 'Standard fertilizer schedule'}
+            'hindi_summary': 'आने वाले मौसम के अनुसार उचित समय पर खाद का प्रयोग करें।',
+            'hindi_details': 'यदि वर्षा की संभावना है तो खाद को बारिश की शुरुआत से 2-3 दिन पहले डालें ताकि बारिश में यह पौधों को अवशोषित हो सके। नाइट्रोजन खाद मौसम गर्म है तो इसका असर जल्दी होता है। जैव खाद (कोम्पोस्ट) का उपयोग मिट्टी की गुणवत्ता में सुधार के लिए करें। पोटेशियम की कमी होने पर पौधे कमजोर हो जाते हैं।',
+            'next_application_day': 2 if total_rainfall > 10 else 1,
+            'type': 'mixed' if total_rainfall > 30 else 'nitrogen',
+            'quantity_kg_per_hectare': 40 if total_rainfall > 30 else 60,
+            'precautions_hindi': 'वर्षा के दिन खाद न डालें। सूखी मिट्टी में खाद डालें। पत्ती जलन से बचने के लिए पत्तीय खाद सूर्यास्त के बाद ही डालें।'
         }
         
+        # Soil management
+        recommendations['soil_management'] = {
+            'hindi_summary': 'मिट्टी की उचित देखभाल उच्च पैदावार के लिए आवश्यक है।',
+            'hindi_details': 'आने वाले मौसम में मिट्टी की नमी बनाए रखना महत्वपूर्ण है। अत्यधिक वर्षा से बचने के लिए जल निकास व्यवस्था करें। गीली घास (मल्च) मिट्टी की नमी को बनाए रखने में मदद करता है और तापमान को नियंत्रित करता है। मिट्टी के स्वास्थ्य के लिए नियमित रूप से जैव खाद का प्रयोग करें। मिट्टी की जांच 6 महीने में एक बार करवाएं।',
+            'mulching_required': total_rainfall < 20,
+            'drainage_required': total_rainfall > 40
+        }
+        
+        # Seasonal insights
         recommendations['seasonal_insights'] = {
-            'optimal_planting_window': 'Consult with local agricultural extension officer',
-            'harvest_timeline': 'Monitor crop maturity indicators',
-            'yield_optimization': 'Ensure timely irrigation and fertilizer application'
+            'hindi_summary': 'मौजूदा मौसम में फसल उत्पादन के लिए निम्नलिखित सुझाव महत्वपूर्ण हैं।',
+            'hindi_details': 'आने वाले सप्ताह में मौसम परिवर्तनशील रहेगा। तापमान और वर्षा दोनों में उतार-चढ़ाव हो सकते हैं। आपको पौधों की स्वास्थ्य स्थिति पर नजर रखनी चाहिए। नियमित निरीक्षण से समस्याओं को जल्दी पहचाना जा सकता है। स्थानीय कृषि विशेषज्ञों से सलाह लें यदि कोई समस्या दिखाई दे। बीज उपचार करें बीमारियों से बचने के लिए।',
+            'optimal_practices': 'नियमित निरीक्षण, समय पर सिंचाई, उचित खाद प्रबंधन, और कीट नियंत्रण।'
         }
         
         return {

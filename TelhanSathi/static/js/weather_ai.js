@@ -105,91 +105,159 @@ class WeatherAIManager {
         const recs = this.currentRecommendations;
         let html = '';
 
+        // Critical Alerts (show first with high priority)
+        if (recs.critical_alerts && recs.critical_alerts.length > 0) {
+            recs.critical_alerts.forEach(alert => {
+                const alertType = alert.type || alert.hindi_summary || 'चेतावनी';
+                const alertSummary = alert.hindi_summary || alert.summary || alertType;
+                html += `<div class="recommendation-card rec-critical" style="grid-column: 1/-1;">
+                    <div class="rec-header">
+                        <h3 class="rec-title">🚨 ${alertType}</h3>
+                        <span class="severity-badge ${alert.severity || 'high'}">${(alert.severity || 'उच्च').toUpperCase()}</span>
+                    </div>
+                    <div class="rec-key-info">${alertSummary}</div>
+                    <div class="rec-content">${alert.hindi_details || alert.details || alertSummary}</div>
+                    <div class="rec-action">📋 कार्रवाई: ${alert.hindi_action || alert.action || 'जल निकास सुनिश्चित करें'}</div>
+                    <a href="/weather/details/alerts" class="detail-btn">विवरण देखें →</a>
+                </div>`;
+            });
+        }
+
         // Irrigation Advice
         if (recs.irrigation_advice && Object.keys(recs.irrigation_advice).length > 0) {
-            const summary = recs.irrigation_advice.summary || 'सिंचाई सलाह';
-            const needed = recs.irrigation_advice.needed ? 'हाँ' : 'नहीं';
-            html += this.renderRecommendationCard(
+            const advice = recs.irrigation_advice;
+            const summary = advice.hindi_summary || advice.summary || 'सिंचाई सलाह';
+            const details = advice.hindi_details || advice.details || summary;
+            const needed = advice.needed ? 'हाँ' : 'नहीं';
+            const timing = advice.timing || 'तदनुसार';
+            html += this.renderDetailedCard(
                 '💧 सिंचाई सलाह',
                 'rec-irrigation',
-                `आवश्यक: ${needed}`,
+                `आवश्यक: ${needed} | समय: ${timing}`,
                 summary,
+                details,
                 'irrigation'
             );
         }
 
-        // Pest Alerts
-        if (recs.pest_alerts && recs.pest_alerts.length > 0) {
-            recs.pest_alerts.forEach((pest, idx) => {
+        // Pest/Disease Alerts
+        if (recs.pest_disease_alerts && recs.pest_disease_alerts.length > 0) {
+            recs.pest_disease_alerts.forEach((pest, idx) => {
+                const riskClass = pest.risk_level ? `risk-${pest.risk_level}` : '';
                 const riskBadge = pest.risk_level ? `<span class="risk-badge ${pest.risk_level}">${pest.risk_level.toUpperCase()}</span>` : '';
-                const keyInfo = `${pest.pest}`;
-                html += this.renderRecommendationCard(
-                    '🐛 कीट नियंत्रण',
-                    'rec-pest',
-                    keyInfo,
-                    pest.summary || pest.details || keyInfo,
-                    'pest',
-                    riskBadge
-                );
+                const pestName = pest.pest_disease_hindi || pest.pest || 'अज्ञात कीट/रोग';
+                const summary = pest.hindi_summary || pest.summary || pestName;
+                const details = pest.hindi_details || pest.details || summary;
+                const prevention = pest.hindi_prevention || pest.prevention || '';
+                
+                html += `<div class="recommendation-card rec-pest ${riskClass}" data-detail-type="pest" style="cursor: pointer;">
+                    <div class="rec-header">
+                        <h3 class="rec-title">🐛 ${pestName}</h3>
+                        ${riskBadge}
+                    </div>
+                    <div class="rec-key-info">${summary}</div>
+                    <div class="rec-content">${details}</div>
+                    ${prevention ? `<div class="rec-prevention">🛡️ निवारण: ${prevention}</div>` : ''}
+                    <a href="/weather/details/pest" class="detail-btn">विवरण देखें →</a>
+                </div>`;
             });
         }
 
         // Fertilizer Timing
         if (recs.fertilizer_timing && Object.keys(recs.fertilizer_timing).length > 0) {
-            const summary = recs.fertilizer_timing.summary || 'खाद का समय';
-            const nextDay = recs.fertilizer_timing.next_application_day || '3';
-            html += this.renderRecommendationCard(
-                '🌾 खाद का समय',
-                'rec-fertilizer',
-                `दिन ${nextDay} को लगाएं`,
-                summary,
-                'fertilizer'
-            );
+            const fert = recs.fertilizer_timing;
+            const summary = fert.hindi_summary || fert.summary || 'खाद का समय';
+            const details = fert.hindi_details || fert.details || summary;
+            const nextDay = fert.next_application_day || '3';
+            const type = fert.type || 'मिश्रित';
+            const quantity = fert.quantity_kg_per_hectare || '50';
+            
+            html += `<div class="recommendation-card rec-fertilizer" data-detail-type="fertilizer" style="cursor: pointer;">
+                <div class="rec-header">
+                    <h3 class="rec-title">🌾 खाद का समय</h3>
+                </div>
+                <div class="rec-key-info">दिन ${nextDay} को ${type} (${quantity} किग्रा/हे)</div>
+                <div class="rec-content">${summary}</div>
+                <div class="rec-details">${details}</div>
+                <div class="rec-precautions">⚠️ सावधानियां: ${fert.precautions_hindi || fert.precautions || 'वर्षा के 1-2 दिन पहले लगाएं'}</div>
+                <a href="/weather/details/fertilizer" class="detail-btn">विवरण देखें →</a>
+            </div>`;
         }
 
         // Weather Warnings
         if (recs.weather_warnings && recs.weather_warnings.length > 0) {
             recs.weather_warnings.forEach(warning => {
-                const summary = warning.summary || warning.condition;
-                const keyInfo = warning.condition || 'मौसम की चेतावनी';
-                html += this.renderRecommendationCard(
-                    '⚠️ मौसम चेतावनी',
-                    'rec-weather',
-                    keyInfo,
-                    summary,
-                    'weather'
-                );
+                const condition = warning.condition_hindi || warning.condition || 'मौसम की चेतावनी';
+                const summary = warning.hindi_summary || warning.summary || condition;
+                const details = warning.hindi_details || warning.details || summary;
+                const preparedness = warning.preparedness_hindi || warning.preparedness || '';
+                
+                html += `<div class="recommendation-card rec-weather" data-detail-type="weather" style="cursor: pointer;">
+                    <div class="rec-header">
+                        <h3 class="rec-title">⚠️ ${condition}</h3>
+                    </div>
+                    <div class="rec-key-info">${summary}</div>
+                    <div class="rec-content">${details}</div>
+                    ${preparedness ? `<div class="rec-preparedness">🚨 तैयारी: ${preparedness}</div>` : ''}
+                    <a href="/weather/details/weather" class="detail-btn">विवरण देखें →</a>
+                </div>`;
             });
+        }
+
+        // Soil Management
+        if (recs.soil_management && Object.keys(recs.soil_management).length > 0) {
+            const soil = recs.soil_management;
+            const summary = soil.hindi_summary || soil.summary || 'मिट्टी प्रबंधन';
+            const details = soil.hindi_details || soil.details || summary;
+            
+            html += `<div class="recommendation-card rec-soil" data-detail-type="soil" style="cursor: pointer;">
+                <div class="rec-header">
+                    <h3 class="rec-title">🌱 मिट्टी प्रबंधन</h3>
+                </div>
+                <div class="rec-content">${summary}</div>
+                <div class="rec-details">${details}</div>
+                ${soil.mulching_required ? `<div class="rec-action">✓ गीली घास की आवश्यकता है</div>` : ''}
+                ${soil.drainage_required ? `<div class="rec-action">✓ जल निकास की आवश्यकता है</div>` : ''}
+                <a href="/weather/details/soil" class="detail-btn">विवरण देखें →</a>
+            </div>`;
         }
 
         // Seasonal Insights
         if (recs.seasonal_insights && Object.keys(recs.seasonal_insights).length > 0) {
-            const summary = recs.seasonal_insights.summary || 'मौसमी सुझाव';
-            html += this.renderRecommendationCard(
-                '📈 मौसमी सुझाव',
-                'rec-seasonal',
-                summary,
-                summary,
-                'seasonal'
-            );
-        }
-
-        // Critical Alerts
-        if (recs.critical_alerts && recs.critical_alerts.length > 0) {
-            const alert = recs.critical_alerts[0];
-            const alertType = alert.type || 'चेतावनी';
-            const alertSummary = alert.summary || alertType;
-            html = `<div class="recommendation-card rec-critical" style="grid-column: 1/-1;">
+            const seasonal = recs.seasonal_insights;
+            const summary = seasonal.hindi_summary || seasonal.summary || 'मौसमी सुझाव';
+            const details = seasonal.hindi_details || seasonal.details || summary;
+            
+            html += `<div class="recommendation-card rec-seasonal" data-detail-type="seasonal" style="cursor: pointer;">
                 <div class="rec-header">
-                    <h3 class="rec-title">🚨 गंभीर चेतावनीयां</h3>
+                    <h3 class="rec-title">📈 मौसमी सुझाव</h3>
                 </div>
-                <div class="rec-key-info">${alertType}</div>
-                <div class="rec-content">${alertSummary}</div>
-                <a href="/weather/details/alerts" class="detail-btn">विवरण देखें →</a>
-            </div>` + html;
+                <div class="rec-content">${summary}</div>
+                <div class="rec-details">${details}</div>
+                ${seasonal.optimal_practices ? `<div class="rec-practices">💡 सर्वोत्तम प्रथाएं: ${seasonal.optimal_practices}</div>` : ''}
+                <a href="/weather/details/seasonal" class="detail-btn">विवरण देखें →</a>
+            </div>`;
         }
 
         this.recommendationsSection.innerHTML = html || this.getEmptyState();
+    }
+
+    /**
+     * Render detailed recommendation card with more information
+     */
+    renderDetailedCard(title, className, keyInfo, summary, details, detailType, badge = '') {
+        return `
+            <div class="recommendation-card ${className}" data-detail-type="${detailType}" style="cursor: pointer;">
+                <div class="rec-header">
+                    <h3 class="rec-title">${title}</h3>
+                    ${badge}
+                </div>
+                <div class="rec-key-info">${keyInfo}</div>
+                <div class="rec-content">${summary}</div>
+                <div class="rec-details">${details}</div>
+                <a href="/weather/details/${detailType}" class="detail-btn">विवरण देखें →</a>
+            </div>
+        `;
     }
 
     /**
