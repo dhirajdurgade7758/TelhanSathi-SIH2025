@@ -21,9 +21,13 @@
 
 ## 🎬 Project Demo
 
-📹 **Watch the Full Project Explanation:** [YouTube Video - Complete Project Walkthrough](https://youtu.be/EXHeilHyvRM?si=W5kljHViqqIftAx7)
-
-This video provides a comprehensive overview of all features, including real-time auctions, AI profit simulator, IoT integration, and more.
+<div align="center">
+  <a href="https://youtu.be/EXHeilHyvRM?si=W5kljHViqqIftAx7" target="_blank">
+    <img src="https://img.youtube.com/vi/EXHeilHyvRM/maxresdefault.jpg" alt="Telhan Sathi - Full Project Walkthrough" width="600" style="border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+  </a>
+  <p><strong>Click above to watch the complete project explanation on YouTube</strong></p>
+  <p>Comprehensive overview of all features: real-time auctions, AI profit simulator, IoT integration, government subsidies, and more! ⏱️ ~ 10 minutes</p>
+</div>
 
 ---
 
@@ -302,66 +306,25 @@ TelhanSathi-SIH2025/
 
 ## 📸 FEATURE SCREENSHOTS
 
-### Farmer Interface
+### 👨‍🌾 Farmer Interface
 
-#### **Home Page**
-![Home Page](documents/screenshots/home%20page.jpeg)
+| | | |
+|---|---|---|
+| **Home Page** | **Auction Dashboard** | **Auction Details** |
+| ![Home](documents/screenshots/home%20page.jpeg) | ![Bidding Dashboard](documents/screenshots/bidding%20dashboard%20farmer.jpeg) | ![Bid Details](documents/screenshots/bid%20details%20page%20farmer.jpeg) |
+| **Profit Simulator** 🤖 | **Crop Economics** | **12-Month Trends** |
+| ![Profit Sim](documents/screenshots/profit%20simulator%20page%20farmer.jpeg) | ![Economics](documents/screenshots/crop%20economics%20page%20farmer.jpeg) | ![Trends](documents/screenshots/detailed%20crop%20economics%20page%20with%2012%20months%20trend%20farmer.jpeg) |
+| **Government Subsidies** | **Redemption Store** 🎁 | **Chat System** 💬 |
+| ![Subsidies](documents/screenshots/schemes%20and%20subsides%20page%20farmer.jpeg) | ![Store](documents/screenshots/redeemption%20store%20page%20farmer.jpeg) | ![Chat](documents/screenshots/chat%20with%20farmer%20page%20buyer.jpeg) |
 
-#### **Auction Dashboard - Farmer View**
-Manage and monitor all auctions created
-![Bidding Dashboard Farmer](documents/screenshots/bidding%20dashboard%20farmer.jpeg)
+### 🛍️ Buyer Interface
 
-#### **View Auction Details**
-Detailed auction information and bid tracking
-![Auction Details Modal](documents/screenshots/bid%20details%20page%20farmer.jpeg)
-
-#### **Winning Bid Details**
-Transaction confirmation and buyer details
-![Winning Bid Details](documents/screenshots/winning%20bid%20details%20page%20farmer.jpeg)
-
-#### **Profit Simulator** 🤖
-AI-powered ROI calculator with ARIMA forecasting
-![Profit Simulator](documents/screenshots/profit%20simulator%20page%20farmer.jpeg)
-
-#### **Crop Economics Analysis**
-Detailed crop comparison and profitability trends
-![Crop Economics](documents/screenshots/crop%20economics%20page%20farmer.jpeg)
-
-#### **12-Month Profitability Trends**
-Extended analysis with historical and projected data
-![Crop Economics Trends](documents/screenshots/detailed%20crop%20economics%20page%20with%2012%20months%20trend%20farmer.jpeg)
-
-#### **Government Subsidies & Schemes**
-Browse and apply for government benefits
-![Subsidies Page](documents/screenshots/schemes%20and%20subsides%20page%20farmer.jpeg)
-
-#### **Redemption Store** 🎁
-Earn and redeem coins for products/services
-![Redemption Store](documents/screenshots/redeemption%20store%20page%20farmer.jpeg)
-
-#### **Chat with Farmers** 💬
-Direct communication with buyers
-![Chat with Farmer](documents/screenshots/chat%20with%20farmer%20page%20buyer.jpeg)
-
----
-
-### Buyer Interface
-
-#### **Buyer Dashboard**
-Main interface with active bids and purchase history
-![Buyer Dashboard](documents/screenshots/bidding%20dashboard%20buyer.jpeg)
-
-#### **Browse & Place Bids**
-Search, filter, and bid on available auctions
-![View Auction Details](documents/screenshots/view%20auction%20details%20modal%20buyer.jpeg)
-
-#### **My Bids Tracking**
-Monitor active bids and negotiations
-![My Bids Page](documents/screenshots/mybids%20page%20buyer.jpeg)
-
-#### **Chat with Farmers** 💬
-Real-time messaging with sellers
-![Chat with Farmer Buyer](documents/screenshots/chat%20with%20farmer%20page%20buyer.jpeg)
+| | | |
+|---|---|---|
+| **Buyer Dashboard** | **Browse Auctions** | **My Bids Tracking** |
+| ![Dashboard](documents/screenshots/bidding%20dashboard%20buyer.jpeg) | ![Browse](documents/screenshots/view%20auction%20details%20modal%20buyer.jpeg) | ![Bids](documents/screenshots/mybids%20page%20buyer.jpeg) |
+| **Chat with Farmers** 💬 | | |
+| ![Chat](documents/screenshots/chat%20with%20farmer%20page%20buyer.jpeg) | | |
 
 ---
 
