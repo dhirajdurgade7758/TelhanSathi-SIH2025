@@ -19,6 +19,14 @@
 
 ---
 
+## 🎬 Project Demo
+
+📹 **Watch the Full Project Explanation:** [YouTube Video - Complete Project Walkthrough](https://youtu.be/EXHeilHyvRM?si=W5kljHViqqIftAx7)
+
+This video provides a comprehensive overview of all features, including real-time auctions, AI profit simulator, IoT integration, and more.
+
+---
+
 ## 👨‍🌾 FARMER-SIDE FEATURES (10 Major Modules)
 
 ### 1. **Authentication & Onboarding**
